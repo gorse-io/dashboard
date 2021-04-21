@@ -1,46 +1,28 @@
 export default function () {
   return [{
-    title: 'Blog Dashboard',
+    title: 'Overview',
     to: {
-      name: 'blog-overview',
+      name: 'overview',
     },
-    htmlBefore: '<i class="material-icons">edit</i>',
+    htmlBefore: '<i class="material-icons">show_chart</i>',
     htmlAfter: '',
   }, {
-    title: 'Blog Posts',
-    htmlBefore: '<i class="material-icons">vertical_split</i>',
+    title: 'Cluster',
+    htmlBefore: '<i class="material-icons">dns</i>',
     to: {
-      name: 'blog-posts',
+      name: 'cluster',
     },
   }, {
-    title: 'Add New Post',
-    htmlBefore: '<i class="material-icons">note_add</i>',
-    to: {
-      name: 'add-new-post',
-    },
-  }, {
-    title: 'Forms & Components',
-    htmlBefore: '<i class="material-icons">view_module</i>',
-    to: {
-      name: 'components-overview',
-    },
-  }, {
-    title: 'Tables',
-    htmlBefore: '<i class="material-icons">table_chart</i>',
-    to: {
-      name: 'tables',
-    },
-  }, {
-    title: 'User Profile',
+    title: 'Users',
     htmlBefore: '<i class="material-icons">person</i>',
     to: {
-      name: 'user-profile-lite',
+      name: 'users',
     },
   }, {
-    title: 'Errors',
-    htmlBefore: '<i class="material-icons">error</i>',
+    title: 'Items',
+    htmlBefore: '<i class="material-icons">inventory_2</i>',
     to: {
-      name: 'errors',
+      name: 'items',
     },
   }];
 }

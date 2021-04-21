@@ -85,7 +85,7 @@ export default {
        */
     title: {
       type: String,
-      default: 'Users by device',
+      default: 'Item Exposed',
     },
   },
   mounted() {

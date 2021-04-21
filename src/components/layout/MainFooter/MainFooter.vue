@@ -18,16 +18,10 @@ const defaultMenuItems = [{
   title: 'Home',
   to: '#',
 }, {
-  title: 'Services',
+  title: 'GitHub',
   to: '#',
 }, {
-  title: 'About',
-  to: '#',
-}, {
-  title: 'Products',
-  to: '#',
-}, {
-  title: 'Blog',
+  title: 'Document',
   to: '#',
 }];
 
@@ -48,7 +42,7 @@ export default {
        */
     copyright: {
       type: String,
-      default: 'Copyright © 2018 DesignRevision',
+      default: 'Copyright © 2021 zhenghaoz',
     },
     /**
        * Whether the footer should be wrapped in a container, or not.

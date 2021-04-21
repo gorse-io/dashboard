@@ -73,7 +73,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: 'Users Overview',
+      default: 'Click-Through Rate',
     },
     chartData: {
       type: Object,
