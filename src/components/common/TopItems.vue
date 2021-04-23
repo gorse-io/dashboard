@@ -22,19 +22,9 @@
     <d-card-footer class="border-top">
       <d-row>
 
-        <!-- Time Frame -->
-        <d-col>
-          <d-select size="sm" value="last-week" style="max-width: 130px;">
-            <option value="last-week">Last Week</option>
-            <option value="today">Today</option>
-            <option value="last-month">Last Month</option>
-            <option value="last-year">Last Year</option>
-          </d-select>
-        </d-col>
-
         <!-- View Full Report -->
         <d-col class="text-right view-report">
-          <a href="#">View full report &rarr;</a>
+          Update time
         </d-col>
 
       </d-row>
@@ -79,7 +69,7 @@ export default {
        */
     title: {
       type: String,
-      default: 'Top Referrals',
+      default: 'Top Items',
     },
     /**
        * The referral datasets.

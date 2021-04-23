@@ -13,13 +13,22 @@
       <div class="col">
         <div class="card card-small mb-4">
           <div class="card-header border-bottom">
-            <h6 class="m-0">Items</h6>
+            <h6 class="m-0">Users</h6>
+          </div>
+          <div class="card-body border-bottom">
+            <d-input-group>
+              <d-input placeholder="User ID" />
+              <d-input-group-addon append>
+                <d-button class="btn-white"><i class="material-icons">search</i></d-button>
+                <d-button class="btn-white"><i class="material-icons">arrow_forward_ios</i></d-button>
+              </d-input-group-addon>
+            </d-input-group>
           </div>
           <div class="card-body p-0 pb-3 text-center">
             <table class="table mb-0">
               <thead class="bg-light">
                 <tr>
-                  <th scope="col" class="border-0">Name</th>
+                  <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Last Active</th>
                   <th scope="col" class="border-0">Last Recommend</th>
                 </tr>
