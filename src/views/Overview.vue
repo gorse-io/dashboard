@@ -29,11 +29,11 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items />
+        <bo-top-items :title="'Popular Items'" :items="popularItems"/>
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items />
+        <bo-top-items :title="'Latest Items'" :items="latestItems"/>
       </d-col>
     </d-row>
   </d-container>
@@ -74,23 +74,12 @@ export default {
         label: 'CTR Model',
         value: '--',
       }],
+      popularItems: [],
+      latestItems: []
     };
   },
-  methods: {
-    handleApprove(id) {
-      alert(`Approving discussion id: ${id}`); // eslint-disable-line no-alert
-    },
-    handleReject(id) {
-      alert(`Rejecting discussion id: ${id}`); // eslint-disable-line no-alert
-    },
-    handleEdit(id) {
-      alert(`Editing discussion id: ${id}`); // eslint-disable-line no-alert
-    },
-    handleViewAllComments() {
-      alert('Viewing all comments!'); // eslint-disable-line no-alert
-    },
-  },
   mounted() {
+    // load status
     axios.get('http://127.0.0.1:8088/dashboard/stats')
     .then((response) => {
       this.smallStats[0].value = numeral(response.data.NumUsers).format("0,0")
@@ -103,6 +92,16 @@ export default {
         this.smallStats[4].value = response.data.CTRModel
       }
     });  
+    // load latest items
+    axios.get('http://127.0.0.1:8088/dashboard/latest')
+      .then((response) => {
+        this.latestItems = response.data
+      });  
+    // load popular items
+    axios.get('http://127.0.0.1:8088/dashboard/popular')
+      .then((response) => {
+        this.popularItems = response.data
+      });  
   },
 };
 </script>

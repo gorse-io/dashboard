@@ -10,61 +10,39 @@
     <d-card-body class="p-0">
 
       <!-- Top Referrals List Group -->
-      <d-list-group flush class="list-group-small">
-        <d-list-group-item v-d-toggle.my-collapse v-for="(item, idx) in referralData" :key="idx" class="d-flex px-3">
-          <span class="text-semibold text-fiord-blue">{{ item.title }}</span>
-          <span class="ml-auto text-right text-semibold text-reagent-gray">{{ item.value }}</span>
-          <d-collapse id="my-collapse">
-                  <h5>😍 Now you see me!</h5>
-                  <span>In sagittis nibh non arcu viverra, nec imperdiet quam suscipit. Sed porta eleifend scelerisque. Vestibulum dapibus quis arcu a facilisis.</span>
-          </d-collapse>
-        </d-list-group-item>
-      </d-list-group>
+      <div v-for="(item, idx) in items" :key="idx" class="blog-comments__item d-flex p-3">
+
+        <!-- Content -->
+        <div class="blog-comments__content">
+
+          <!-- Content - Title -->
+          <div class="blog-comments__meta text-muted">
+            {{ item.ItemId }}
+          </div>
+
+          <!-- Content - Body -->
+          <p class="m-0 my-1 mb-2 text-muted text-semibold">{{ item.Comment }}</p>
+
+          <!-- Content - Actions -->
+          <div class="blog-comments__actions">
+            <d-badge outline theme="primary" v-for="(label, idx) in item.Labels" :key="idx">
+              {{ label }}
+            </d-badge>
+          </div>
+        </div>
+
+      </div>
 
     </d-card-body>
 
     <d-card-footer class="border-top">
-      <d-row>
-
-        <!-- View Full Report -->
-        <d-col class="text-right view-report">
-          Update time
-        </d-col>
-
-      </d-row>
     </d-card-footer>
 
   </d-card>
 </template>
 
 <script>
-const defaultTopReferrals = [{
-  title: 'GitHub',
-  value: '19,291',
-}, {
-  title: 'Stack Overflow',
-  value: '11,201',
-}, {
-  title: 'Hacker News',
-  value: '9,291',
-}, {
-  title: 'Reddit',
-  value: '8,281',
-}, {
-  title: 'The Next Web',
-  value: '7,128',
-}, {
-  title: 'Tech Crunch',
-  value: '6,218',
-}, {
-  title: 'YouTube',
-  value: '1,218',
-}, {
-  title: 'Adobe',
-  value: '1,171',
-},
-];
-
+const axios = require('axios');
 export default {
   name: 'ao-top-referrals',
   props: {
@@ -73,17 +51,17 @@ export default {
        */
     title: {
       type: String,
-      default: 'Top Items',
+      default: '--',
     },
     /**
        * The referral datasets.
        */
-    referralData: {
+    items: {
       type: Array,
       default() {
-        return defaultTopReferrals;
+        return [];
       },
     },
-  },
+  }
 };
 </script>
