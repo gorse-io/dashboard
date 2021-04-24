@@ -9,8 +9,11 @@
     "build": "vue-cli-service build && statik -src=dist"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "bootstrap": "^4.1.3",
     "chart.js": "^2.7.2",
+    "moment": "^2.29.1",
+    "numeral": "^2.0.6",
     "quill": "^1.3.6",
     "shards-ui": "^2.1.0",
     "shards-vue": "^1.0.4",

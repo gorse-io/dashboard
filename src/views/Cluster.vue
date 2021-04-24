@@ -22,6 +22,7 @@
                   <th scope="col" class="border-0">Type</th>
                   <th scope="col" class="border-0">Name</th>
                   <th scope="col" class="border-0">IP</th>
+                  <th scope="col" class="border-0">Links</th>
                 </tr>
               </thead>
               <tbody>
@@ -29,6 +30,12 @@
                   <td>{{ node.Type }}</td>
                   <td>{{ node.Name }}</td>
                   <td>{{ node.IP }}</td>
+                  <td>
+                    <d-button-group size="small">
+                      <d-button @click="openAPIDocs(node.Http)" v-if="node.Type == 'Server'" outline>API</d-button>
+                      <d-button @click="openMetrics(node.Http)" outline>Metrics</d-button>
+                    </d-button-group>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -58,13 +65,19 @@ export default {
   },
   methods: {
     fetchNodes() {
-      axios.get('http://127.0.0.1:8088/cluster')
+      axios.get('http://127.0.0.1:8088/dashboard/cluster')
         .then((response) => {
           this.nodes = response.data
         });  
     },
     cancelAutoUpdate() {
       clearInterval(this.timer);
+    },
+    openMetrics(address) {
+      window.open('http://' + address + '/metrics', '_blank')
+    },
+    openAPIDocs(address) {
+      window.open('http://' + address + '/apidocs', '_blank')
     }
   }
 };

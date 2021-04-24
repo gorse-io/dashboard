@@ -73,7 +73,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: 'Click-Through Rate',
+      default: 'Normalized Discounted cumulative gain',
     },
     chartData: {
       type: Object,

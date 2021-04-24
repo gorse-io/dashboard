@@ -6,6 +6,7 @@ import Errors from './views/Errors.vue';
 import Cluster from './views/Cluster.vue';
 import Users from './views/Users.vue';
 import Items from './views/Items.vue';
+import Recommend from './views/Recommend.vue';
 
 Vue.use(Router);
 
@@ -46,6 +47,11 @@ export default new Router({
       path: '/items',
       name: 'items',
       component: Items,
+    },
+    {
+      path: '/recommend',
+      name: 'recommend',
+      component: Recommend,
     },
     {
       path: '*',

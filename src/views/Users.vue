@@ -17,42 +17,33 @@
           </div>
           <div class="card-body border-bottom">
             <d-input-group>
-              <d-input placeholder="User ID" />
+              <d-input id="user_id" v-model="user_id" placeholder="User ID" @keyup.enter.native="search_user" />
               <d-input-group-addon append>
-                <d-button class="btn-white"><i class="material-icons">search</i></d-button>
-                <d-button class="btn-white"><i class="material-icons">arrow_forward_ios</i></d-button>
+                <d-button class="btn-white" @click="search_user"><i class="material-icons">search</i></d-button>
+                <d-button class="btn-white" @click="next_page"><i class="material-icons">arrow_forward_ios</i></d-button>
               </d-input-group-addon>
             </d-input-group>
           </div>
-          <div class="card-body p-0 pb-3 text-center">
+          <div class="card-body p-0 pb-3">
             <table class="table mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Last Active</th>
-                  <th scope="col" class="border-0">Last Recommend</th>
+                  <th scope="col" class="border-0">Last Update</th>
+                  <th scope="col" class="border-0">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Ali</td>
-                  <td>Kerry</td>
-                  <td>Russian Federation</td>
-                </tr>
-                <tr>
-                  <td>Clark</td>
-                  <td>Angela</td>
-                  <td>Estonia</td>
-                </tr>
-                <tr>
-                  <td>Jerry</td>
-                  <td>Nathan</td>
-                  <td>Cyprus</td>
-                </tr>
-                <tr>
-                  <td>Colt</td>
-                  <td>Angela</td>
-                  <td>Liberia</td>
+                <tr v-for="(user, idx) in users" :key="idx" >
+                  <td>{{ user.UserId }}</td>
+                  <td>{{ user.LastActiveTime }}</td>
+                  <td>{{ user.LastUpdateTime }}</td>
+                  <td>
+                    <router-link :to="{name: 'recommend', params: {user_id: user.UserId }}">
+                      <d-button size="small" outline>View</d-button>
+                    </router-link>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -63,3 +54,42 @@
 
   </div>
 </template>
+
+<script>
+const axios = require('axios');
+export default {
+  data() {
+    return {
+      users: null,
+      cursor: '',
+    }
+  },
+  mounted() {
+    axios.get('http://127.0.0.1:8088/dashboard/users')
+      .then((response) => {
+        console.log(response.data)
+        this.users = response.data.Users
+        this.cursor = response.data.Cursor
+      });  
+  },
+  methods: {
+    next_page() {
+      axios.get('http://127.0.0.1:8088/dashboard/users', {
+        params: {
+          cursor: this.cursor,
+        }
+      })
+        .then((response) => {
+          this.users = response.data.Users
+          this.cursor = response.data.Cursor
+        });  
+    },
+    search_user() {
+      axios.get('http://127.0.0.1:8088/dashboard/user/' + this.user_id)
+        .then((response) => {
+          this.users = [response.data]
+        });
+    }
+  }
+};
+</script>

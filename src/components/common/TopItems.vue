@@ -11,9 +11,13 @@
 
       <!-- Top Referrals List Group -->
       <d-list-group flush class="list-group-small">
-        <d-list-group-item v-for="(item, idx) in referralData" :key="idx" class="d-flex px-3">
+        <d-list-group-item v-d-toggle.my-collapse v-for="(item, idx) in referralData" :key="idx" class="d-flex px-3">
           <span class="text-semibold text-fiord-blue">{{ item.title }}</span>
           <span class="ml-auto text-right text-semibold text-reagent-gray">{{ item.value }}</span>
+          <d-collapse id="my-collapse">
+                  <h5>😍 Now you see me!</h5>
+                  <span>In sagittis nibh non arcu viverra, nec imperdiet quam suscipit. Sed porta eleifend scelerisque. Vestibulum dapibus quis arcu a facilisis.</span>
+          </d-collapse>
         </d-list-group-item>
       </d-list-group>
 
