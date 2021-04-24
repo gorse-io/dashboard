@@ -2,6 +2,8 @@
 
 An admin dashboard for gorse recommender system derived from [shards-dashboard-vue](https://github.com/DesignRevision/shards-dashboard-vue).
 
+![](https://raw.githubusercontent.com/gorse-io/dashboard/master/assets/preview.png)
+
 ## Quick Start
 
 - Install dependencies by running `yarn`.
