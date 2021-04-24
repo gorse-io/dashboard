@@ -25,25 +25,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Ali</td>
-                  <td>Kerry</td>
-                  <td>Russian Federation</td>
-                </tr>
-                <tr>
-                  <td>Clark</td>
-                  <td>Angela</td>
-                  <td>Estonia</td>
-                </tr>
-                <tr>
-                  <td>Jerry</td>
-                  <td>Nathan</td>
-                  <td>Cyprus</td>
-                </tr>
-                <tr>
-                  <td>Colt</td>
-                  <td>Angela</td>
-                  <td>Liberia</td>
+                <tr v-for="(node, idx) in nodes" :key="idx" >
+                  <td>{{ node.Type }}</td>
+                  <td>{{ node.Name }}</td>
+                  <td>{{ node.IP }}</td>
                 </tr>
               </tbody>
             </table>
@@ -54,3 +39,33 @@
 
   </div>
 </template>
+
+
+<script>
+const axios = require('axios');
+export default {
+  data() {
+    return {
+      nodes: null,
+    }
+  },
+  mounted() {
+      this.fetchNodes();
+      this.timer = setInterval(this.fetchNodes, 1000);
+  },
+  beforeUnmount() {
+    this.cancelAutoUpdate();
+  },
+  methods: {
+    fetchNodes() {
+      axios.get('http://127.0.0.1:8088/cluster')
+        .then((response) => {
+          this.nodes = response.data
+        });  
+    },
+    cancelAutoUpdate() {
+      clearInterval(this.timer);
+    }
+  }
+};
+</script>
