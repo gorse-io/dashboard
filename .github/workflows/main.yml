@@ -1,0 +1,31 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: install
+
+      - uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: build
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        
+      - name: Install statik
+        run: go get github.com/rakyll/statik
+        
+      - name: Build embed files
+        run: statik -src=dist
