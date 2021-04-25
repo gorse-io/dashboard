@@ -11,3 +11,32 @@ An admin dashboard for gorse recommender system derived from [shards-dashboard-v
 - Install dependencies by running `yarn`.
 - Run `yarn serve` to start the local development server.
 - Run `yarn build` to build go embed files.
+
+## Usage
+
+Install the package.
+
+```bash
+go get -u github.com/gorse-io/dashboard@statik
+```
+
+Import and serve.
+
+```go
+import (
+  "github.com/rakyll/statik/fs"
+  
+  _ "github.com/gorse-io/dashboard/statik"
+)
+
+  // ...
+
+  statikFS, err := fs.New()
+  if err != nil {
+    log.Fatal(err)
+  }
+  
+  // Serve the contents over HTTP.
+  http.Handle("/public/", http.StripPrefix("/", http.FileServer(statikFS)))
+  http.ListenAndServe(":8080", nil)
+```
