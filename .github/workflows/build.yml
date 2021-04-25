@@ -27,7 +27,9 @@ jobs:
         uses: actions/setup-go@v2
         
       - name: Install statik
-        run: go get github.com/rakyll/statik
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          go get github.com/rakyll/statik
         
       - name: Build embed files
         run: statik -src=dist
