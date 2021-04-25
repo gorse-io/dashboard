@@ -18,7 +18,7 @@ jobs:
         with:
           cmd: install
 
-      - name: Build dist
+      - name: Build for production
         uses: borales/actions-yarn@v2.0.0
         with:
           cmd: build
@@ -26,10 +26,8 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         
-      - name: Install statik
+      - name: Install statik & build embed files
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           go get github.com/rakyll/statik
-        
-      - name: Build embed files
-        run: statik -src=dist
+          statik -src=dist
