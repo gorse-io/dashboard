@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build && statik -src=dist"
+    "build": "vue-cli-service build"
   },
   "dependencies": {
     "axios": "^0.21.1",
