@@ -31,3 +31,19 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           go get github.com/rakyll/statik
           statik -src=dist
+
+      - name: Commit files
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git checkout --orphan statik
+          git rm -r --cached .
+          git add statik
+          git commit -m "Build embed files"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: refs/remotes/origin/statik
+          force: true
