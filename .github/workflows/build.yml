@@ -35,8 +35,8 @@ jobs:
       - name: Commit files
         run: |
           cd statik
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           git init
           git add statik.go
           git commit -m "Build embed files"
