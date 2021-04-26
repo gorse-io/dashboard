@@ -34,16 +34,11 @@ jobs:
 
       - name: Commit files
         run: |
+          cd statik
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git checkout --orphan statik
-          git rm -r --cached .
-          git add statik
+          git config --local user.name "github-actions[bot]
+          git init
+          git add statik.go
           git commit -m "Build embed files"
-          
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: refs/remotes/origin/statik
-          force: true
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push origin statik -f
