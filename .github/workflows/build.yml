@@ -40,5 +40,6 @@ jobs:
           git init
           git add statik.go
           git commit -m "Build embed files"
+          git remote add origin https://github.com/gorse-io/dashboard.git
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git push origin statik -f
