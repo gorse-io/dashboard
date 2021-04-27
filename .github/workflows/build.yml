@@ -42,7 +42,9 @@ jobs:
           git checkout statik || git checkout --orphan statik
           git rm -r --cached .
           cp -f ../dashboard/statik/statik.go statik.go
-          git add statik.go
+          go mod init github.com/gorse-io/dashboard/statik
+          go mod tidy
+          git add statik.go go.mod go.sum
           git commit -m "Build embed files"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git push origin statik
