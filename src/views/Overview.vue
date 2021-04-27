@@ -82,13 +82,13 @@ export default {
   },
   mounted() {
     // load config
-    axios.get('/dashboard/config')
+    axios.get('/api/dashboard/config')
       .then((response) => {
         this.cacheSize = response.data.Database.CacheSize
         this.defaultN = response.data.Server.DefaultN
       });  
     // load status
-    axios.get('/dashboard/stats')
+    axios.get('/api/dashboard/stats')
     .then((response) => {
       this.smallStats[0].value = numeral(response.data.NumUsers).format("0,0")
       this.smallStats[1].value = numeral(response.data.NumItems).format("0,0")
@@ -101,7 +101,7 @@ export default {
       }
     });  
     // load latest items
-    axios.get('/dashboard/latest', {
+    axios.get('/api/dashboard/latest', {
         params: {
           end: this.cacheSize
         }
@@ -110,7 +110,7 @@ export default {
         this.latestItems = response.data
       });  
     // load popular items
-    axios.get('/dashboard/popular', {
+    axios.get('/api/dashboard/popular', {
         params: {
           end: this.cacheSize
         }

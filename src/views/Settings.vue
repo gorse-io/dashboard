@@ -45,7 +45,7 @@ export default {
     }
   },
   mounted() {
-    axios.get('/dashboard/config')
+    axios.get('/api/dashboard/config')
       .then((response) => {
         this.config = response.data
       });  

@@ -65,7 +65,7 @@ export default {
     }
   },
   mounted() {
-    axios.get('/dashboard/users')
+    axios.get('/api/dashboard/users')
       .then((response) => {
         this.users = response.data.Users
         this.cursor = response.data.Cursor
@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     next_page() {
-      axios.get('/dashboard/users', {
+      axios.get('/api/dashboard/users', {
         params: {
           cursor: this.cursor,
         }
@@ -84,7 +84,7 @@ export default {
         });  
     },
     search_user() {
-      axios.get('/dashboard/user/' + this.user_id)
+      axios.get('/api/dashboard/user/' + this.user_id)
         .then((response) => {
           this.users = [response.data]
         });

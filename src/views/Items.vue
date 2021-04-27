@@ -68,7 +68,7 @@ export default {
     }
   },
   mounted() {
-    axios.get('/items')
+    axios.get('/api/items')
       .then((response) => {
         this.items = response.data.Items
         this.cursor = response.data.Cursor
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     next_page() {
-      axios.get('/items', {
+      axios.get('/api/items', {
         params: {
           cursor: this.cursor
         }
@@ -90,7 +90,7 @@ export default {
       return moment(String(timestamp)).format('YYYY/MM/DD hh:mm')
     },
     search_item() {
-      axios.get('/item/' + this.item_id)
+      axios.get('/api/item/' + this.item_id)
       .then((response) => {
         this.items = [response.data]
       });  

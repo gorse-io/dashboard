@@ -47,14 +47,14 @@ export default {
   },
   mounted() {
     // load config
-    axios.get('/dashboard/config')
+    axios.get('/api/dashboard/config')
       .then((response) => {
         this.cacheSize = response.data.Database.CacheSize
         this.feedbackTypes = response.data.Database.PositiveFeedbackType
         this.defaultN = response.data.Server.DefaultN
         var feedbackItems = []
         this.feedbackTypes.forEach((feedbackType) => {
-          axios.get('/dashboard/user/' + this.user_id + '/feedback/' + feedbackType +'/')
+          axios.get('/api/dashboard/user/' + this.user_id + '/feedback/' + feedbackType +'/')
             .then((response) => {
               response.data.forEach((feedback) => {
                 feedbackItems.push(feedback.Item)
@@ -63,7 +63,7 @@ export default {
         })
         this.feedback = feedbackItems
       });  
-    axios.get('/dashboard/recommend/' + this.user_id, {
+    axios.get('/api/dashboard/recommend/' + this.user_id, {
         params: {
           n: this.cacheSize
         }
