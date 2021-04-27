@@ -65,16 +65,15 @@ export default {
     }
   },
   mounted() {
-    axios.get('http://127.0.0.1:8088/dashboard/users')
+    axios.get('/dashboard/users')
       .then((response) => {
-        console.log(response.data)
         this.users = response.data.Users
         this.cursor = response.data.Cursor
       });  
   },
   methods: {
     next_page() {
-      axios.get('http://127.0.0.1:8088/dashboard/users', {
+      axios.get('/dashboard/users', {
         params: {
           cursor: this.cursor,
         }
@@ -85,7 +84,7 @@ export default {
         });  
     },
     search_user() {
-      axios.get('http://127.0.0.1:8088/dashboard/user/' + this.user_id)
+      axios.get('/dashboard/user/' + this.user_id)
         .then((response) => {
           this.users = [response.data]
         });

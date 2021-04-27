@@ -29,11 +29,11 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Popular Items'" :items="popularItems"/>
+        <bo-top-items :title="'Popular Items'" :items="popularItems" :pageSize="defaultN"/>
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Latest Items'" :items="latestItems"/>
+        <bo-top-items :title="'Latest Items'" :items="latestItems" :pageSize="defaultN"/>
       </d-col>
     </d-row>
   </d-container>
@@ -57,6 +57,8 @@ export default {
   },
   data() {
     return {
+      cacheSize: 100,
+      defaultN: 10,
       smallStats: 
        [{
         label: 'Users',
@@ -79,8 +81,14 @@ export default {
     };
   },
   mounted() {
+    // load config
+    axios.get('/dashboard/config')
+      .then((response) => {
+        this.cacheSize = response.data.Database.CacheSize
+        this.defaultN = response.data.Server.DefaultN
+      });  
     // load status
-    axios.get('http://127.0.0.1:8088/dashboard/stats')
+    axios.get('/dashboard/stats')
     .then((response) => {
       this.smallStats[0].value = numeral(response.data.NumUsers).format("0,0")
       this.smallStats[1].value = numeral(response.data.NumItems).format("0,0")
@@ -93,12 +101,20 @@ export default {
       }
     });  
     // load latest items
-    axios.get('http://127.0.0.1:8088/dashboard/latest')
+    axios.get('/dashboard/latest', {
+        params: {
+          end: this.cacheSize
+        }
+      })
       .then((response) => {
         this.latestItems = response.data
       });  
     // load popular items
-    axios.get('http://127.0.0.1:8088/dashboard/popular')
+    axios.get('/dashboard/popular', {
+        params: {
+          end: this.cacheSize
+        }
+      })
       .then((response) => {
         this.popularItems = response.data
       });  

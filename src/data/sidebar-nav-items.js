@@ -24,5 +24,11 @@ export default function () {
     to: {
       name: 'items',
     },
+  }, {
+    title: 'Settings',
+    htmlBefore: '<i class="material-icons">settings</i>',
+    to: {
+      name: 'config',
+    },
   }];
 }

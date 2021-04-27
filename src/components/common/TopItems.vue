@@ -10,7 +10,7 @@
     <d-card-body class="p-0">
 
       <!-- Top Referrals List Group -->
-      <div v-for="(item, idx) in items" :key="idx" class="blog-comments__item d-flex p-3">
+      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
 
         <!-- Content -->
         <div class="blog-comments__content">
@@ -36,6 +36,10 @@
     </d-card-body>
 
     <d-card-footer class="border-top">
+      <d-button-group class="mb-3">
+        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber != 0"><i class="material-icons">arrow_back_ios</i></d-button>
+        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber+1 != pageCount"><i class="material-icons">arrow_forward_ios</i></d-button>
+      </d-button-group>
     </d-card-footer>
 
   </d-card>
@@ -46,22 +50,42 @@ const axios = require('axios');
 export default {
   name: 'ao-top-referrals',
   props: {
-    /**
-       * The component's title.
-       */
     title: {
       type: String,
       default: '--',
     },
-    /**
-       * The referral datasets.
-       */
+    pageSize: {
+      default: 10,
+    },
     items: {
       type: Array,
       default() {
         return [];
       },
     },
+  },
+  data() {
+    return {
+      pageNumber: 0,
+    }
+  },
+  computed: {
+    pageCount() {
+      return this.items.length / this.pageSize
+    },
+    pageItems() {
+      var start = this.pageNumber * this.pageSize;
+      var end = Math.min(start + this.pageSize, this.items.length);
+      return this.items.slice(start, end)
+    },
+  },
+  methods: {
+    prevPage() {
+      this.pageNumber -= 1;
+    },
+    nextPage() {
+      this.pageNumber += 1;
+    }
   }
 };
 </script>

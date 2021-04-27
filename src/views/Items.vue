@@ -68,7 +68,7 @@ export default {
     }
   },
   mounted() {
-    axios.get('http://127.0.0.1:8088/items')
+    axios.get('/items')
       .then((response) => {
         this.items = response.data.Items
         this.cursor = response.data.Cursor
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     next_page() {
-      axios.get('http://127.0.0.1:8088/items', {
+      axios.get('/items', {
         params: {
           cursor: this.cursor
         }
@@ -90,7 +90,7 @@ export default {
       return moment(String(timestamp)).format('YYYY/MM/DD hh:mm')
     },
     search_item() {
-      axios.get('http://127.0.0.1:8088/item/' + this.item_id)
+      axios.get('/item/' + this.item_id)
       .then((response) => {
         this.items = [response.data]
       });  

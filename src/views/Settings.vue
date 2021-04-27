@@ -1,0 +1,54 @@
+<template>
+  <div class="main-content-container container-fluid px-4">
+    <!-- Page Header -->
+    <div class="page-header row no-gutters py-4">
+      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+        <span class="text-uppercase page-subtitle">Overview</span>
+        <h3 class="page-title">Settings</h3>
+      </div>
+    </div>
+
+    <!-- Default Light Table -->
+    <div class="row" v-for="(settings, section) in config" :key="section">
+      <div class="col">
+        <div class="card card-small mb-4">
+          <div class="card-header border-bottom">
+            <h6 class="m-0">{{ section }}</h6>
+          </div>
+          <div class="card-body p-0 pb-3">
+            <d-list-group flush>
+            <d-list-group-item class="p-3" v-for="(value, name) in settings" :key="name">
+            <d-row>
+              <d-col sm="12" md="2">
+               <label>{{ name }}</label>
+              </d-col>
+              <d-col sm="12" md="10">
+                <d-input type="text" :value="value" readonly/>
+              </d-col>
+            </d-row>
+            </d-list-group-item>
+            </d-list-group>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+const axios = require('axios');
+export default {
+  data() {
+    return {
+      config: null,
+    }
+  },
+  mounted() {
+    axios.get('/dashboard/config')
+      .then((response) => {
+        this.config = response.data
+      });  
+  }
+};
+</script>

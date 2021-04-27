@@ -65,7 +65,7 @@ export default {
   },
   methods: {
     fetchNodes() {
-      axios.get('http://127.0.0.1:8088/dashboard/cluster')
+      axios.get('/dashboard/cluster')
         .then((response) => {
           this.nodes = response.data
         });  

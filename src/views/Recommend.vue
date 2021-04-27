@@ -10,64 +10,14 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-  <d-card class="card-small">
-
-    <!-- Card Header -->
-    <d-card-header class="border-bottom">
-      <h6 class="m-0">Positive Feedback
-      </h6>
-      <div class="block-handle"></div>
-
-        <!-- View Full Report -->
-
-
-    </d-card-header>
-  
-
-    <d-card-body class="p-0">
-
-      <!-- Top Referrals List Group -->
-      <d-list-group flush class="list-group-small">
-        <d-list-group-item v-for="(fb, idx) in page_feedback" :key="idx" class="d-flex px-3">
-          <span class="text-semibold text-fiord-blue">{{ fb.ItemId }}</span>
-          <span class="ml-auto text-right text-semibold text-reagent-gray">{{ }}</span>
-        </d-list-group-item>
-      </d-list-group>
-
-    </d-card-body>
-
-    <d-card-footer class="border-top">
-
-    </d-card-footer>
-
-  </d-card>
+        <bo-top-items :title="'Positive Feedback'" :items="feedback" :pageSize="defaultN"/>
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
-  <d-card class="card-small">
 
-    <!-- Card Header -->
-    <d-card-header class="border-bottom">
-      <h6 class="m-0">Recommendation</h6>
-      <div class="block-handle"></div>
-    </d-card-header>
+        <bo-top-items :title="'Recommend'" :items="recommends" :pageSize="defaultN"/>
 
-    <d-card-body class="p-0">
 
-      <!-- Top Referrals List Group -->
-      <d-list-group flush class="list-group-small">
-        <d-list-group-item v-for="(item, idx) in recommends" :key="idx" class="d-flex px-3">
-          <span class="text-semibold text-fiord-blue">{{ item }}</span>
-          <span class="ml-auto text-right text-semibold text-reagent-gray">{{ item.value }}</span>
-        </d-list-group-item>
-      </d-list-group>
-
-    </d-card-body>
-
-    <d-card-footer class="border-top">
-    </d-card-footer>
-
-  </d-card>
       </d-col>
     </d-row>
   </d-container>
@@ -75,27 +25,49 @@
 
 <script>
 const axios = require('axios');
+
+import TopItems from '@/components/common/TopItems.vue';
+
 export default {
+  components: {
+    boTopItems: TopItems,
+  },
   data() {
     return {
+      cacheSize: 100,
+      defaultN: 10,
       user_id: null,
-      feedback: null,
-      recommends: null,
-      page_feedback: null,
-      page_feedback_no: 0,
+      feedback: [],
+      recommends: [],
+      feedbackTypes: [],
     };
   },
   created() {
     this.user_id = this.$route.params.user_id;
   },
   mounted() {
-    axios.get('http://127.0.0.1:8088/user/' + this.user_id + '/feedback/star/')
+    // load config
+    axios.get('/dashboard/config')
       .then((response) => {
-        console.log(response.data)
-        this.feedback = response.data
-        this.page_feedback = this.feedback.slice(0, 10)
-      });
-    axios.get('http://127.0.0.1:8088/recommend/' + this.user_id)
+        this.cacheSize = response.data.Database.CacheSize
+        this.feedbackTypes = response.data.Database.PositiveFeedbackType
+        this.defaultN = response.data.Server.DefaultN
+        var feedbackItems = []
+        this.feedbackTypes.forEach((feedbackType) => {
+          axios.get('/dashboard/user/' + this.user_id + '/feedback/' + feedbackType +'/')
+            .then((response) => {
+              response.data.forEach((feedback) => {
+                feedbackItems.push(feedback.Item)
+              })
+            });
+        })
+        this.feedback = feedbackItems
+      });  
+    axios.get('/dashboard/recommend/' + this.user_id, {
+        params: {
+          n: this.cacheSize
+        }
+      })
       .then((response) => {
         this.recommends = response.data
       });

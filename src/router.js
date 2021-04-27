@@ -7,6 +7,7 @@ import Cluster from './views/Cluster.vue';
 import Users from './views/Users.vue';
 import Items from './views/Items.vue';
 import Recommend from './views/Recommend.vue';
+import Settings from './views/Settings.vue';
 
 Vue.use(Router);
 
@@ -47,6 +48,11 @@ export default new Router({
       path: '/items',
       name: 'items',
       component: Items,
+    },
+    {
+      path: '/config',
+      name: 'config',
+      component: Settings,
     },
     {
       path: '/recommend',
