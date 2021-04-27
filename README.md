@@ -26,7 +26,7 @@ Import and serve.
 import (
   "github.com/rakyll/statik/fs"
   
-  _ "github.com/gorse-io/dashboard/statik"
+  _ "github.com/gorse-io/dashboard"
 )
 
   // ...
@@ -37,6 +37,6 @@ import (
   }
   
   // Serve the contents over HTTP.
-  http.Handle("/public/", http.StripPrefix("/", http.FileServer(statikFS)))
+  http.Handle("/", http.FileServer(statikFS))
   http.ListenAndServe(":8080", nil)
 ```
