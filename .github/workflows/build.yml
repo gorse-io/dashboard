@@ -41,6 +41,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git checkout statik || git checkout --orphan statik
           git rm -r --cached .
+          rm statik.go go.mod go.sum
           cp -f ../dashboard/statik/statik.go statik.go
           go mod init github.com/gorse-io/dashboard
           go mod tidy
