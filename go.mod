@@ -1,4 +1,4 @@
-module github.com/gorse-io/dashboard/statik
+module github.com/gorse-io/dashboard
 
 go 1.15
 
