@@ -32,14 +32,20 @@ jobs:
           go get github.com/rakyll/statik
           statik -src=dist
 
-      - name: Commit files
+      - name: Commit embed files
         run: |
-          cd statik
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git init
-          git add statik.go
+          cd ..
+          git clone https://github.com/gorse-io/dashboard.git dashboard-statik
+          cd dashboard-statik
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git checkout statik || git checkout --orphan statik
+          git rm -r --cached .
+          rm statik.go go.mod go.sum
+          cp -f ../dashboard/statik/statik.go statik.go
+          go mod init github.com/gorse-io/dashboard
+          go mod tidy
+          git add statik.go go.mod go.sum
           git commit -m "Build embed files"
-          git remote add origin https://github.com/gorse-io/dashboard.git
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git push origin statik -f
+          git push origin statik
