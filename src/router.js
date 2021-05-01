@@ -7,6 +7,7 @@ import Cluster from './views/Cluster.vue';
 import Users from './views/Users.vue';
 import Items from './views/Items.vue';
 import Recommend from './views/Recommend.vue';
+import Neighbor from './views/Neighbor.vue';
 import Settings from './views/Settings.vue';
 
 Vue.use(Router);
@@ -58,6 +59,11 @@ export default new Router({
       path: '/recommend',
       name: 'recommend',
       component: Recommend,
+    },
+    {
+      path: '/neighbor',
+      name: 'neighbor',
+      component: Neighbor,
     },
     {
       path: '*',

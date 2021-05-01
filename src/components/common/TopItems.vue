@@ -29,6 +29,8 @@
               {{ label }}
             </d-badge>
           </div>
+
+          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size:80%;">{{ item.Timestamp }}</p>
         </div>
 
       </div>

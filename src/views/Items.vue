@@ -32,6 +32,7 @@
                   <th scope="col" class="border-0">Timestamp</th>
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Description</th>
+                  <th scope="col" class="border-0">Recommend</th>
                 </tr>
               </thead>
               <tbody>
@@ -46,6 +47,11 @@
                     </div>
                   </td>
                   <td>{{ item.Comment }}</td>
+                  <td>
+                    <router-link :to="{name: 'neighbor', params: {item_id: item.ItemId}}">
+                      <d-button size="small" outline>Preview</d-button>
+                    </router-link>
+                  </td>
                 </tr>
               </tbody>
             </table>

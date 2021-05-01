@@ -57,6 +57,7 @@ export default {
           axios.get('/api/dashboard/user/' + this.user_id + '/feedback/' + feedbackType +'/')
             .then((response) => {
               response.data.forEach((feedback) => {
+                feedback.Item.Timestamp = feedback.Timestamp
                 feedbackItems.push(feedback.Item)
               })
             });

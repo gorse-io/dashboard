@@ -31,7 +31,7 @@
                   <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Last Active</th>
                   <th scope="col" class="border-0">Last Update</th>
-                  <th scope="col" class="border-0">Actions</th>
+                  <th scope="col" class="border-0">Recommend</th>
                 </tr>
               </thead>
               <tbody>
@@ -41,7 +41,7 @@
                   <td>{{ user.LastUpdateTime }}</td>
                   <td>
                     <router-link :to="{name: 'recommend', params: {user_id: user.UserId }}">
-                      <d-button size="small" outline>View</d-button>
+                      <d-button size="small" outline>Preview</d-button>
                     </router-link>
                   </td>
                 </tr>

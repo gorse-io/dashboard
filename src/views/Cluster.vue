@@ -32,8 +32,8 @@
                   <td>{{ node.IP }}</td>
                   <td>
                     <d-button-group size="small">
-                      <d-button @click="openAPIDocs(node.Http)" v-if="node.Type == 'Server'" outline>API</d-button>
-                      <d-button @click="openMetrics(node.Http)" outline>Metrics</d-button>
+                      <d-button @click="openAPIDocs(node.IP, node.HttpPort)" v-if="node.Type == 'Server'" outline>API</d-button>
+                      <d-button @click="openMetrics(node.IP, node.HttpPort)" outline>Metrics</d-button>
                     </d-button-group>
                   </td>
                 </tr>
@@ -73,11 +73,11 @@ export default {
     cancelAutoUpdate() {
       clearInterval(this.timer);
     },
-    openMetrics(address) {
-      window.open('http://' + address + '/metrics', '_blank')
+    openMetrics(host, port) {
+      window.open('http://' + host + ':' + port + '/metrics', '_blank')
     },
-    openAPIDocs(address) {
-      window.open('http://' + address + '/apidocs', '_blank')
+    openAPIDocs(host, port) {
+      window.open('http://' + host + ':' + port + '/apidocs', '_blank')
     }
   }
 };
