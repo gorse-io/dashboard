@@ -25,6 +25,12 @@ export default function () {
       name: 'items',
     },
   }, {
+    title: 'Advance',
+    htmlBefore: '<i class="material-icons">subject</i>',
+    to: {
+      name: 'advance',
+    }
+  }, {
     title: 'Settings',
     htmlBefore: '<i class="material-icons">settings</i>',
     to: {

@@ -9,6 +9,7 @@ import Items from './views/Items.vue';
 import Recommend from './views/Recommend.vue';
 import Neighbor from './views/Neighbor.vue';
 import Settings from './views/Settings.vue';
+import Advance from './views/Advance.vue';
 
 Vue.use(Router);
 
@@ -64,6 +65,11 @@ export default new Router({
       path: '/neighbor',
       name: 'neighbor',
       component: Neighbor,
+    },
+    {
+      path: '/advance',
+      name: 'advance',
+      component: Advance,
     },
     {
       path: '*',
