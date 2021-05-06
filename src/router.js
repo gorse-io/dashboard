@@ -10,6 +10,8 @@ import Recommend from './views/Recommend.vue';
 import Neighbor from './views/Neighbor.vue';
 import Settings from './views/Settings.vue';
 import Advance from './views/Advance.vue';
+import ImportItems from './views/ImportItems.vue';
+import ImportFeedback from './views/ImportFeedback.vue';
 
 Vue.use(Router);
 
@@ -70,6 +72,16 @@ export default new Router({
       path: '/advance',
       name: 'advance',
       component: Advance,
+    },
+    {
+      path: '/import/items',
+      name: 'import_items',
+      component: ImportItems
+    },
+    {
+      path: '/import/feedback',
+      name: 'import_feedback',
+      component: ImportFeedback
     },
     {
       path: '*',

@@ -16,34 +16,41 @@
           </div>
           <div class="card-body p-0 pb-3">
             <d-list-group flush>
-            <d-list-group-item class="p-3">
-            <d-row>
-              <d-col sm="12" md="2">
-               <label>Timestamp</label>
-              </d-col>
-              <d-col sm="12" md="10">
-                <label class="text-light">{{ format_date_time(current_item.Timestamp) }}</label>
-              </d-col>
-            </d-row>
-            <d-row>
-              <d-col sm="12" md="2">
-               <label>Labels</label>
-              </d-col>
-              <d-col sm="12" md="10">
-                    <d-badge outline theme="primary" v-for="(label, idx) in current_item.Labels" :key="idx">
+              <d-list-group-item class="p-3">
+                <d-row>
+                  <d-col sm="12" md="2">
+                    <label>Timestamp</label>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <label class="text-light">{{
+                      format_date_time(current_item.Timestamp)
+                    }}</label>
+                  </d-col>
+                </d-row>
+                <d-row>
+                  <d-col sm="12" md="2">
+                    <label>Labels</label>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <d-badge
+                      outline
+                      theme="primary"
+                      v-for="(label, idx) in current_item.Labels"
+                      :key="idx"
+                    >
                       {{ label }}
                     </d-badge>
-              </d-col>
-            </d-row>
-            <d-row>
-              <d-col sm="12" md="2">
-               <label>Description</label>
-              </d-col>
-              <d-col sm="12" md="10">
-                <label class="text-light">{{ current_item.Comment }}</label>
-              </d-col>
-            </d-row>
-            </d-list-group-item>
+                  </d-col>
+                </d-row>
+                <d-row>
+                  <d-col sm="12" md="2">
+                    <label>Description</label>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <label class="text-light">{{ current_item.Comment }}</label>
+                  </d-col>
+                </d-row>
+              </d-list-group-item>
             </d-list-group>
           </div>
         </div>
@@ -68,14 +75,19 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, idx) in items" :key="idx" >
+                <tr v-for="(item, idx) in items" :key="idx">
                   <td>{{ item.ItemId }}</td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
                     <div>
-                    <d-badge outline theme="primary" v-for="(label, idx) in item.Labels" :key="idx">
-                      {{ label }}
-                    </d-badge>
+                      <d-badge
+                        outline
+                        theme="primary"
+                        v-for="(label, idx) in item.Labels"
+                        :key="idx"
+                      >
+                        {{ label }}
+                      </d-badge>
                     </div>
                   </td>
                   <td>{{ item.Comment }}</td>
@@ -86,39 +98,35 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
-const axios = require('axios');
-import moment from 'moment';
+const axios = require("axios");
+import moment from "moment";
 export default {
   data() {
     return {
       item_id: null,
       items: [],
       current_item: null,
-    }
+    };
   },
   created() {
     this.item_id = this.$route.params.item_id;
-    console.log(this.item_id)
   },
   mounted() {
-    axios.get('/api/dashboard/neighbors/' + this.item_id)
-      .then((response) => {
-        this.items = response.data
-      });  
-    axios.get('/api/item/' + this.item_id)
-      .then((response) => {
-        this.current_item = response.data
-      });  
+    axios.get("/api/dashboard/neighbors/" + this.item_id).then((response) => {
+      this.items = response.data;
+    });
+    axios.get("/api/item/" + this.item_id).then((response) => {
+      this.current_item = response.data;
+    });
   },
   methods: {
     format_date_time(timestamp) {
-      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm')
-    }
-  }
+      return moment(String(timestamp)).format("YYYY/MM/DD hh:mm");
+    },
+  },
 };
 </script>
