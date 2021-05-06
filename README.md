@@ -10,7 +10,6 @@ An admin dashboard for gorse recommender system derived from [shards-dashboard-v
 
 - Install dependencies by running `yarn`.
 - Run `yarn serve` to start the local development server.
-- Run `yarn build` to build go embed files.
 
 ## Usage
 
