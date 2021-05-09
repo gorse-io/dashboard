@@ -7,6 +7,14 @@
         <h3 class="page-title">Import Feedback</h3>
       </div>
     </div>
+    <d-alert
+      :theme="alertTheme"
+      :show="timeUntilDismissed"
+      dismissible
+      @alert-dismissed="timeUntilDismissed = 0"
+      @alert-dismiss-countdown="handleTimeChange"
+      >{{ alertText }}</d-alert
+    >
     <div class="row">
       <div class="col">
         <div class="card card-small mb-4">
@@ -19,7 +27,7 @@
                     <input
                       type="file"
                       class="custom-file-input"
-                      id="customFile2"
+                      id="csvFile"
                       @change="loadFile"
                       required
                     />
@@ -45,7 +53,7 @@
                 </d-col>
               </d-form-row>
             </d-form>
-            <d-form>
+            <d-form @submit.prevent="uploadFile">
               <d-form-row>
                 <d-col md="3">
                   <strong class="text-muted d-block mb-2"
@@ -110,13 +118,16 @@
                     >The first line is the header.</d-checkbox
                   >
                 </d-col>
-                <d-col md="2">
-                  <d-button type="submit">Comfirm Import</d-button></d-col
-                >
+                <d-col md="2"> <d-button>Comfirm Import</d-button></d-col>
               </d-form-row>
             </d-form>
           </div>
-          <d-progress height="5px" class="mb-3" :value="20" :max="100" />
+          <d-progress
+            height="5px"
+            class="mb-3"
+            :value="progressLoaded"
+            :max="progressTotal"
+          />
           <div class="card-body p-0 pb-3">
             <table class="table mb-0">
               <thead class="bg-light">
@@ -163,6 +174,7 @@
 </template>
 
 <script>
+const axios = require("axios");
 import moment from "moment";
 
 export default {
@@ -177,6 +189,12 @@ export default {
       userIdColIdx: 1,
       itemIdColIdx: 2,
       timestampColIdx: 3,
+      progressLoaded: 0,
+      progressTotal: 100,
+      alertTheme: "danger",
+      alertText: null,
+      duration: 3,
+      timeUntilDismissed: 0,
     };
   },
   computed: {
@@ -243,17 +261,46 @@ export default {
     format_date_time(timestamp) {
       return moment(String(timestamp)).format("YYYY/MM/DD hh:mm");
     },
-    splitLabels(text, sep) {
-      let labels = [];
-      if (sep.length == 0) {
-        return labels;
-      }
-      text.split(sep).forEach((e) => {
-        if (e.length > 0) {
-          labels.push(e);
-        }
-      });
-      return labels;
+    handleTimeChange(time) {
+      this.timeUntilDismissed = time;
+    },
+    showAlert() {
+      this.timeUntilDismissed = this.duration;
+    },
+    resetProgressBar() {
+      this.progressTotal = 100;
+      this.progressLoaded = 0;
+    },
+    resetTable() {
+      this.table = []
+    },
+    uploadFile() {
+      var config = {
+        onUploadProgress: (progressEvent) => {
+          this.progressLoaded = progressEvent.loaded;
+          this.progressTotal = progressEvent.total;
+        },
+      };
+      var formData = new FormData();
+      formData.append('sep', this.fieldSeparator);
+      formData.append('has-header', this.hasHeader);
+      var csvfile = document.querySelector("#csvFile");
+      formData.append("file", csvfile.files[0]);
+      axios
+        .post("/api/bulk/feedback", formData, config)
+        .then((response) => {
+          this.alertTheme = "success";
+          this.alertText = response.data;
+          this.showAlert();
+          this.resetProgressBar();
+          this.resetTable();
+        })
+        .catch((error) => {
+          this.alertTheme = "danger";
+          this.alertText = error.response.data;
+          this.showAlert();
+          this.resetProgressBar();
+        });
     },
   },
 };

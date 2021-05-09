@@ -1,9 +1,9 @@
 <template>
   <div :class="['main-navbar', 'bg-white', stickyTop ? 'sticky-top' : '']">
     <d-navbar type="light" class="align-items-stretch flex-md-nowrap p-0">
-      <navbar-search />
+      <!-- <navbar-search />
       <navbar-nav />
-      <navbar-toggle />
+      <navbar-toggle /> -->
     </d-navbar>
   </div>
 </template>

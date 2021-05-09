@@ -7,6 +7,14 @@
         <h3 class="page-title">Import Items</h3>
       </div>
     </div>
+    <d-alert
+      :theme="alertTheme"
+      :show="timeUntilDismissed"
+      dismissible
+      @alert-dismissed="timeUntilDismissed = 0"
+      @alert-dismiss-countdown="handleTimeChange"
+      >{{ alertText }}</d-alert
+    >
     <div class="row">
       <div class="col">
         <div class="card card-small mb-4">
@@ -19,7 +27,7 @@
                     <input
                       type="file"
                       class="custom-file-input"
-                      id="customFile2"
+                      id="csvFile"
                       @change="loadFile"
                       required
                     />
@@ -57,7 +65,7 @@
                 </d-col>
               </d-form-row>
             </d-form>
-            <d-form>
+            <d-form @submit.prevent="uploadFile">
               <d-form-row>
                 <d-col md="3">
                   <strong class="text-muted d-block mb-2"
@@ -108,12 +116,12 @@
                   >
                 </d-col>
                 <d-col md="2">
-                  <d-button type="submit">Comfirm Import</d-button></d-col
+                  <d-button>Comfirm Import</d-button></d-col
                 >
               </d-form-row>
             </d-form>
           </div>
-          <d-progress height="5px" class="mb-3" :value="20" :max="100" />
+          <d-progress height="5px" class="mb-3" :value="progressLoaded" :max="progressTotal" />
           <div class="card-body p-0 pb-3">
             <table class="table mb-0">
               <thead class="bg-light">
@@ -159,6 +167,7 @@
 </template>
 
 <script>
+const axios = require('axios');
 import moment from "moment";
 
 export default {
@@ -174,6 +183,12 @@ export default {
       timestampColIdx: 1,
       labelsColIdx: 2,
       descColIdx: 3,
+      progressTotal: 100,
+      progressLoaded: 0,
+      alertTheme: "danger",
+      alertText: null,
+      duration: 3,
+      timeUntilDismissed: 0,
     };
   },
   computed: {
@@ -252,6 +267,47 @@ export default {
       });
       return labels;
     },
+    handleTimeChange(time) {
+      this.timeUntilDismissed = time;
+    },
+    showAlert() {
+      this.timeUntilDismissed = this.duration;
+    },
+    resetProgressBar() {
+      this.progressTotal = 100;
+      this.progressLoaded = 0;
+    },
+    resetTable() {
+      this.table = []
+    },
+    uploadFile() {
+      var config = {
+        onUploadProgress: (progressEvent) => {
+          this.progressLoaded = progressEvent.loaded;
+          this.progressTotal = progressEvent.total;
+        }
+      };
+      var formData = new FormData();
+      formData.append('sep', this.fieldSeparator);
+      formData.append('has-header', this.hasHeader);
+      formData.append('label-sep', this.labelSeparator);
+      var csvfile = document.querySelector('#csvFile');
+      formData.append("file", csvfile.files[0]);
+      axios.post('/api/bulk/items', formData, config)
+        .then((response) => {
+          this.alertTheme = "success";
+          this.alertText = response.data;
+          this.showAlert();
+          this.resetProgressBar();
+          this.resetTable();
+        })
+        .catch((error) => {
+          this.alertTheme = "danger";
+          this.alertText = error.response.data;
+          this.showAlert();
+          this.resetProgressBar();
+        });
+    }
   },
 };
 </script>
