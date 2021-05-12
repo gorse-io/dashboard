@@ -12,7 +12,6 @@
 </template>
 
 <script>
-import { nanoid } from '../../utils';
 
 export default {
   name: 'd-small-stats',
@@ -47,9 +46,6 @@ export default {
     },
   },
   computed: {
-    computedChartId() {
-      return this.id || `stats-small-${nanoid()}`;
-    },
     computedVariationClass() {
       return this.variation ? `stats-small--${this.variation}` : null;
     },
@@ -94,7 +90,7 @@ export default {
       }
 
       return 'text-right align-items-center';
-    }
+    },
   },
 };
 </script>

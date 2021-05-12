@@ -48,7 +48,6 @@
 </template>
 
 <script>
-const axios = require('axios');
 export default {
   name: 'ao-top-referrals',
   props: {
@@ -69,16 +68,16 @@ export default {
   data() {
     return {
       pageNumber: 0,
-    }
+    };
   },
   computed: {
     pageCount() {
-      return this.items.length / this.pageSize
+      return this.items.length / this.pageSize;
     },
     pageItems() {
-      var start = this.pageNumber * this.pageSize;
-      var end = Math.min(start + this.pageSize, this.items.length);
-      return this.items.slice(start, end)
+      const start = this.pageNumber * this.pageSize;
+      const end = Math.min(start + this.pageSize, this.items.length);
+      return this.items.slice(start, end);
     },
   },
   methods: {
@@ -87,7 +86,7 @@ export default {
     },
     nextPage() {
       this.pageNumber += 1;
-    }
-  }
+    },
+  },
 };
 </script>

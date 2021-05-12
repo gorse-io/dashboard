@@ -23,7 +23,7 @@
                <label>{{ name }}</label>
               </d-col>
               <d-col sm="12" md="10">
-                <d-input type="text" :value="value" readonly/>
+                <d-input type="text" :value="value.toString()" readonly/>
               </d-col>
             </d-row>
             </d-list-group-item>
@@ -38,17 +38,18 @@
 
 <script>
 const axios = require('axios');
+
 export default {
   data() {
     return {
       config: null,
-    }
+    };
   },
   mounted() {
     axios.get('/api/dashboard/config')
       .then((response) => {
-        this.config = response.data
-      });  
-  }
+        this.config = response.data;
+      });
+  },
 };
 </script>

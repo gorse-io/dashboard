@@ -72,7 +72,7 @@
                   </d-input-group>
                 </d-col>
                 <d-col md="3">
-                  <strong class="text-muted d-block mb-2">&nbsp</strong>
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="UserId" class="mb-3">
                     <d-select v-model="userIdColIdx">
                       <option
@@ -86,7 +86,7 @@
                   </d-input-group>
                 </d-col>
                 <d-col md="3">
-                  <strong class="text-muted d-block mb-2">&nbsp</strong>
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="ItemId" class="mb-3">
                     <d-select v-model="itemIdColIdx">
                       <option
@@ -100,7 +100,7 @@
                   </d-input-group>
                 </d-col>
                 <d-col md="3">
-                  <strong class="text-muted d-block mb-2">&nbsp</strong>
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="Timestamp" class="mb-3">
                     <d-select v-model="timestampColIdx">
                       <option
@@ -122,12 +122,16 @@
               </d-form-row>
             </d-form>
           </div>
-          <d-progress
-            height="5px"
-            class="mb-3"
-            :value="progressLoaded"
-            :max="progressTotal"
-          />
+          <div class="progress" v-if="progressShow">
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              role="progressbar"
+              aria-valuenow="75"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style="width: 100%"
+            ></div>
+          </div>
           <div class="card-body p-0 pb-3">
             <table class="table mb-0">
               <thead class="bg-light">
@@ -174,44 +178,44 @@
 </template>
 
 <script>
-const axios = require("axios");
-import moment from "moment";
+import moment from 'moment';
+import utils from '@/utils/index';
+
+const axios = require('axios');
 
 export default {
   data() {
     return {
-      fieldSeparator: ",",
-      fileName: "Choose file...",
+      fieldSeparator: ',',
+      fileName: 'Choose file...',
       hasHeader: true,
-      lines: [],
-      items: [],
+      text: '',
       feedbackTypeColIdx: 0,
       userIdColIdx: 1,
       itemIdColIdx: 2,
       timestampColIdx: 3,
-      progressLoaded: 0,
-      progressTotal: 100,
-      alertTheme: "danger",
+      progressShow: false,
+      alertTheme: 'danger',
       alertText: null,
-      duration: 3,
+      duration: 5,
       timeUntilDismissed: 0,
     };
   },
   computed: {
     mappedColumNames() {
-      let header = this.previewHeader;
-      let names = [];
-      for (let i = 0; i < header.length; i++) {
-        if (i == this.feedbackTypeColIdx) {
-          names.push("FeedbackType");
-        } else if (i == this.userIdColIdx) {
-          names.push("UserId");
-        } else if (i == this.itemIdColIdx) {
-          names.push("ItemId");
-        } else if (i == this.timestampColIdx) {
-          names.push("Timestamp");
+      const header = this.previewHeader;
+      const names = [];
+      for (let i = 0; i < header.length; i += 1) {
+        if (i === this.feedbackTypeColIdx) {
+          names.push('FeedbackType');
+        } else if (i === this.userIdColIdx) {
+          names.push('UserId');
+        } else if (i === this.itemIdColIdx) {
+          names.push('ItemId');
+        } else if (i === this.timestampColIdx) {
+          names.push('Timestamp');
         } else {
-          names.push("");
+          names.push('');
         }
       }
       return names;
@@ -223,21 +227,21 @@ export default {
       return this.previewTable.slice(1);
     },
     previewTable() {
-      if (this.fieldSeparator.length == 0) {
+      if (this.fieldSeparator.length === 0) {
         return [];
       }
-      let table = [];
       let numCols = 0;
       // split fields
-      this.lines.forEach((line) => {
-        const fields = line.split(this.fieldSeparator);
-        table.push(fields);
+      const table = utils
+        .parseLines(this.text, this.fieldSeparator)
+        .slice(0, -1);
+      table.forEach((fields) => {
         numCols = Math.max(numCols, fields.length);
       });
       // add header
       if (!this.hasHeader) {
-        let header = [];
-        for (let i = 0; i < numCols; i++) {
+        const header = [];
+        for (let i = 0; i < numCols; i += 1) {
           header.push(i.toString());
         }
         table.unshift(header);
@@ -254,52 +258,73 @@ export default {
       const reader = new FileReader();
       reader.readAsText(file.slice(0, 1024));
       reader.onload = (e) => {
-        const lines = e.target.result.split(/\r?\n/);
-        this.lines = lines.slice(0, -1);
+        this.text = e.target.result;
       };
     },
     format_date_time(timestamp) {
-      return moment(String(timestamp)).format("YYYY/MM/DD hh:mm");
+      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm');
     },
     handleTimeChange(time) {
       this.timeUntilDismissed = time;
     },
-    showAlert() {
+    showDanger(mesage) {
       this.timeUntilDismissed = this.duration;
+      this.alertTheme = 'danger';
+      this.alertText = mesage;
+    },
+    showSuccess(mesage) {
+      this.timeUntilDismissed = this.duration;
+      this.alertTheme = 'success';
+      this.alertText = mesage;
     },
     resetProgressBar() {
       this.progressTotal = 100;
       this.progressLoaded = 0;
     },
     resetTable() {
-      this.table = []
+      this.table = [];
     },
     uploadFile() {
-      var config = {
-        onUploadProgress: (progressEvent) => {
-          this.progressLoaded = progressEvent.loaded;
-          this.progressTotal = progressEvent.total;
-        },
-      };
-      var formData = new FormData();
+      const formData = new FormData();
+      // 1. field separator must be a single character
+      if (this.fieldSeparator.length !== 1) {
+        this.showDanger('field separator must be a single character');
+        return;
+      }
       formData.append('sep', this.fieldSeparator);
       formData.append('has-header', this.hasHeader);
-      var csvfile = document.querySelector("#csvFile");
-      formData.append("file", csvfile.files[0]);
+      formData.append(
+        'format',
+        utils.mapFields('fuit', [
+          this.feedbackTypeColIdx,
+          this.userIdColIdx,
+          this.itemIdColIdx,
+          this.timestampColIdx,
+        ]),
+      );
+      // 2. file must be chosen
+      const csvfile = document.querySelector('#csvFile');
+      if (csvfile.files.length === 0) {
+        this.showDanger('file must be chosen');
+        return;
+      }
+      formData.append('file', csvfile.files[0]);
+      // start upload
+      this.progressShow = true;
       axios
-        .post("/api/bulk/feedback", formData, config)
+        .post('/api/bulk/feedback', formData)
         .then((response) => {
-          this.alertTheme = "success";
-          this.alertText = response.data;
-          this.showAlert();
+          // import items successfully
+          this.showSuccess(response.data);
           this.resetProgressBar();
           this.resetTable();
+          this.progressShow = false;
         })
         .catch((error) => {
-          this.alertTheme = "danger";
-          this.alertText = error.response.data;
-          this.showAlert();
+          // receive error
+          this.showDanger(error.response.data);
           this.resetProgressBar();
+          this.progressShow = false;
         });
     },
   },

@@ -24,9 +24,9 @@
 </template>
 
 <script>
-const axios = require('axios');
-
 import TopItems from '@/components/common/TopItems.vue';
+
+const axios = require('axios');
 
 export default {
   components: {
@@ -49,29 +49,29 @@ export default {
     // load config
     axios.get('/api/dashboard/config')
       .then((response) => {
-        this.cacheSize = response.data.Database.CacheSize
-        this.feedbackTypes = response.data.Database.PositiveFeedbackType
-        this.defaultN = response.data.Server.DefaultN
-        var feedbackItems = []
+        this.cacheSize = response.data.Database.CacheSize;
+        this.feedbackTypes = response.data.Database.PositiveFeedbackType;
+        this.defaultN = response.data.Server.DefaultN;
+        const feedbackItems = [];
         this.feedbackTypes.forEach((feedbackType) => {
-          axios.get('/api/dashboard/user/' + this.user_id + '/feedback/' + feedbackType +'/')
-            .then((response) => {
-              response.data.forEach((feedback) => {
-                feedback.Item.Timestamp = feedback.Timestamp
-                feedbackItems.push(feedback.Item)
-              })
+          axios.get(`/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`)
+            .then((r) => {
+              r.data.forEach((feedback) => {
+                feedback.Item.Timestamp = feedback.Timestamp;
+                feedbackItems.push(feedback.Item);
+              });
             });
-        })
-        this.feedback = feedbackItems
-      });  
-    axios.get('/api/dashboard/recommend/' + this.user_id, {
-        params: {
-          n: this.cacheSize
-        }
-      })
-      .then((response) => {
-        this.recommends = response.data
+        });
+        this.feedback = feedbackItems;
       });
-  }
-}
+    axios.get(`/api/dashboard/recommend/${this.user_id}`, {
+      params: {
+        n: this.cacheSize,
+      },
+    })
+      .then((response) => {
+        this.recommends = response.data;
+      });
+  },
+};
 </script>

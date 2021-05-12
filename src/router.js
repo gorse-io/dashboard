@@ -76,12 +76,12 @@ export default new Router({
     {
       path: '/import/items',
       name: 'import_items',
-      component: ImportItems
+      component: ImportItems,
     },
     {
       path: '/import/feedback',
       name: 'import_feedback',
-      component: ImportFeedback
+      component: ImportFeedback,
     },
     {
       path: '*',

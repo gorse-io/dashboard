@@ -40,13 +40,13 @@
 </template>
 
 <script>
-const axios = require('axios');
-const numeral = require("numeral");
-
 import SmallStats from '@/components/common/SmallStats.vue';
 import TopItems from '@/components/common/TopItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
 import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
+
+const axios = require('axios');
+const numeral = require('numeral');
 
 export default {
   components: {
@@ -59,65 +59,65 @@ export default {
     return {
       cacheSize: 100,
       defaultN: 10,
-      smallStats: 
+      smallStats:
        [{
-        label: 'Users',
-        value: '--',
-      }, {
-        label: 'Items',
-        value: '--',
-      }, {
-        label: 'Positive',
-        value: '--',
-      }, {
-        label: 'PR Model',
-        value: '--',
-      }, {
-        label: 'CTR Model',
-        value: '--',
-      }],
+         label: 'Users',
+         value: '--',
+       }, {
+         label: 'Items',
+         value: '--',
+       }, {
+         label: 'Positive',
+         value: '--',
+       }, {
+         label: 'PR Model',
+         value: '--',
+       }, {
+         label: 'CTR Model',
+         value: '--',
+       }],
       popularItems: [],
-      latestItems: []
+      latestItems: [],
     };
   },
   mounted() {
     // load config
     axios.get('/api/dashboard/config')
       .then((response) => {
-        this.cacheSize = response.data.Database.CacheSize
-        this.defaultN = response.data.Server.DefaultN
-      });  
+        this.cacheSize = response.data.Database.CacheSize;
+        this.defaultN = response.data.Server.DefaultN;
+      });
     // load status
     axios.get('/api/dashboard/stats')
-    .then((response) => {
-      this.smallStats[0].value = numeral(response.data.NumUsers).format("0,0")
-      this.smallStats[1].value = numeral(response.data.NumItems).format("0,0")
-      this.smallStats[2].value = numeral(response.data.NumPosFeedback).format("0,0")
-      if (response.data.PRModel != "") {
-        this.smallStats[3].value = response.data.PRModel.toUpperCase()
-      }
-      if (response.data.CTRModel != "") {
-        this.smallStats[4].value = response.data.CTRModel
-      }
-    });  
+      .then((response) => {
+        this.smallStats[0].value = numeral(response.data.NumUsers).format('0,0');
+        this.smallStats[1].value = numeral(response.data.NumItems).format('0,0');
+        this.smallStats[2].value = numeral(response.data.NumPosFeedback).format('0,0');
+        if (response.data.PRModel !== '') {
+          this.smallStats[3].value = response.data.PRModel.toUpperCase();
+        }
+        if (response.data.CTRModel !== '') {
+          this.smallStats[4].value = response.data.CTRModel;
+        }
+      });
     // load latest items
     axios.get('/api/dashboard/latest', {
-        params: {
-          end: this.cacheSize
-        }
-      })
+      params: {
+        end: this.cacheSize,
+      },
+    })
       .then((response) => {
-        this.latestItems = response.data
-      });  
+        this.latestItems = response.data;
+      });
     // load popular items
     axios.get('/api/dashboard/popular', {
-        params: {
-          end: this.cacheSize
-        }
-      })
+      params: {
+        end: this.cacheSize,
+      },
+    })
       .then((response) => {
-        this.popularItems = response.data
-      });  
+        this.popularItems = response.data;
+      });
   },
 };
 </script>

@@ -22,7 +22,7 @@
                   <d-col sm="12" md="2">
                     <a :href="'/api/bulk/items'">
                       <d-button class="advance_button" outline
-                        >&nbsp&nbsp&nbspExport Items&nbsp&nbsp&nbsp</d-button
+                        >&nbsp;&nbsp;&nbsp;Export Items&nbsp;&nbsp;&nbsp;</d-button
                       >
                     </a>
                   </d-col>
@@ -68,7 +68,7 @@
                   <d-col sm="12" md="2">
                     <router-link :to="{ name: 'import_items' }">
                       <d-button outline
-                        >&nbsp&nbsp&nbspImport Items&nbsp&nbsp&nbsp</d-button
+                        >&nbsp;&nbsp;&nbsp;Import Items&nbsp;&nbsp;&nbsp;</d-button
                       >
                     </router-link>
                   </d-col>

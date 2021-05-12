@@ -73,37 +73,53 @@
                   >
                   <d-input-group prepend="ID" class="mb-3">
                     <d-select v-model="itemIdColIdx">
-                      <option v-for="(name, idx) in previewHeader" :key="idx" :value="idx">
+                      <option
+                        v-for="(name, idx) in previewHeader"
+                        :key="idx"
+                        :value="idx"
+                      >
                         {{ name }}
                       </option>
                     </d-select>
                   </d-input-group>
                 </d-col>
                 <d-col md="3">
-                  <strong class="text-muted d-block mb-2">&nbsp</strong>
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="Timestamp" class="mb-3">
                     <d-select v-model="timestampColIdx">
-                      <option v-for="(name, idx) in previewHeader" :key="idx" :value="idx">
+                      <option
+                        v-for="(name, idx) in previewHeader"
+                        :key="idx"
+                        :value="idx"
+                      >
                         {{ name }}
                       </option>
                     </d-select>
                   </d-input-group>
                 </d-col>
                 <d-col md="3">
-                  <strong class="text-muted d-block mb-2">&nbsp</strong>
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="Labels" class="mb-3">
                     <d-select v-model="labelsColIdx">
-                      <option v-for="(name, idx) in previewHeader" :key="idx" :value="idx">
+                      <option
+                        v-for="(name, idx) in previewHeader"
+                        :key="idx"
+                        :value="idx"
+                      >
                         {{ name }}
                       </option>
                     </d-select>
                   </d-input-group>
                 </d-col>
                 <d-col md="3">
-                  <strong class="text-muted d-block mb-2">&nbsp</strong>
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="Description" class="mb-3">
                     <d-select v-model="descColIdx">
-                      <option v-for="(name, idx) in previewHeader" :key="idx" :value="idx">
+                      <option
+                        v-for="(name, idx) in previewHeader"
+                        :key="idx"
+                        :value="idx"
+                      >
                         {{ name }}
                       </option>
                     </d-select>
@@ -115,13 +131,20 @@
                     >The first line is the header.</d-checkbox
                   >
                 </d-col>
-                <d-col md="2">
-                  <d-button>Comfirm Import</d-button></d-col
-                >
+                <d-col md="2"> <d-button>Comfirm Import</d-button></d-col>
               </d-form-row>
             </d-form>
           </div>
-          <d-progress height="5px" class="mb-3" :value="progressLoaded" :max="progressTotal" />
+          <div class="progress" v-if="progressShow">
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              role="progressbar"
+              aria-valuenow="75"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style="width: 100%"
+            ></div>
+          </div>
           <div class="card-body p-0 pb-3">
             <table class="table mb-0">
               <thead class="bg-light">
@@ -132,7 +155,8 @@
                     v-for="(name, idx) in previewHeader"
                     :key="idx"
                   >
-                    {{ mappedColumNames[idx] }}<span class="text-semibold">({{ name }})</span>
+                    {{ mappedColumNames[idx]
+                    }}<span class="text-semibold">({{ name }})</span>
                   </th>
                 </tr>
               </thead>
@@ -167,45 +191,45 @@
 </template>
 
 <script>
+import moment from 'moment';
+import utils from '@/utils/index';
+
 const axios = require('axios');
-import moment from "moment";
 
 export default {
   data() {
     return {
-      fieldSeparator: ",",
-      labelSeparator: "|",
-      fileName: "Choose file...",
+      fieldSeparator: ',',
+      labelSeparator: '|',
+      fileName: 'Choose file...',
       hasHeader: true,
-      lines: [],
-      items: [],
+      text: '',
       itemIdColIdx: 0,
       timestampColIdx: 1,
       labelsColIdx: 2,
       descColIdx: 3,
-      progressTotal: 100,
-      progressLoaded: 0,
-      alertTheme: "danger",
+      progressShow: false,
+      alertTheme: 'danger',
       alertText: null,
-      duration: 3,
+      duration: 5,
       timeUntilDismissed: 0,
     };
   },
   computed: {
     mappedColumNames() {
-      let header = this.previewHeader;
-      let names = [];
-      for (let i = 0; i < header.length; i++) {
-        if (i == this.itemIdColIdx) {
-          names.push("ID");
-        } else if (i == this.timestampColIdx) {
-          names.push("Timestamp");
-        } else if (i == this.labelsColIdx) {
-          names.push("Labels");
-        } else if (i == this.descColIdx) {
-          names.push("Description");
+      const header = this.previewHeader;
+      const names = [];
+      for (let i = 0; i < header.length; i += 1) {
+        if (i === this.itemIdColIdx) {
+          names.push('ID');
+        } else if (i === this.timestampColIdx) {
+          names.push('Timestamp');
+        } else if (i === this.labelsColIdx) {
+          names.push('Labels');
+        } else if (i === this.descColIdx) {
+          names.push('Description');
         } else {
-          names.push("");
+          names.push('');
         }
       }
       return names;
@@ -217,21 +241,21 @@ export default {
       return this.previewTable.slice(1);
     },
     previewTable() {
-      if (this.fieldSeparator.length == 0) {
+      if (this.fieldSeparator.length === 0) {
         return [];
       }
-      let table = [];
       let numCols = 0;
       // split fields
-      this.lines.forEach((line) => {
-        const fields = line.split(this.fieldSeparator);
-        table.push(fields);
+      const table = utils
+        .parseLines(this.text, this.fieldSeparator)
+        .slice(0, -1);
+      table.forEach((fields) => {
         numCols = Math.max(numCols, fields.length);
       });
       // add header
       if (!this.hasHeader) {
-        let header = [];
-        for (let i = 0; i < numCols; i++) {
+        const header = [];
+        for (let i = 0; i < numCols; i += 1) {
           header.push(i.toString());
         }
         table.unshift(header);
@@ -248,16 +272,15 @@ export default {
       const reader = new FileReader();
       reader.readAsText(file.slice(0, 1024));
       reader.onload = (e) => {
-        const lines = e.target.result.split(/\r?\n/);
-        this.lines = lines.slice(0, -1);
+        this.text = e.target.result;
       };
     },
     format_date_time(timestamp) {
-      return moment(String(timestamp)).format("YYYY/MM/DD hh:mm");
+      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm');
     },
     splitLabels(text, sep) {
-      let labels = [];
-      if (sep.length == 0) {
+      const labels = [];
+      if (sep.length === 0) {
         return labels;
       }
       text.split(sep).forEach((e) => {
@@ -270,44 +293,73 @@ export default {
     handleTimeChange(time) {
       this.timeUntilDismissed = time;
     },
-    showAlert() {
+    showDanger(mesage) {
       this.timeUntilDismissed = this.duration;
+      this.alertTheme = 'danger';
+      this.alertText = mesage;
+    },
+    showSuccess(mesage) {
+      this.timeUntilDismissed = this.duration;
+      this.alertTheme = 'success';
+      this.alertText = mesage;
     },
     resetProgressBar() {
       this.progressTotal = 100;
       this.progressLoaded = 0;
     },
     resetTable() {
-      this.table = []
+      this.table = [];
     },
     uploadFile() {
-      var config = {
-        onUploadProgress: (progressEvent) => {
-          this.progressLoaded = progressEvent.loaded;
-          this.progressTotal = progressEvent.total;
-        }
-      };
-      var formData = new FormData();
+      // create form
+      const formData = new FormData();
+      // 1. field separator must be a single character
+      if (this.fieldSeparator.length !== 1) {
+        this.showDanger('field separator must be a single character');
+        return;
+      }
       formData.append('sep', this.fieldSeparator);
       formData.append('has-header', this.hasHeader);
+      // 2. label separator cannot be empty
+      if (this.labelSeparator.length === 0) {
+        this.showDanger('label separator cannot be empty');
+        return;
+      }
       formData.append('label-sep', this.labelSeparator);
-      var csvfile = document.querySelector('#csvFile');
-      formData.append("file", csvfile.files[0]);
-      axios.post('/api/bulk/items', formData, config)
+      formData.append(
+        'format',
+        utils.mapFields('itlc', [
+          this.itemIdColIdx,
+          this.timestampColIdx,
+          this.labelsColIdx,
+          this.descColIdx,
+        ]),
+      );
+      // 3. file must be chosen
+      const csvfile = document.querySelector('#csvFile');
+      if (csvfile.files.length === 0) {
+        this.showDanger('file must be chosen');
+        return;
+      }
+      formData.append('file', csvfile.files[0]);
+      // start upload
+      this.progressShow = true;
+      axios
+        .post('/api/bulk/items', formData)
         .then((response) => {
-          this.alertTheme = "success";
-          this.alertText = response.data;
-          this.showAlert();
+          // import items successfully
+          this.showSuccess(response.data);
           this.resetProgressBar();
           this.resetTable();
+          this.progressShow = false;
         })
         .catch((error) => {
-          this.alertTheme = "danger";
-          this.alertText = error.response.data;
-          this.showAlert();
+          // receive error
+          this.showDanger(error.response.data);
           this.resetProgressBar();
+          this.progressShow = false;
         });
-    }
+    },
   },
 };
 </script>

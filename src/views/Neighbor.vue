@@ -16,7 +16,7 @@
           </div>
           <div class="card-body p-0 pb-3">
             <d-list-group flush>
-              <d-list-group-item class="p-3">
+              <d-list-group-item class="p-3" v-if="current_item != null">
                 <d-row>
                   <d-col sm="12" md="2">
                     <label>Timestamp</label>
@@ -102,8 +102,10 @@
 </template>
 
 <script>
-const axios = require("axios");
-import moment from "moment";
+import moment from 'moment';
+
+const axios = require('axios');
+
 export default {
   data() {
     return {
@@ -116,16 +118,16 @@ export default {
     this.item_id = this.$route.params.item_id;
   },
   mounted() {
-    axios.get("/api/dashboard/neighbors/" + this.item_id).then((response) => {
+    axios.get(`/api/dashboard/neighbors/${this.item_id}`).then((response) => {
       this.items = response.data;
     });
-    axios.get("/api/item/" + this.item_id).then((response) => {
+    axios.get(`/api/item/${this.item_id}`).then((response) => {
       this.current_item = response.data;
     });
   },
   methods: {
     format_date_time(timestamp) {
-      return moment(String(timestamp)).format("YYYY/MM/DD hh:mm");
+      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm');
     },
   },
 };

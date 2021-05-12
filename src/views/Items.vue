@@ -17,10 +17,19 @@
           </div>
           <div class="card-body border-bottom">
             <d-input-group>
-              <d-input id="item_id" placeholder="Item ID" v-model="item_id"  @keyup.enter.native="search_item"/>
+              <d-input
+                id="item_id"
+                placeholder="Item ID"
+                v-model="item_id"
+                @keyup.enter.native="search_item"
+              />
               <d-input-group-addon append>
-                <d-button class="btn-white" @click="search_item"><i class="material-icons">search</i></d-button>
-                <d-button class="btn-white" @click="next_page"><i class="material-icons">arrow_forward_ios</i></d-button>
+                <d-button class="btn-white" @click="search_item"
+                  ><i class="material-icons">search</i></d-button
+                >
+                <d-button class="btn-white" @click="next_page"
+                  ><i class="material-icons">arrow_forward_ios</i></d-button
+                >
               </d-input-group-addon>
             </d-input-group>
           </div>
@@ -36,19 +45,29 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, idx) in items" :key="idx" >
+                <tr v-for="(item, idx) in items" :key="idx">
                   <td>{{ item.ItemId }}</td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
                     <div>
-                    <d-badge outline theme="primary" v-for="(label, idx) in item.Labels" :key="idx">
-                      {{ label }}
-                    </d-badge>
+                      <d-badge
+                        outline
+                        theme="primary"
+                        v-for="(label, idx) in item.Labels"
+                        :key="idx"
+                      >
+                        {{ label }}
+                      </d-badge>
                     </div>
                   </td>
                   <td>{{ item.Comment }}</td>
                   <td>
-                    <router-link :to="{name: 'neighbor', params: {item_id: item.ItemId}}">
+                    <router-link
+                      :to="{
+                        name: 'neighbor',
+                        params: { item_id: item.ItemId },
+                      }"
+                    >
                       <d-button size="small" outline>Preview</d-button>
                     </router-link>
                   </td>
@@ -59,48 +78,49 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
-const axios = require('axios');
 import moment from 'moment';
+
+const axios = require('axios');
+
 export default {
   data() {
     return {
       items: null,
       cursor: '',
-    }
+      item_id: null,
+    };
   },
   mounted() {
-    axios.get('/api/items')
-      .then((response) => {
-        this.items = response.data.Items
-        this.cursor = response.data.Cursor
-      });  
+    axios.get('/api/items').then((response) => {
+      this.items = response.data.Items;
+      this.cursor = response.data.Cursor;
+    });
   },
   methods: {
     next_page() {
-      axios.get('/api/items', {
-        params: {
-          cursor: this.cursor
-        }
-      })
+      axios
+        .get('/api/items', {
+          params: {
+            cursor: this.cursor,
+          },
+        })
         .then((response) => {
-          this.items = response.data.Items
-          this.cursor = response.data.Cursor
-        });  
+          this.items = response.data.Items;
+          this.cursor = response.data.Cursor;
+        });
     },
     format_date_time(timestamp) {
-      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm')
+      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm');
     },
     search_item() {
-      axios.get('/api/item/' + this.item_id)
-      .then((response) => {
-        this.items = [response.data]
-      });  
-    }
-  }
+      axios.get(`/api/item/${this.item_id}`).then((response) => {
+        this.items = [response.data];
+      });
+    },
+  },
 };
 </script>

@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "test": "jest"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -14,7 +15,6 @@
     "chart.js": "^2.7.2",
     "moment": "^2.29.1",
     "numeral": "^2.0.6",
-    "quill": "^1.3.6",
     "shards-ui": "^2.1.0",
     "shards-vue": "^1.0.4",
     "vue": "^2.5.17",
@@ -26,8 +26,12 @@
     "@vue/cli-plugin-eslint": "^3.0.3",
     "@vue/cli-service": "^3.0.3",
     "@vue/eslint-config-airbnb": "^3.0.3",
+    "babel-jest": "^26.6.3",
+    "eslint-plugin-jest": "^24.3.6",
+    "jest": "^26.6.3",
     "node-sass": "^4.9.0",
     "sass-loader": "^7.0.1",
+    "ts-jest": "^26.5.6",
     "vue-template-compiler": "^2.5.17"
   },
   "vue": {

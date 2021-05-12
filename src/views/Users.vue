@@ -57,38 +57,40 @@
 
 <script>
 const axios = require('axios');
+
 export default {
   data() {
     return {
       users: null,
       cursor: '',
-    }
+      user_id: null,
+    };
   },
   mounted() {
     axios.get('/api/dashboard/users')
       .then((response) => {
-        this.users = response.data.Users
-        this.cursor = response.data.Cursor
-      });  
+        this.users = response.data.Users;
+        this.cursor = response.data.Cursor;
+      });
   },
   methods: {
     next_page() {
       axios.get('/api/dashboard/users', {
         params: {
           cursor: this.cursor,
-        }
+        },
       })
         .then((response) => {
-          this.users = response.data.Users
-          this.cursor = response.data.Cursor
-        });  
+          this.users = response.data.Users;
+          this.cursor = response.data.Cursor;
+        });
     },
     search_user() {
-      axios.get('/api/dashboard/user/' + this.user_id)
+      axios.get(`/api/dashboard/user/${this.user_id}`)
         .then((response) => {
-          this.users = [response.data]
+          this.users = [response.data];
         });
-    }
-  }
+    },
+  },
 };
 </script>

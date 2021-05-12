@@ -50,15 +50,16 @@
 
 <script>
 const axios = require('axios');
+
 export default {
   data() {
     return {
       nodes: null,
-    }
+    };
   },
   mounted() {
-      this.fetchNodes();
-      this.timer = setInterval(this.fetchNodes, 1000);
+    this.fetchNodes();
+    this.timer = setInterval(this.fetchNodes, 1000);
   },
   beforeUnmount() {
     this.cancelAutoUpdate();
@@ -67,18 +68,18 @@ export default {
     fetchNodes() {
       axios.get('/api/dashboard/cluster')
         .then((response) => {
-          this.nodes = response.data
-        });  
+          this.nodes = response.data;
+        });
     },
     cancelAutoUpdate() {
       clearInterval(this.timer);
     },
     openMetrics(host, port) {
-      window.open('http://' + host + ':' + port + '/metrics', '_blank')
+      window.open(`http://${host}:${port}/metrics`, '_blank');
     },
     openAPIDocs(host, port) {
-      window.open('http://' + host + ':' + port + '/apidocs', '_blank')
-    }
-  }
+      window.open(`http://${host}:${port}/apidocs`, '_blank');
+    },
+  },
 };
 </script>
