@@ -70,10 +70,10 @@ export default {
   mounted() {
     // load click through rate
     axios.get("/api/measurements/ClickThroughRate?n=30").then((response) => {
-      this.chartData.datasets[0].data = response.data.map((x) => x.Value);
+      this.chartData.datasets[0].data = response.data.map((x) => x.Value).reverse();
       this.chartData.labels = response.data.map((x) =>
         moment(x.Timestamp).format("MM/DD")
-      );
+      ).reverse();
 
       const chartOptions = {
         ...{
