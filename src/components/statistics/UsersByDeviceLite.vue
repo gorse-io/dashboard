@@ -1,61 +1,46 @@
 <template>
   <div class="card card-small h-100">
-
     <!-- Card Header -->
     <div class="card-header border-bottom">
-      <h6 class="m-0">{{title}}</h6>
+      <h6 class="m-0">{{ title }}</h6>
     </div>
 
     <!-- Chart -->
     <div class="card-body d-flex py-0">
-      <canvas height="220" ref="canvas" class="blog-users-by-device m-auto"></canvas>
+      <canvas
+        height="220"
+        ref="canvas"
+        class="blog-users-by-device m-auto"
+      ></canvas>
     </div>
-
-    <d-card-footer class="border-top">
-      <d-row>
-
-        <!-- Time Frame -->
-        <d-col>
-          <d-select size="sm" value="last-week" style="max-width: 130px;">
-            <option value="last-week">Last Week</option>
-            <option value="today">Today</option>
-            <option value="last-month">Last Month</option>
-            <option value="last-year">Last Year</option>
-          </d-select>
-        </d-col>
-
-        <!-- View Full Report -->
-        <d-col class="text-right view-report">
-          <a href="#">View full report &rarr;</a>
-        </d-col>
-
-      </d-row>
-    </d-card-footer>
   </div>
 </template>
 
 <script>
-import Chart from '../../utils/chart';
+import Chart from "../../utils/chart";
+const axios = require("axios");
 
 const defaultChartData = {
-  datasets: [{
-    hoverBorderColor: '#ffffff',
-    data: [68.3, 24.2, 7.5],
-    backgroundColor: [
-      'rgba(0,123,255,0.9)',
-      'rgba(0,123,255,0.5)',
-      'rgba(0,123,255,0.3)',
-    ],
-  }],
-  labels: ['Desktop', 'Tablet', 'Mobile'],
+  datasets: [
+    {
+      hoverBorderColor: "#ffffff",
+      data: [1, 0, 0],
+      backgroundColor: [
+        "rgba(0,123,255,0.9)",
+        "rgba(0,123,255,0.5)",
+        "rgba(0,123,255,0.3)",
+      ],
+    },
+  ],
+  labels: ["Total", "Monthly", "Daily"],
 };
 
 export default {
-  name: 'users-by-device',
+  name: "users-by-device",
   props: {
     /**
-       * The chart config.
-       */
+     * The chart config.
+     */
     chartConfig: {
       type: Object,
       default() {
@@ -63,8 +48,8 @@ export default {
       },
     },
     /**
-       * The chart options.
-       */
+     * The chart options.
+     */
     chartOptions: {
       type: Object,
       default() {
@@ -72,8 +57,8 @@ export default {
       },
     },
     /**
-       * The chart data.
-       */
+     * The chart data.
+     */
     chartData: {
       type: Object,
       default() {
@@ -81,38 +66,52 @@ export default {
       },
     },
     /**
-       * The chart title.
-       */
+     * The chart title.
+     */
     title: {
       type: String,
-      default: 'Item Exposed',
+      default: "Active Users",
     },
   },
   mounted() {
-    const chartConfig = {
-      type: 'pie',
-      data: this.chartData,
-      options: {
-        ...{
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 25,
-              boxWidth: 20,
-            },
-          },
-          cutoutPercentage: 0,
-          tooltips: {
-            custom: false,
-            mode: 'index',
-            position: 'nearest',
-          },
-        },
-        ...this.chartOptions,
-      },
-    };
+    axios
+      .all([
+        axios.get("/api/measurements/ActiveUsersYesterday?n=1"),
+        axios.get(`/api/measurements/ActiveUsersMonthly?n=1`),
+        axios.get(`/api/dashboard/stats`),
+      ])
+      .then(
+        axios.spread((response1, response2, response3) => {
+          this.chartData.datasets[0].data[0] = response3.data.NumUsers;
+          this.chartData.datasets[0].data[1] = response2.data[0].Value;
+          this.chartData.datasets[0].data[2] = response1.data[0].Value;
 
-    new Chart(this.$refs.canvas, chartConfig);
+          const chartConfig = {
+            type: "pie",
+            data: this.chartData,
+            options: {
+              ...{
+                legend: {
+                  position: "bottom",
+                  labels: {
+                    padding: 25,
+                    boxWidth: 20,
+                  },
+                },
+                cutoutPercentage: 0,
+                tooltips: {
+                  custom: false,
+                  mode: "index",
+                  position: "nearest",
+                },
+              },
+              ...this.chartOptions,
+            },
+          };
+
+          new Chart(this.$refs.canvas, chartConfig);
+        })
+      );
   },
 };
 </script>

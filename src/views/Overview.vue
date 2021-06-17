@@ -15,17 +15,17 @@
       </d-col>
     </d-row>
 
-    <!-- <d-row> -->
+    <d-row>
       <!-- Users Overview -->
-      <!-- <d-col lg="8" md="6" sm="12" class="mb-4">
+      <d-col lg="8" md="6" sm="12" class="mb-4">
         <bo-users-overview />
-      </d-col> -->
+      </d-col>
 
       <!-- Users by Device (lite) -->
-      <!-- <d-col lg="4" md="6" sm="12" class="mb-4">
+      <d-col lg="4" md="6" sm="12" class="mb-4">
         <bo-users-by-device />
       </d-col>
-    </d-row> -->
+    </d-row>
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
@@ -70,10 +70,10 @@ export default {
          label: 'Positive',
          value: '--',
        }, {
-         label: 'PR Model',
+         label: 'Ranking Model',
          value: '--',
        }, {
-         label: 'CTR Model',
+         label: 'Click Model',
          value: '--',
        }],
       popularItems: [],
@@ -94,11 +94,11 @@ export default {
         this.smallStats[1].value = numeral(response.data.NumItems).format('0,0');
         this.smallStats[2].value = numeral(response.data.NumPosFeedback).format('0,0');
         if (response.data.PRModel !== '') {
-          this.smallStats[3].value = response.data.PRModel.toUpperCase();
+          this.smallStats[3].value = response.data.RankingModel.toUpperCase();
         }
-        if (response.data.CTRModel !== '') {
-          this.smallStats[4].value = response.data.CTRModel;
-        }
+        // if (response.data.CTRModel !== '') {
+        //   this.smallStats[4].value = response.data.CTRModel;
+        // }
       });
     // load latest items
     axios.get('/api/dashboard/latest', {
