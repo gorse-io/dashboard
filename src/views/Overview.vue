@@ -70,10 +70,10 @@ export default {
          label: 'Positive',
          value: '--',
        }, {
-         label: 'Ranking Model',
+         label: 'Ranking Preicision@10',
          value: '--',
        }, {
-         label: 'Click Model',
+         label: 'Click Preicision',
          value: '--',
        }],
       popularItems: [],
@@ -93,12 +93,8 @@ export default {
         this.smallStats[0].value = numeral(response.data.NumUsers).format('0,0');
         this.smallStats[1].value = numeral(response.data.NumItems).format('0,0');
         this.smallStats[2].value = numeral(response.data.NumPosFeedback).format('0,0');
-        if (response.data.PRModel !== '') {
-          this.smallStats[3].value = response.data.RankingModel.toUpperCase();
-        }
-        // if (response.data.CTRModel !== '') {
-        //   this.smallStats[4].value = response.data.CTRModel;
-        // }
+        this.smallStats[3].value = response.data.RankingScore.toFixed(4);
+        this.smallStats[4].value = response.data.ClickScore.toFixed(4);
       });
     // load latest items
     axios.get('/api/dashboard/latest', {
