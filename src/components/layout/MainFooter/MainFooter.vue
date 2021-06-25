@@ -4,7 +4,7 @@
       <div class="row">
         <ul class="nav">
           <li v-for="(item, idx) in menuItems" :key="idx" class="nav-item">
-            <d-link class="nav-link" :to="item.to">{{ item.title }}</d-link>
+            <a class="nav-link" target="__blank" :href="item.to">{{ item.title }}</a>
           </li>
         </ul>
         <span class="copyright ml-auto my-auto mr-2">{{ copyright }}</span>
@@ -16,13 +16,13 @@
 <script>
 const defaultMenuItems = [{
   title: 'Home',
-  to: '#',
+  to: 'https://gorse.io/',
 }, {
   title: 'GitHub',
-  to: '#',
+  to: 'https://github.com/zhenghaoz/gorse',
 }, {
   title: 'Document',
-  to: '#',
+  to: 'https://docs.gorse.io/',
 }];
 
 export default {
