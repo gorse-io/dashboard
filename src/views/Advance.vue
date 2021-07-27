@@ -20,9 +20,28 @@
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
+                    <a :href="'/api/bulk/users'">
+                      <d-button class="advance_button" outline
+                        >&nbsp;&nbsp;&nbsp;Export
+                        Users&nbsp;&nbsp;&nbsp;</d-button
+                      >
+                    </a>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <label
+                      >Export users into a csv file. The format is "user_id,
+                      labels".</label
+                    >
+                  </d-col>
+                </d-row>
+              </d-list-group-item>
+              <d-list-group-item class="p-3">
+                <d-row>
+                  <d-col sm="12" md="2">
                     <a :href="'/api/bulk/items'">
                       <d-button class="advance_button" outline
-                        >&nbsp;&nbsp;&nbsp;Export Items&nbsp;&nbsp;&nbsp;</d-button
+                        >&nbsp;&nbsp;&nbsp;Export
+                        Items&nbsp;&nbsp;&nbsp;</d-button
                       >
                     </a>
                   </d-col>
@@ -66,9 +85,25 @@
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
+                    <router-link :to="{ name: 'import_users' }">
+                      <d-button outline
+                        >&nbsp;&nbsp;&nbsp;Import
+                        Users&nbsp;&nbsp;&nbsp;</d-button
+                      >
+                    </router-link>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <label>Import users into gorse.</label>
+                  </d-col>
+                </d-row>
+              </d-list-group-item>
+              <d-list-group-item class="p-3">
+                <d-row>
+                  <d-col sm="12" md="2">
                     <router-link :to="{ name: 'import_items' }">
                       <d-button outline
-                        >&nbsp;&nbsp;&nbsp;Import Items&nbsp;&nbsp;&nbsp;</d-button
+                        >&nbsp;&nbsp;&nbsp;Import
+                        Items&nbsp;&nbsp;&nbsp;</d-button
                       >
                     </router-link>
                   </d-col>

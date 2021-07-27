@@ -11,6 +11,7 @@ import Neighbor from './views/Neighbor.vue';
 import Settings from './views/Settings.vue';
 import Advance from './views/Advance.vue';
 import ImportItems from './views/ImportItems.vue';
+import ImportUsers from './views/ImportUsers.vue';
 import ImportFeedback from './views/ImportFeedback.vue';
 
 Vue.use(Router);
@@ -77,6 +78,11 @@ export default new Router({
       path: '/import/items',
       name: 'import_items',
       component: ImportItems,
+    },
+    {
+      path: '/import/users',
+      name: 'import_users',
+      component: ImportUsers,
     },
     {
       path: '/import/feedback',

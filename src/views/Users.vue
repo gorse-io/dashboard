@@ -17,10 +17,19 @@
           </div>
           <div class="card-body border-bottom">
             <d-input-group>
-              <d-input id="user_id" v-model="user_id" placeholder="User ID" @keyup.enter.native="search_user" />
+              <d-input
+                id="user_id"
+                v-model="user_id"
+                placeholder="User ID"
+                @keyup.enter.native="search_user"
+              />
               <d-input-group-addon append>
-                <d-button class="btn-white" @click="search_user"><i class="material-icons">search</i></d-button>
-                <d-button class="btn-white" @click="next_page"><i class="material-icons">arrow_forward_ios</i></d-button>
+                <d-button class="btn-white" @click="search_user"
+                  ><i class="material-icons">search</i></d-button
+                >
+                <d-button class="btn-white" @click="next_page"
+                  ><i class="material-icons">arrow_forward_ios</i></d-button
+                >
               </d-input-group-addon>
             </d-input-group>
           </div>
@@ -29,18 +38,36 @@
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
+                  <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Last Active</th>
                   <th scope="col" class="border-0">Last Update</th>
                   <th scope="col" class="border-0">Recommend</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(user, idx) in users" :key="idx" >
+                <tr v-for="(user, idx) in users" :key="idx">
                   <td>{{ user.UserId }}</td>
+                  <td>
+                    <div>
+                      <d-badge
+                        outline
+                        theme="primary"
+                        v-for="(label, idx) in user.Labels"
+                        :key="idx"
+                      >
+                        {{ label }}
+                      </d-badge>
+                    </div>
+                  </td>
                   <td>{{ user.LastActiveTime }}</td>
                   <td>{{ user.LastUpdateTime }}</td>
                   <td>
-                    <router-link :to="{name: 'recommend', params: {user_id: user.UserId }}">
+                    <router-link
+                      :to="{
+                        name: 'recommend',
+                        params: { user_id: user.UserId },
+                      }"
+                    >
                       <d-button size="small" outline>Preview</d-button>
                     </router-link>
                   </td>
@@ -51,45 +78,43 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
-const axios = require('axios');
+const axios = require("axios");
 
 export default {
   data() {
     return {
       users: null,
-      cursor: '',
+      cursor: "",
       user_id: null,
     };
   },
   mounted() {
-    axios.get('/api/dashboard/users')
-      .then((response) => {
-        this.users = response.data.Users;
-        this.cursor = response.data.Cursor;
-      });
+    axios.get("/api/dashboard/users").then((response) => {
+      this.users = response.data.Users;
+      this.cursor = response.data.Cursor;
+    });
   },
   methods: {
     next_page() {
-      axios.get('/api/dashboard/users', {
-        params: {
-          cursor: this.cursor,
-        },
-      })
+      axios
+        .get("/api/dashboard/users", {
+          params: {
+            cursor: this.cursor,
+          },
+        })
         .then((response) => {
           this.users = response.data.Users;
           this.cursor = response.data.Cursor;
         });
     },
     search_user() {
-      axios.get(`/api/dashboard/user/${this.user_id}`)
-        .then((response) => {
-          this.users = [response.data];
-        });
+      axios.get(`/api/dashboard/user/${this.user_id}`).then((response) => {
+        this.users = [response.data];
+      });
     },
   },
 };
