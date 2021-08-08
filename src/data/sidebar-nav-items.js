@@ -7,6 +7,12 @@ export default function () {
     htmlBefore: '<i class="material-icons">show_chart</i>',
     htmlAfter: '',
   }, {
+    title: 'Tasks',
+    htmlBefore: '<i class="material-icons">task</i>',
+    to: {
+      name: 'tasks',
+    },
+  }, {
     title: 'Cluster',
     htmlBefore: '<i class="material-icons">dns</i>',
     to: {

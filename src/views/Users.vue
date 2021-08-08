@@ -59,8 +59,8 @@
                       </d-badge>
                     </div>
                   </td>
-                  <td>{{ user.LastActiveTime }}</td>
-                  <td>{{ user.LastUpdateTime }}</td>
+                  <td>{{ format_date_time(user.LastActiveTime) }}</td>
+                  <td>{{ format_date_time(user.LastUpdateTime) }}</td>
                   <td>
                     <router-link
                       :to="{
@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import moment from 'moment';
+
 const axios = require("axios");
 
 export default {
@@ -116,6 +118,12 @@ export default {
         this.users = [response.data];
       });
     },
+    format_date_time(timestamp) {
+      if (timestamp == "") {
+        return "";
+      }
+      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
+    }
   },
 };
 </script>

@@ -242,7 +242,10 @@ export default {
       };
     },
     format_date_time(timestamp) {
-      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm');
+      if (timestamp == "") {
+        return "";
+      }
+      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
     splitLabels(text, sep) {
       const labels = [];

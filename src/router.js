@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
+import Tasks from './views/Tasks.vue';
 import Overview from './views/Overview.vue';
 import Errors from './views/Errors.vue';
 import Cluster from './views/Cluster.vue';
@@ -38,6 +39,11 @@ export default new Router({
       path: '/errors',
       name: 'errors',
       component: Errors,
+    },
+    {
+      path: '/tasks',
+      name: 'tasks',
+      component: Tasks,
     },
     {
       path: '/users',

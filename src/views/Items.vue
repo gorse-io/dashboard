@@ -114,7 +114,10 @@ export default {
         });
     },
     format_date_time(timestamp) {
-      return moment(String(timestamp)).format('YYYY/MM/DD hh:mm');
+      if (timestamp == "") {
+        return "";
+      }
+      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
     search_item() {
       axios.get(`/api/item/${this.item_id}`).then((response) => {
