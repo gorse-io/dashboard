@@ -41,7 +41,7 @@
                   <th scope="col" class="border-0">Timestamp</th>
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Description</th>
-                  <th scope="col" class="border-0">Recommend</th>
+                  <th scope="col" class="border-0"></th>
                 </tr>
               </thead>
               <tbody>
@@ -64,11 +64,11 @@
                   <td>
                     <router-link
                       :to="{
-                        name: 'neighbor',
+                        name: 'item_neighbors',
                         params: { item_id: item.ItemId },
                       }"
                     >
-                      <d-button size="small" outline>Preview</d-button>
+                      <d-button size="small" outline>Neighbors</d-button>
                     </router-link>
                   </td>
                 </tr>

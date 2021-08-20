@@ -118,7 +118,7 @@ export default {
     this.item_id = this.$route.params.item_id;
   },
   mounted() {
-    axios.get(`/api/dashboard/neighbors/${this.item_id}`).then((response) => {
+    axios.get(`/api/dashboard/item/${this.item_id}/neighbors`).then((response) => {
       this.items = response.data;
     });
     axios.get(`/api/item/${this.item_id}`).then((response) => {

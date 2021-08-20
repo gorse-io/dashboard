@@ -41,7 +41,8 @@
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Last Active</th>
                   <th scope="col" class="border-0">Last Update</th>
-                  <th scope="col" class="border-0">Recommend</th>
+                  <th scope="col" class="border-0"></th>
+                  <th scope="col" class="border-0"></th>
                 </tr>
               </thead>
               <tbody>
@@ -64,11 +65,21 @@
                   <td>
                     <router-link
                       :to="{
+                        name: 'user_neighbors',
+                        params: { user_id: user.UserId },
+                      }"
+                    >
+                      <d-button size="small" outline>Neighbors</d-button>
+                    </router-link>
+                  </td>
+                  <td>
+                    <router-link
+                      :to="{
                         name: 'recommend',
                         params: { user_id: user.UserId },
                       }"
                     >
-                      <d-button size="small" outline>Preview</d-button>
+                      <d-button size="small" outline>Insight</d-button>
                     </router-link>
                   </td>
                 </tr>

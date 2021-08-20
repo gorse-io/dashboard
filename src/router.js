@@ -8,7 +8,8 @@ import Cluster from './views/Cluster.vue';
 import Users from './views/Users.vue';
 import Items from './views/Items.vue';
 import Recommend from './views/Recommend.vue';
-import Neighbor from './views/Neighbor.vue';
+import ItemNeighbors from './views/ItemNeighbors.vue';
+import UserNeighbors from './views/UserNeighbors.vue';
 import Settings from './views/Settings.vue';
 import Advance from './views/Advance.vue';
 import ImportItems from './views/ImportItems.vue';
@@ -71,9 +72,14 @@ export default new Router({
       component: Recommend,
     },
     {
-      path: '/neighbor',
-      name: 'neighbor',
-      component: Neighbor,
+      path: '/item_neighbors',
+      name: 'item_neighbors',
+      component: ItemNeighbors,
+    },
+    {
+      path: '/user_neighbors',
+      name: 'user_neighbors',
+      component: UserNeighbors,
     },
     {
       path: '/advance',
