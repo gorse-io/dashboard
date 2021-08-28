@@ -95,9 +95,9 @@ export default {
       pageSize: 10,
       items: [],
       pageNumber: 0,
-      selected: "final",
+      selected: "ctr",
       options: [
-        { value: "final", text: "Final Recommendation" },
+        { value: "ctr", text: "Click-through Rate Recommendation" },
         { value: "collaborative", text: "Collaborative Recommendation" },
         { value: "item_based", text: "Item-based Recommendation" },
         { value: "user_based", text: "User-based Recommendation" },
