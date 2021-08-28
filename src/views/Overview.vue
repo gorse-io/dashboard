@@ -11,7 +11,7 @@
     <!-- Small Stats Blocks -->
     <d-row>
       <d-col lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
-        <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label" :value="stats.value" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" />
+        <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label" :value="stats.value" :tip="stats.tip" :increase="stats.increase" :decrease="stats.decrease" />
       </d-col>
     </d-row>
 
@@ -29,11 +29,11 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Popular Items'" :items="popularItems" :pageSize="defaultN"/>
+        <bo-top-items :title="'Popular Items'" :items="popularItems" />
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Latest Items'" :items="latestItems" :pageSize="defaultN"/>
+        <bo-top-items :title="'Latest Items'" :items="latestItems" />
       </d-col>
     </d-row>
   </d-container>
@@ -58,23 +58,27 @@ export default {
   data() {
     return {
       cacheSize: 100,
-      defaultN: 10,
       smallStats:
        [{
          label: 'Users',
          value: '--',
+         tip: "",
        }, {
          label: 'Items',
          value: '--',
+         tip: "",
        }, {
-         label: 'Positive',
+         label: 'Total Positive',
          value: '--',
+         tip: "",
        }, {
-         label: 'Ranking Preicision@10',
+         label: 'Valid Positive',
          value: '--',
+         tip: "A positive feedback is valid only if this user has both positive feedback and negative feedback",
        }, {
-         label: 'Click Preicision',
+         label: 'Valid Negative',
          value: '--',
+         tip: "A negative feedback is valid only if this user has both positive feedback and negative feedback",
        }],
       popularItems: [],
       latestItems: [],
@@ -85,16 +89,15 @@ export default {
     axios.get('/api/dashboard/config')
       .then((response) => {
         this.cacheSize = response.data.Database.CacheSize;
-        this.defaultN = response.data.Server.DefaultN;
       });
     // load status
     axios.get('/api/dashboard/stats')
       .then((response) => {
         this.smallStats[0].value = numeral(response.data.NumUsers).format('0,0');
         this.smallStats[1].value = numeral(response.data.NumItems).format('0,0');
-        this.smallStats[2].value = numeral(response.data.NumPosFeedback).format('0,0');
-        this.smallStats[3].value = response.data.RankingScore.toFixed(4);
-        this.smallStats[4].value = response.data.ClickScore.toFixed(4);
+        this.smallStats[2].value = numeral(response.data.NumTotalPosFeedback).format('0,0');
+        this.smallStats[3].value = numeral(response.data.NumValidPosFeedback).format('0,0');
+        this.smallStats[4].value = numeral(response.data.NumValidNegFeedback).format('0,0');
       });
     // load latest items
     axios.get('/api/dashboard/latest', {

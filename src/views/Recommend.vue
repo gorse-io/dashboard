@@ -10,12 +10,12 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Positive Feedback'" :items="feedback" :pageSize="defaultN"/>
+        <bo-top-items :title="'Positive Feedback'" :items="feedback"/>
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
 
-        <bo-top-items :title="'Recommend'" :items="recommends" :pageSize="defaultN"/>
+        <bo-user-recommend :user_id = "user_id"/>
 
 
       </d-col>
@@ -25,17 +25,18 @@
 
 <script>
 import TopItems from '@/components/common/TopItems.vue';
+import UserRecommend from '@/components/common/UserRecommend.vue';
 
 const axios = require('axios');
 
 export default {
   components: {
     boTopItems: TopItems,
+    boUserRecommend: UserRecommend,
   },
   data() {
     return {
       cacheSize: 100,
-      defaultN: 10,
       user_id: null,
       feedback: [],
       recommends: [],
@@ -51,7 +52,6 @@ export default {
       .then((response) => {
         this.cacheSize = response.data.Database.CacheSize;
         this.feedbackTypes = response.data.Database.PositiveFeedbackType;
-        this.defaultN = response.data.Server.DefaultN;
         const feedbackItems = [];
         this.feedbackTypes.forEach((feedbackType) => {
           axios.get(`/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`)
@@ -63,14 +63,6 @@ export default {
             });
         });
         this.feedback = feedbackItems;
-      });
-    axios.get(`/api/dashboard/recommend/${this.user_id}`, {
-      params: {
-        n: this.cacheSize,
-      },
-    })
-      .then((response) => {
-        this.recommends = response.data;
       });
   },
 };
