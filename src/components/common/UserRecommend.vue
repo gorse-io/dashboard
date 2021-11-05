@@ -95,9 +95,9 @@ export default {
       pageSize: 10,
       items: [],
       pageNumber: 0,
-      selected: "ctr",
+      selected: "offline",
       options: [
-        { value: "ctr", text: "Click-through Rate Recommendation" },
+        { value: "offline", text: "Offline Recommendation" },
         { value: "collaborative", text: "Collaborative Recommendation" },
         { value: "item_based", text: "Item-based Recommendation" },
         { value: "user_based", text: "User-based Recommendation" },
