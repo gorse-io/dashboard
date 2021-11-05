@@ -23,8 +23,9 @@
                <label>{{ name }}</label>
               </d-col>
               <d-col sm="12" md="10">
-                <d-input v-if="value != null" type="text" :value="value.toString()" readonly/>
                 <d-input v-if="value == null" type="text" :placeholder="'missing `' + name + '` in configuration file'" state="invalid" readonly/>
+                <d-input v-else-if="value.constructor == Object || value.constructor == Array" type="text" :value="JSON.stringify(value)" readonly/>
+                <d-input v-else type="text" :value="value.toString()" readonly/>
               </d-col>
             </d-row>
             </d-list-group-item>
