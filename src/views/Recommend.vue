@@ -52,17 +52,20 @@ export default {
       .then((response) => {
         this.cacheSize = response.data.Database.CacheSize;
         this.feedbackTypes = response.data.Database.PositiveFeedbackType;
-        const feedbackItems = [];
+        const requests = [];
         this.feedbackTypes.forEach((feedbackType) => {
-          axios.get(`/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`)
-            .then((r) => {
-              r.data.forEach((feedback) => {
-                feedback.Item.Timestamp = feedback.Timestamp;
-                feedbackItems.push(feedback.Item);
-              });
-            });
+          requests.push(axios.get(`/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`));
         });
-        this.feedback = feedbackItems;
+        axios.all(requests).then(axios.spread((...responses) => {
+          const feedbackItems = [];
+          responses.forEach((response) => {
+            response.data.forEach((feedback) => {
+              feedback.Item.Timestamp = feedback.Timestamp;
+              feedbackItems.push(feedback.Item);
+            });
+          })
+          this.feedback = feedbackItems.sort((a, b) => (a.Timestamp < b.Timestamp) ? 1 : -1);
+        }))
       });
   },
 };
