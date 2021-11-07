@@ -38,6 +38,8 @@
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
+                  <th scope="col" class="border-0">Category</th>
+                  <th scope="col" class="border-0">Hidden</th>
                   <th scope="col" class="border-0">Timestamp</th>
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Description</th>
@@ -47,6 +49,8 @@
               <tbody>
                 <tr v-for="(item, idx) in items" :key="idx">
                   <td>{{ item.ItemId }}</td>
+                  <td>{{ item.Category }}</td>
+                  <td><d-checkbox :checked="item.IsHidden" disabled="true"/></td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
                     <div>
