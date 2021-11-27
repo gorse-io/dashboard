@@ -1,6 +1,5 @@
 <template>
   <d-card class="card-small">
-
     <!-- Card Header -->
     <d-card-header class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
@@ -8,42 +7,70 @@
     </d-card-header>
 
     <d-card-body class="p-0">
-
       <!-- Top Referrals List Group -->
-      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
-
+      <div
+        v-for="(item, idx) in pageItems"
+        :key="idx"
+        class="blog-comments__item d-flex p-3"
+      >
         <!-- Content -->
         <div class="blog-comments__content">
-
           <!-- Content - Title -->
           <div class="blog-comments__meta text-muted">
             {{ item.ItemId }}
           </div>
 
           <!-- Content - Body -->
-          <p class="m-0 my-1 mb-2 text-muted text-semibold">{{ item.Comment }}</p>
+          <p class="m-0 my-1 mb-2 text-muted text-semibold">
+            {{ item.Comment }}
+          </p>
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
-            <d-badge outline theme="primary" v-for="(label, idx) in item.Labels" :key="idx">
+            <d-badge
+              outline
+              theme="secondary"
+              v-for="(label, idx) in item.Categories"
+              :key="idx"
+            >
+              {{ label }}
+            </d-badge>
+            <d-badge
+              outline
+              theme="primary"
+              v-for="(label, idx) in item.Labels"
+              :key="idx"
+            >
               {{ label }}
             </d-badge>
           </div>
 
-          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size:80%;">{{ item.Timestamp }}</p>
+          <p
+            class="m-0 my-0 mb-0 text-muted text-semibold"
+            style="font-size: 80%"
+          >
+            {{ item.Timestamp }}
+          </p>
         </div>
-
       </div>
-
     </d-card-body>
 
     <d-card-footer class="border-top">
       <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber != 0"><i class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber+1 != pageCount"><i class="material-icons">arrow_forward_ios</i></d-button>
+        <d-button
+          class="btn-white"
+          @click="prevPage"
+          v-if="this.pageNumber !== 0"
+          ><i class="material-icons">arrow_back_ios</i></d-button
+        >
+        <d-button
+          class="btn-white"
+          @click="nextPage"
+          v-if="this.pageNumber + 1 !== pageCount"
+          ><i class="material-icons">arrow_forward_ios</i></d-button
+        >
       </d-button-group>
     </d-card-footer>
-
   </d-card>
 </template>
 

@@ -2,40 +2,19 @@
   <d-card class="card-small">
     <!-- Card Header -->
     <d-card-header class="border-bottom">
-      <h6 class="m-0">Recommend</h6>
+      <h6 class="m-0">{{ title }}</h6>
       <div class="block-handle"></div>
     </d-card-header>
 
-    <d-card-body class="p-0">
-      <div class="card-body border-bottom">
-        <d-row>
-          <d-col sm="6"
-            ><d-select v-model="recommender" @change="changeRecommend">
-              <option
-                v-for="option in options"
-                :key="option.value"
-                :value="option.value"
-              >
-                {{ option.text }}
-              </option>
-            </d-select></d-col
-          >
-          <d-col sm="6"
-            ><d-input-group prepend="Categories" class="mb-3">
-              <d-select v-model="category" @change="changeCategory">
-                <option
-                  v-for="(category, idx) in categories"
-                  :key="idx"
-                  :value="category"
-                >
-                  {{ category }}
-                </option>
-              </d-select>
-            </d-input-group></d-col
-          >
-        </d-row>
-      </div>
-    </d-card-body>
+    <div class="card-body border-bottom">
+      <d-input-group prepend="Categories" class="mb-3">
+        <d-select @change="changeCategory">
+          <option v-for="(category, idx) in categories" :key="idx" :value="category">
+            {{ category }}
+          </option>
+        </d-select>
+      </d-input-group>
+    </div>
 
     <d-card-body class="p-0">
       <!-- Top Referrals List Group -->
@@ -58,6 +37,14 @@
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
+            <d-badge
+              outline
+              theme="secondary"
+              v-for="(label, idx) in item.Categories"
+              :key="idx"
+            >
+              {{ label }}
+            </d-badge>
             <d-badge
               outline
               theme="primary"
@@ -103,25 +90,36 @@ const axios = require('axios');
 export default {
   name: 'ao-top-referrals',
   props: {
-    user_id: {
-      default: '',
+    title: {
+      type: String,
+      default: '--',
+    },
+    pageSize: {
+      default: 10,
+    },
+    api: {
+      type: String,
     },
   },
   data() {
     return {
-      categories: [''],
-      pageSize: 10,
       items: [],
       pageNumber: 0,
-      recommender: 'offline',
-      category: '',
-      options: [
-        { value: 'offline', text: 'Offline Recommendation' },
-        { value: 'collaborative', text: 'Collaborative Recommendation' },
-        { value: 'item_based', text: 'Item-based Recommendation' },
-        { value: 'user_based', text: 'User-based Recommendation' },
-      ],
+      categories: [''],
     };
+  },
+  mounted() {
+    axios.get('/api/dashboard/categories').then((response) => {
+      this.categories = [''].concat(response.data);
+    });
+    axios.get(this.api, {
+      params: {
+        end: this.cacheSize,
+      },
+    })
+      .then((response) => {
+        this.items = response.data;
+      });
   },
   computed: {
     pageCount() {
@@ -140,42 +138,16 @@ export default {
     nextPage() {
       this.pageNumber += 1;
     },
-    changeRecommend(value) {
-      axios
-        .get(`/api/dashboard/recommend/${this.user_id}/${value}/${this.category}`, {
-          params: {
-            n: 100,
-          },
-        })
-        .then((response) => {
-          this.items = response.data;
-        });
-    },
     changeCategory(value) {
-      axios
-        .get(`/api/dashboard/recommend/${this.user_id}/${this.recommender}/${value}`, {
-          params: {
-            n: 100,
-          },
-        })
-        .then((response) => {
-          this.items = response.data;
-        });
-    },
-  },
-  mounted() {
-    axios
-      .get(`/api/dashboard/recommend/${this.user_id}/${this.recommender}/`, {
+      axios.get(this.api + value, {
         params: {
-          n: 100,
+          end: this.cacheSize,
         },
       })
-      .then((response) => {
-        this.items = response.data;
-      });
-    axios.get('/api/dashboard/categories').then((response) => {
-      this.categories = [''].concat(response.data);
-    });
+        .then((response) => {
+          this.items = response.data;
+        });
+    },
   },
 };
 </script>

@@ -38,7 +38,7 @@
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
-                  <th scope="col" class="border-0">Category</th>
+                  <th scope="col" class="border-0">Categories</th>
                   <th scope="col" class="border-0">Hidden</th>
                   <th scope="col" class="border-0">Timestamp</th>
                   <th scope="col" class="border-0">Labels</th>
@@ -49,8 +49,21 @@
               <tbody>
                 <tr v-for="(item, idx) in items" :key="idx">
                   <td>{{ item.ItemId }}</td>
-                  <td>{{ item.Category }}</td>
-                  <td><d-checkbox :checked="item.IsHidden" disabled="true"/></td>
+                  <td>
+                    <div>
+                      <d-badge
+                        outline
+                        theme="secondary"
+                        v-for="(category, idx) in item.Categories"
+                        :key="idx"
+                      >
+                        {{ category }}
+                      </d-badge>
+                    </div>
+                  </td>
+                  <td>
+                    <d-checkbox :checked="item.IsHidden" disabled="true" />
+                  </td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
                     <div>
@@ -86,20 +99,20 @@
 </template>
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 
-const axios = require('axios');
+const axios = require("axios");
 
 export default {
   data() {
     return {
       items: null,
-      cursor: '',
+      cursor: "",
       item_id: null,
     };
   },
   mounted() {
-    axios.get('/api/items').then((response) => {
+    axios.get("/api/items").then((response) => {
       this.items = response.data.Items;
       this.cursor = response.data.Cursor;
     });
@@ -107,7 +120,7 @@ export default {
   methods: {
     next_page() {
       axios
-        .get('/api/items', {
+        .get("/api/items", {
           params: {
             cursor: this.cursor,
           },
@@ -121,7 +134,7 @@ export default {
       if (timestamp == "") {
         return "";
       }
-      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
+      return moment(String(timestamp)).format("YYYY/MM/DD HH:mm");
     },
     search_item() {
       axios.get(`/api/item/${this.item_id}`).then((response) => {

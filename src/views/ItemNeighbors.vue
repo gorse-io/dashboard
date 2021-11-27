@@ -19,6 +19,21 @@
               <d-list-group-item class="p-3" v-if="current_item != null">
                 <d-row>
                   <d-col sm="12" md="2">
+                    <label>Categories</label>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <d-badge
+                      outline
+                      theme="secondary"
+                      v-for="(category, idx) in current_item.Categories"
+                      :key="idx"
+                    >
+                      {{ category }}
+                    </d-badge>
+                  </d-col>
+                </d-row>
+                <d-row>
+                  <d-col sm="12" md="2">
                     <label>Timestamp</label>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -64,11 +79,25 @@
           <div class="card-header border-bottom">
             <h6 class="m-0">Related Items</h6>
           </div>
+          <div class="card-body border-bottom">
+            <d-input-group prepend="Categories" class="mb-3">
+              <d-select @change="changeCategory">
+                <option
+                  v-for="(category, idx) in categories"
+                  :key="idx"
+                  :value="category"
+                >
+                  {{ category }}
+                </option>
+              </d-select>
+            </d-input-group>
+          </div>
           <div class="card-body p-0 pb-3">
             <table class="table mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
+                  <th scope="col" class="border-0">Categories</th>
                   <th scope="col" class="border-0">Timestamp</th>
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Description</th>
@@ -77,6 +106,18 @@
               <tbody>
                 <tr v-for="(item, idx) in items" :key="idx">
                   <td>{{ item.ItemId }}</td>
+                  <td>
+                    <div>
+                      <d-badge
+                        outline
+                        theme="secondary"
+                        v-for="(category, idx) in item.Categories"
+                        :key="idx"
+                      >
+                        {{ category }}
+                      </d-badge>
+                    </div>
+                  </td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
                     <div>
@@ -112,25 +153,42 @@ export default {
       item_id: null,
       items: [],
       current_item: null,
+      categories: [''],
     };
   },
   created() {
     this.item_id = this.$route.params.item_id;
   },
   mounted() {
-    axios.get(`/api/dashboard/item/${this.item_id}/neighbors`).then((response) => {
-      this.items = response.data;
-    });
+    axios
+      .get(`/api/dashboard/item/${this.item_id}/neighbors`)
+      .then((response) => {
+        this.items = response.data;
+      });
     axios.get(`/api/item/${this.item_id}`).then((response) => {
       this.current_item = response.data;
+    });
+    axios.get('/api/dashboard/categories').then((response) => {
+      this.categories = [''].concat(response.data);
     });
   },
   methods: {
     format_date_time(timestamp) {
-      if (timestamp == "") {
-        return "";
+      if (timestamp === '') {
+        return '';
       }
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
+    },
+    changeCategory(event) {
+      axios
+        .get(`/api/dashboard/item/${this.item_id}/neighbors/${event}`, {
+          params: {
+            n: 100,
+          },
+        })
+        .then((response) => {
+          this.items = response.data;
+        });
     },
   },
 };

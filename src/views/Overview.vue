@@ -29,11 +29,11 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Popular Items'" :items="popularItems" />
+        <bo-top-items :title="'Popular Items'" :api="'/api/dashboard/popular/'" />
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Latest Items'" :items="latestItems" />
+        <bo-top-items :title="'Latest Items'" :api="'/api/dashboard/latest/'" />
       </d-col>
     </d-row>
   </d-container>
@@ -41,7 +41,7 @@
 
 <script>
 import SmallStats from '@/components/common/SmallStats.vue';
-import TopItems from '@/components/common/TopItems.vue';
+import CategorizedItems from '@/components/common/CategorizedItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
 import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
 
@@ -53,7 +53,7 @@ export default {
     SmallStats,
     boUsersOverview: UsersOverview,
     boUsersByDevice: UsersByDevice,
-    boTopItems: TopItems,
+    boTopItems: CategorizedItems,
   },
   data() {
     return {
@@ -62,23 +62,23 @@ export default {
        [{
          label: 'Users',
          value: '--',
-         tip: "",
+         tip: '',
        }, {
          label: 'Items',
          value: '--',
-         tip: "",
+         tip: '',
        }, {
          label: 'Total Positive',
          value: '--',
-         tip: "",
+         tip: '',
        }, {
          label: 'Valid Positive',
          value: '--',
-         tip: "A positive feedback is valid only if this user has both positive feedback and negative feedback",
+         tip: 'A positive feedback is valid only if this user has both positive feedback and negative feedback',
        }, {
          label: 'Valid Negative',
          value: '--',
-         tip: "A negative feedback is valid only if this user has both positive feedback and negative feedback",
+         tip: 'A negative feedback is valid only if this user has both positive feedback and negative feedback',
        }],
       popularItems: [],
       latestItems: [],
@@ -98,24 +98,6 @@ export default {
         this.smallStats[2].value = numeral(response.data.NumTotalPosFeedback).format('0,0');
         this.smallStats[3].value = numeral(response.data.NumValidPosFeedback).format('0,0');
         this.smallStats[4].value = numeral(response.data.NumValidNegFeedback).format('0,0');
-      });
-    // load latest items
-    axios.get('/api/dashboard/latest', {
-      params: {
-        end: this.cacheSize,
-      },
-    })
-      .then((response) => {
-        this.latestItems = response.data;
-      });
-    // load popular items
-    axios.get('/api/dashboard/popular', {
-      params: {
-        end: this.cacheSize,
-      },
-    })
-      .then((response) => {
-        this.popularItems = response.data;
       });
   },
 };
