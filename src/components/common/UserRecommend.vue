@@ -113,9 +113,10 @@ export default {
       pageSize: 10,
       items: [],
       pageNumber: 0,
-      recommender: 'offline',
+      recommender: '',
       category: '',
       options: [
+        { value: '', text: 'Recommendation' },
         { value: 'offline', text: 'Offline Recommendation' },
         { value: 'collaborative', text: 'Collaborative Recommendation' },
         { value: 'item_based', text: 'Item-based Recommendation' },
