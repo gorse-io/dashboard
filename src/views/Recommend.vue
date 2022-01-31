@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import TopItems from '@/components/common/TopItems.vue';
+import TopItems from '@/components/common/TopItemsCard.vue';
 import UserRecommend from '@/components/common/UserRecommend.vue';
 
 const axios = require('axios');

@@ -1,5 +1,10 @@
 <template>
   <d-card class="card-small">
+    <!-- Card Header -->
+    <d-card-header class="border-bottom">
+      <h6 class="m-0">{{ title }}</h6>
+      <div class="block-handle"></div>
+    </d-card-header>
 
     <div class="card-body border-bottom">
       <d-input-group prepend="Categories" class="mb-3">
@@ -66,13 +71,13 @@
           class="btn-white"
           @click="prevPage"
           v-if="this.pageNumber !== 0"
-          ><i class="material-icons">arrow_back_ios</i></d-button
+        ><i class="material-icons">arrow_back_ios</i></d-button
         >
         <d-button
           class="btn-white"
           @click="nextPage"
           v-if="this.pageNumber + 1 !== pageCount"
-          ><i class="material-icons">arrow_forward_ios</i></d-button
+        ><i class="material-icons">arrow_forward_ios</i></d-button
         >
       </d-button-group>
     </d-card-footer>

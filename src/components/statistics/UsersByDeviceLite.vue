@@ -16,7 +16,7 @@
         >
           <span class="text-semibold text-fiord-blue"><i class="material-icons mr-1">{{ item.icon }}</i>{{ item.name }}</span>
           <span class="ml-auto text-right text-semibold text-reagent-gray"
-            >{{ query(item.key) }}</span
+            >{{ format(query(item.key)) }}</span
           >
         </d-list-group-item>
       </d-list-group>
@@ -26,47 +26,65 @@
 </template>
 
 <script>
-const axios = require("axios");
+import moment from 'moment';
+
+const axios = require('axios');
 const jsonPath = require('jsonpath');
 
 export default {
-  name: "users-by-device",
+  name: 'users-by-device',
   props: {
     title: {
       type: String,
-      default: "System Status",
+      default: 'System Status',
     },
   },
   data() {
     return {
       items: [
-        { icon: "dns", name: "Number of Workers", key: '$.NumWorkers' },
-        { icon: "dns", name: "Number of Servers", key: '$.NumServers' },
-        { icon: "tag", name: "Number of User Labels", key: '$.NumUserLabels' },
-        { icon: "tag", name: "Number of Item Labels", key: '$.NumItemLabels' },
-        { icon: "group_work", name: "Collaborative Filtering Prediction Precision@10", key: '$.RankingScore.Precision' },
-        { icon: "group_work", name: "Collaborative Filtering Prediction Recall@10", key: '$.RankingScore.Recall' },
-        { icon: "group_work", name: "Collaborative Filtering Prediction NDCG@10", key: '$.RankingScore.NDCG' },
-        { icon: "ads_click", name: "Click-through Rate Prediction Precision", key: '$.ClickScore.Precision' },
-        { icon: "ads_click", name: "Click-through Rate Prediction Recall", key: '$.ClickScore.Recall' },
-        { icon: "ads_click", name: "Click-through Rate Prediction AUC", key: '$.ClickScore.AUC' },
+        { icon: 'dns', name: 'Number of Workers', key: '$.NumWorkers' },
+        { icon: 'dns', name: 'Number of Servers', key: '$.NumServers' },
+        { icon: 'tag', name: 'Number of User Labels', key: '$.NumUserLabels' },
+        { icon: 'tag', name: 'Number of Item Labels', key: '$.NumItemLabels' },
+        { icon: 'trending_up', name: 'Popular Items Update Time', key: '$.PopularItemsUpdateTime' },
+        { icon: 'trending_up', name: 'Latest Items Update Time', key: '$.LatestItemsUpdateTime' },
+        { icon: 'group_work', name: 'Matching Model Fit Time', key: '$.MatchingModelFitTime' },
+        { icon: 'group_work', name: 'Matching Model Precision@10', key: '$.MatchingModelScore.Precision' },
+        { icon: 'group_work', name: 'Matching Model Recall@10', key: '$.MatchingModelScore.Recall' },
+        { icon: 'group_work', name: 'Matching Model NDCG@10', key: '$.MatchingModelScore.NDCG' },
+        { icon: 'ads_click', name: 'Ranking Model Fit Time', key: '$.RankingModelFitTime' },
+        { icon: 'ads_click', name: 'Ranking Model Precision', key: '$.RankingModelScore.Precision' },
+        { icon: 'ads_click', name: 'Ranking Model Recall', key: '$.RankingModelScore.Recall' },
+        { icon: 'ads_click', name: 'Ranking Model AUC', key: '$.RankingModelScore.AUC' },
+        { icon: 'travel_explore', name: 'User Neighbor Index Recall', key: '$.UserNeighborIndexRecall' },
+        { icon: 'travel_explore', name: 'Item Neighbor Index Recall', key: '$.ItemNeighborIndexRecall' },
+        { icon: 'travel_explore', name: 'Matching Index Recall', key: '$.MatchingIndexRecall' },
       ],
-      status: {}
+      status: {},
     };
   },
   mounted() {
-    axios.get(`/api/dashboard/stats`).then((res) => {
+    axios.get('/api/dashboard/stats').then((res) => {
       this.status = res.data;
     });
   },
   methods: {
     query(path) {
       if (!(typeof path === 'string') || !path.startsWith('$')) {
-        return ''
+        return '';
       }
-      return jsonPath.query(this.status, path)[0]
-    }
-  }
+      return jsonPath.query(this.status, path)[0];
+    },
+    format(data) {
+      if (typeof data === 'number') {
+        return data;
+      }
+      if (data === '') {
+        return '';
+      }
+      return moment(String(data)).format('YYYY/MM/DD HH:mm');
+    },
+  },
 };
 </script>
 

@@ -10,7 +10,7 @@
       <!-- Legend & Chart -->
       <div ref="legend"></div>
       <canvas
-        height="120"
+        height="80"
         ref="canvas"
         style="max-width: 100% !important"
       ></canvas>
@@ -19,25 +19,25 @@
 </template>
 
 <script>
-import Chart from "../../utils/chart";
-const axios = require("axios");
-import moment from "moment";
+import Chart from '../../utils/chart';
+import moment from 'moment';
+
+const axios = require('axios');
 
 const defaultChartData = {
   labels: Array.from(new Array(30), (_, i) =>
     moment()
-      .subtract(30 - i, "days")
-      .format("MM/DD")
-  ),
+      .subtract(30 - i, 'days')
+      .format('MM/DD')),
   datasets: [
     {
-      label: "Current Month",
-      fill: "start",
+      label: 'Current Month',
+      fill: 'start',
       data: Array.from(new Array(30), (_, i) => 0),
-      backgroundColor: "rgba(0,123,255,0.1)",
-      borderColor: "rgba(0,123,255,1)",
-      pointBackgroundColor: "#ffffff",
-      pointHoverBackgroundColor: "rgb(0,123,255)",
+      backgroundColor: 'rgba(0,123,255,0.1)',
+      borderColor: 'rgba(0,123,255,1)',
+      pointBackgroundColor: '#ffffff',
+      pointHoverBackgroundColor: 'rgb(0,123,255)',
       borderWidth: 1.5,
       pointRadius: 0,
       pointHoverRadius: 3,
@@ -46,11 +46,11 @@ const defaultChartData = {
 };
 
 export default {
-  name: "users-overview",
+  name: 'users-overview',
   props: {
     title: {
       type: String,
-      default: "Click Through Rate",
+      default: 'Click Through Rate',
     },
     chartData: {
       type: Object,
@@ -69,17 +69,16 @@ export default {
   },
   mounted() {
     // load click through rate
-    axios.get("/api/measurements/ClickThroughRate?n=30").then((response) => {
-      this.chartData.datasets[0].data = response.data.map((x) => x.Value).reverse();
-      this.chartData.labels = response.data.map((x) =>
-        moment(x.Timestamp).format("MM/DD")
-      ).reverse();
+    axios.get('/api/measurements/ClickThroughRate?n=30').then((response) => {
+      this.chartData.datasets[0].data = response.data.map(x => x.Value).reverse();
+      this.chartData.labels = response.data.map(x =>
+        moment(x.Timestamp).format('MM/DD')).reverse();
 
       const chartOptions = {
         ...{
           responsive: true,
           legend: {
-            position: "top",
+            position: 'top',
           },
           elements: {
             line: {
@@ -97,7 +96,7 @@ export default {
                 ticks: {
                   callback(tick, index) {
                     // Jump every 7 values on the X axis labels to avoid clutter.
-                    return index % 7 !== 0 ? "" : tick;
+                    return index % 7 !== 0 ? '' : tick;
                   },
                 },
               },
@@ -118,12 +117,12 @@ export default {
             ],
           },
           hover: {
-            mode: "nearest",
+            mode: 'nearest',
             intersect: false,
           },
           tooltips: {
             custom: false,
-            mode: "nearest",
+            mode: 'nearest',
             intersect: false,
           },
         },
@@ -131,7 +130,7 @@ export default {
       };
 
       const BlogUsersOverview = new Chart(this.$refs.canvas, {
-        type: "LineWithLine",
+        type: 'LineWithLine',
         data: this.chartData,
         options: chartOptions,
       });

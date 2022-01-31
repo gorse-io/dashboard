@@ -17,23 +17,25 @@
 
     <d-row>
       <!-- Users Overview -->
-      <d-col lg="8" md="6" sm="12" class="mb-4">
+      <d-col lg="12" md="12" sm="12" class="mb-4">
         <bo-users-overview />
-      </d-col>
-
-      <!-- Users by Device (lite) -->
-      <d-col lg="4" md="6" sm="12" class="mb-4">
-        <bo-users-by-device />
       </d-col>
     </d-row>
 
     <d-row>
-      <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Popular Items'" :api="'/api/dashboard/popular/'" />
+      <d-col lg="7" md="12" sm="12" class="mb-4">
+        <d-tabs>
+          <d-tab title="Popular Items" active>
+            <bo-top-items :api="'/api/dashboard/popular/'" />
+          </d-tab>
+          <d-tab title="Latest Items">
+            <bo-top-items :api="'/api/dashboard/latest/'" />
+          </d-tab>
+        </d-tabs>
       </d-col>
 
-      <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Latest Items'" :api="'/api/dashboard/latest/'" />
+      <d-col lg="5" md="12" sm="12" class="mb-4">
+        <bo-users-by-device />
       </d-col>
     </d-row>
   </d-container>
