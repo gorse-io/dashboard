@@ -13,10 +13,12 @@ import router from './router';
 
 // Layouts
 import Default from '@/layouts/Default.vue';
+import Login from '@/layouts/Login.vue';
 
 ShardsVue.install(Vue);
 
 Vue.component('default-layout', Default);
+Vue.component('login-layout', Login);
 
 Vue.config.productionTip = false;
 Vue.prototype.$eventHub = new Vue();

@@ -102,6 +102,11 @@ export default new Router({
       component: ImportFeedback,
     },
     {
+      path: '/login',
+      name: 'login',
+      meta: { layout: 'login' },
+    },
+    {
       path: '*',
       redirect: '/errors',
     },
