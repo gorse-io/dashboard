@@ -29,21 +29,21 @@ const defaultChartData = {
     moment()
       .subtract(30 - i, 'days')
       .format('MM/DD')),
-  datasets: [
-    {
-      label: 'Current Month',
-      fill: 'start',
-      data: Array.from(new Array(30), (_, i) => 0),
-      backgroundColor: 'rgba(0,123,255,0.1)',
-      borderColor: 'rgba(0,123,255,1)',
-      pointBackgroundColor: '#ffffff',
-      pointHoverBackgroundColor: 'rgb(0,123,255)',
-      borderWidth: 1.5,
-      pointRadius: 0,
-      pointHoverRadius: 3,
-    },
-  ],
+  datasets: [],
 };
+
+const colors = [
+  '#2196f3',
+  '#f44336',
+  '#ffeb3b',
+  '#4caf50',
+  '#009688',
+  '#e91e63',
+  '#ff9800',
+  '#8bc34a',
+  '#9c27b0',
+  '#795548',
+];
 
 export default {
   name: 'users-overview',
@@ -68,11 +68,33 @@ export default {
     };
   },
   mounted() {
-    // load click through rate
-    axios.get('/api/measurements/ClickThroughRate?n=30').then((response) => {
-      this.chartData.datasets[0].data = response.data.map(x => x.Value).reverse();
-      this.chartData.labels = response.data.map(x =>
-        moment(x.Timestamp).format('MM/DD')).reverse();
+    // load click-through rate
+    let i = 0;
+    axios.get('/api/dashboard/rates?n=30').then((response) => {
+      this.chartData.datasets = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [key, value] of (Object.entries(response.data))) {
+        const color = colors[i];
+        this.chartData.datasets.push({
+          label: key,
+          fill: 'start',
+          data: value.map(x => x.Value).reverse(),
+          backgroundColor: this.hexToRgba(color, 0),
+          borderColor: this.hexToRgba(color, 1),
+          pointBackgroundColor: '#ffffff',
+          pointHoverBackgroundColor: this.hexToRgba(color),
+          borderWidth: 1.5,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+        });
+        if (i === 0) {
+          this.chartData.labels = value.map(x =>
+            moment(x.Timestamp)
+              .format('MM/DD'))
+            .reverse();
+        }
+        i += 1;
+      }
 
       const chartOptions = {
         ...{
@@ -145,6 +167,21 @@ export default {
       // Render the chart.
       BlogUsersOverview.render();
     });
+  },
+  methods: {
+    hexToRgba(hex, a = null) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      if (result == null) {
+        return null;
+      }
+      const r = parseInt(result[1], 16);
+      const g = parseInt(result[2], 16);
+      const b = parseInt(result[3], 16);
+      if (a == null) {
+        return `rgb(${r},${g},${b})`;
+      }
+      return `rgba(${r},${g},${b},${a})`;
+    },
   },
 };
 </script>
