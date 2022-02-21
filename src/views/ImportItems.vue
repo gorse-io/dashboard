@@ -67,7 +67,7 @@
             </d-form>
             <d-form @submit.prevent="uploadFile">
               <d-form-row>
-                <d-col md="3">
+                <d-col md="2">
                   <strong class="text-muted d-block mb-2"
                     >Field Matching</strong
                   >
@@ -83,7 +83,35 @@
                     </d-select>
                   </d-input-group>
                 </d-col>
-                <d-col md="3">
+                <d-col md="2">
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
+                  <d-input-group prepend="Hidden" class="mb-3">
+                    <d-select v-model="isHiddenColIdx">
+                      <option
+                        v-for="(name, idx) in previewHeader"
+                        :key="idx"
+                        :value="idx"
+                      >
+                        {{ name }}
+                      </option>
+                    </d-select>
+                  </d-input-group>
+                </d-col>
+                <d-col md="2">
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
+                  <d-input-group prepend="Categories" class="mb-3">
+                    <d-select v-model="categoryColIdx">
+                      <option
+                        v-for="(name, idx) in previewHeader"
+                        :key="idx"
+                        :value="idx"
+                      >
+                        {{ name }}
+                      </option>
+                    </d-select>
+                  </d-input-group>
+                </d-col>
+                <d-col md="2">
                   <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="Timestamp" class="mb-3">
                     <d-select v-model="timestampColIdx">
@@ -97,7 +125,7 @@
                     </d-select>
                   </d-input-group>
                 </d-col>
-                <d-col md="3">
+                <d-col md="2">
                   <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="Labels" class="mb-3">
                     <d-select v-model="labelsColIdx">
@@ -111,7 +139,7 @@
                     </d-select>
                   </d-input-group>
                 </d-col>
-                <d-col md="3">
+                <d-col md="2">
                   <strong class="text-muted d-block mb-2">&nbsp;</strong>
                   <d-input-group prepend="Description" class="mb-3">
                     <d-select v-model="descColIdx">
@@ -163,7 +191,7 @@
               <tbody>
                 <tr v-for="(line, row_idx) in previewBody" :key="row_idx">
                   <td v-for="(value, col_idx) in line" :key="col_idx">
-                    <div v-if="mappedColumNames[col_idx] == 'Labels'">
+                    <div v-if="mappedColumNames[col_idx] === 'Labels' || mappedColumNames[col_idx] === 'Categories'">
                       <d-badge
                         outline
                         theme="primary"
@@ -205,9 +233,11 @@ export default {
       hasHeader: true,
       text: '',
       itemIdColIdx: 0,
-      timestampColIdx: 1,
-      labelsColIdx: 2,
-      descColIdx: 3,
+      isHiddenColIdx: 1,
+      categoryColIdx: 2,
+      timestampColIdx: 3,
+      labelsColIdx: 4,
+      descColIdx: 5,
       progressShow: false,
       alertTheme: 'danger',
       alertText: null,
@@ -222,6 +252,10 @@ export default {
       for (let i = 0; i < header.length; i += 1) {
         if (i === this.itemIdColIdx) {
           names.push('ID');
+        } else if (i === this.isHiddenColIdx) {
+          names.push('Hidden');
+        } else if (i === this.categoryColIdx) {
+          names.push('Categories');
         } else if (i === this.timestampColIdx) {
           names.push('Timestamp');
         } else if (i === this.labelsColIdx) {
@@ -276,8 +310,8 @@ export default {
       };
     },
     format_date_time(timestamp) {
-      if (timestamp == "") {
-        return "";
+      if (timestamp === '') {
+        return '';
       }
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
@@ -296,15 +330,15 @@ export default {
     handleTimeChange(time) {
       this.timeUntilDismissed = time;
     },
-    showDanger(mesage) {
+    showDanger(message) {
       this.timeUntilDismissed = this.duration;
       this.alertTheme = 'danger';
-      this.alertText = mesage;
+      this.alertText = message;
     },
-    showSuccess(mesage) {
+    showSuccess(message) {
       this.timeUntilDismissed = this.duration;
       this.alertTheme = 'success';
-      this.alertText = mesage;
+      this.alertText = message;
     },
     resetProgressBar() {
       this.progressTotal = 100;
@@ -331,8 +365,10 @@ export default {
       formData.append('label-sep', this.labelSeparator);
       formData.append(
         'format',
-        utils.mapFields('itlc', [
+        utils.mapFields('ihctld', [
           this.itemIdColIdx,
+          this.isHiddenColIdx,
+          this.categoryColIdx,
           this.timestampColIdx,
           this.labelsColIdx,
           this.descColIdx,
