@@ -47,8 +47,8 @@
                   </d-col>
                   <d-col sm="12" md="10">
                     <label
-                      >Export items into a csv file. The format is "item_id,
-                      timestamp, labels".</label
+                      >Export items into a csv file. The format is "item_id, is_hidden, categories,
+                      timestamp, labels, description".</label
                     >
                   </d-col>
                 </d-row>
