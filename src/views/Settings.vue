@@ -24,7 +24,13 @@
               </d-col>
               <d-col sm="12" md="10">
                 <d-input v-if="value == null" type="text" :placeholder="'missing `' + name + '` in configuration file'" state="invalid" readonly/>
-                <d-input v-else-if="value.constructor == Object || value.constructor == Array" type="text" :value="JSON.stringify(value)" readonly/>
+                <div v-else-if="typeof value == 'object'">
+                  <d-input-group v-for="(fieldValue, fieldName) in value" :key="fieldName" class="mb-2">
+                    <d-input-group-text slot="prepend" style="width: 250px">{{ fieldName }}</d-input-group-text>
+                    <d-input v-if="fieldValue.constructor === Object || fieldValue.constructor === Array" type="text" :value="JSON.stringify(fieldValue)" readonly/>
+                    <d-input v-else :value="fieldValue.toString()" type="text" readonly/>
+                  </d-input-group>
+                </div>
                 <d-input v-else type="text" :value="value.toString()" readonly/>
               </d-col>
             </d-row>
