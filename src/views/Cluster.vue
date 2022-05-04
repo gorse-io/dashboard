@@ -21,21 +21,16 @@
                 <tr>
                   <th scope="col" class="border-0">Type</th>
                   <th scope="col" class="border-0">Name</th>
-                  <th scope="col" class="border-0">IP</th>
-                  <th scope="col" class="border-0">Links</th>
+                  <th scope="col" class="border-0">Port</th>
+                  <th scope="col" class="border-0">Version</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(node, idx) in nodes" :key="idx" >
                   <td>{{ node.Type }}</td>
                   <td>{{ node.Name }}</td>
-                  <td>{{ node.IP }}</td>
-                  <td>
-                    <d-button-group size="small">
-                      <d-button @click="openAPIDocs(node.IP, node.HttpPort)" v-if="node.Type == 'Server'" outline>API</d-button>
-                      <d-button @click="openMetrics(node.IP, node.HttpPort)" outline>Metrics</d-button>
-                    </d-button-group>
-                  </td>
+                  <td>{{ node.IP }}:{{ node.HttpPort }}</td>
+                  <td>{{ node.BinaryVersion }}</td>
                 </tr>
               </tbody>
             </table>

@@ -42,6 +42,7 @@ export default {
   data() {
     return {
       items: [
+        { icon: 'label', name: 'Master Version', key: '$.BinaryVersion' },
         { icon: 'dns', name: 'Number of Workers', key: '$.NumWorkers' },
         { icon: 'dns', name: 'Number of Servers', key: '$.NumServers' },
         { icon: 'tag', name: 'Number of User Labels', key: '$.NumUserLabels' },
@@ -82,9 +83,12 @@ export default {
       if (data === '') {
         return '';
       }
-      return moment(String(data)).format('YYYY/MM/DD HH:mm');
+      const date = moment(String(data));
+      if (date.isValid()) {
+        return date.format('YYYY/MM/DD HH:mm');
+      }
+      return data;
     },
   },
 };
 </script>
-
