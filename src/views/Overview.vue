@@ -90,7 +90,7 @@ export default {
     // load config
     axios.get('/api/dashboard/config')
       .then((response) => {
-        this.cacheSize = response.data.Database.CacheSize;
+        this.cacheSize = response.data.database.cache_size;
       });
     // load status
     axios.get('/api/dashboard/stats')
