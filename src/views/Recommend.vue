@@ -50,8 +50,8 @@ export default {
     // load config
     axios.get('/api/dashboard/config')
       .then((response) => {
-        this.cacheSize = response.data.Database.CacheSize;
-        this.feedbackTypes = response.data.Database.PositiveFeedbackType;
+        this.cacheSize = response.data.recommend.cache_size;
+        this.feedbackTypes = response.data.recommend.data_source.positive_feedback_types;
         const requests = [];
         this.feedbackTypes.forEach((feedbackType) => {
           requests.push(axios.get(`/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`));
