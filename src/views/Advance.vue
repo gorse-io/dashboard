@@ -129,5 +129,95 @@
         </div>
       </div>
     </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="card card-small mb-4">
+          <div class="card-header border-bottom">
+            <h6 class="m-0">Danger Zone</h6>
+          </div>
+          <div class="card-body p-0 pb-3">
+            <d-list-group flush>
+              <d-list-group-item class="p-3">
+                <d-row>
+                  <d-col sm="12" md="2">
+                    <d-button outline theme="danger" @click.native="handleClick"
+                    >&nbsp;Purge
+                      Database&nbsp;</d-button
+                    >
+                    <d-modal v-if="showDialog" @close="handleClose" centered>
+                      <d-modal-header>
+                        <d-modal-title>Are you absolutely sure?</d-modal-title>
+                      </d-modal-header>
+                      <d-modal-body>
+                        This action <span style="color: red;">cannot</span> be undone. This will permanently delete users, items, feedbacks, and remove all cache.<br><br>
+                        Please type dashboard password to confirm.<br><br>
+                        <d-alert :theme="alertTheme" :show="showAlert">{{ alertMessage }}</d-alert>
+                        <d-input v-model="password" type="password" class="mb-2" /><br>
+                        <d-button outline theme="danger" @click="purge">
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          I understand the consequences, purge all data
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </d-button>
+                      </d-modal-body>
+                    </d-modal>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <label>Purge all data in data storage and cache storage.</label>
+                  </d-col>
+                </d-row>
+              </d-list-group-item>
+            </d-list-group>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
+<script>
+const axios = require('axios');
+
+export default {
+  data() {
+    return {
+      showDialog: false,
+      password: '',
+      alertMessage: '',
+      alertTheme: '',
+      showAlert: false,
+    };
+  },
+  methods: {
+    handleClick() {
+      this.showDialog = true;
+      this.showAlert = false;
+    },
+    handleClose() {
+      this.showDialog = false;
+    },
+    purge() {
+      const params = new URLSearchParams();
+      params.append('password', this.password);
+      axios.post('api/purge', params)
+        .then(() => {
+          this.alertMessage = 'purge database successfully';
+          this.alertTheme = 'success';
+          this.showAlert = true;
+          setTimeout(() => {
+            this.showDialog = false;
+          }, 500);
+        })
+        .catch((error) => {
+          if (error.response) {
+            this.alertMessage = error.response.data;
+          } else {
+            this.alertMessage = error;
+          }
+          this.alertTheme = 'danger';
+          this.showAlert = true;
+        });
+    },
+  },
+};
+</script>

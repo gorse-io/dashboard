@@ -23,6 +23,9 @@ const defaultMenuItems = [{
 }, {
   title: 'Document',
   to: 'https://docs.gorse.io/',
+}, {
+  title: 'API',
+  to: '/apidocs/',
 }];
 
 export default {
