@@ -101,6 +101,7 @@
                   <th scope="col" class="border-0">Timestamp</th>
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Description</th>
+                  <th scope="col" class="border-0">Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -132,6 +133,7 @@
                     </div>
                   </td>
                   <td>{{ item.Comment }}</td>
+                  <td>{{ item.Score.toFixed(5) }}</td>
                 </tr>
               </tbody>
             </table>

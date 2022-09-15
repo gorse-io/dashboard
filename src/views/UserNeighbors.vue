@@ -52,6 +52,7 @@
                 <tr>
                   <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Labels</th>
+                  <th scope="col" class="border-0">Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -69,6 +70,7 @@
                       </d-badge>
                     </div>
                   </td>
+                  <td>{{ user.Score.toFixed(5) }}</td>
                   <td>
                     <router-link
                       :to="{
