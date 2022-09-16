@@ -150,11 +150,13 @@
                         <d-modal-title>Are you absolutely sure?</d-modal-title>
                       </d-modal-header>
                       <d-modal-body>
-                        This action <span style="color: red;">cannot</span> be undone. This will permanently delete users, items, feedbacks, and remove all cache.<br><br>
-                        Please type dashboard password to confirm.<br><br>
+                        <label>This action <span style="color: red; font-weight: bold">cannot</span> be undone. This will permanently:</label>
+                        <d-checkbox v-model="checkList" value="delete_users">Delete all users.</d-checkbox>
+                        <d-checkbox v-model="checkList" value="delete_items">Delete all items.</d-checkbox>
+                        <d-checkbox v-model="checkList" value="delete_feedback">Delete all feedbacks.</d-checkbox>
+                        <d-checkbox v-model="checkList" value="delete_cache">Delete all caches.</d-checkbox>
                         <d-alert :theme="alertTheme" :show="showAlert">{{ alertMessage }}</d-alert>
-                        <d-input v-model="password" type="password" class="mb-2" /><br>
-                        <d-button outline theme="danger" @click="purge">
+                        <d-button outline theme="danger" @click="purge" :disabled="disableDialog">
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                           I understand the consequences, purge all data
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -182,23 +184,27 @@ export default {
   data() {
     return {
       showDialog: false,
-      password: '',
+      checkList: [],
       alertMessage: '',
       alertTheme: '',
       showAlert: false,
+      disableDialog: false,
     };
   },
   methods: {
     handleClick() {
       this.showDialog = true;
       this.showAlert = false;
+      this.disableDialog = false;
+      this.checkList = [];
     },
     handleClose() {
       this.showDialog = false;
     },
     purge() {
+      this.disableDialog = true;
       const params = new URLSearchParams();
-      params.append('password', this.password);
+      params.append('check_list', this.checkList);
       axios.post('api/purge', params)
         .then(() => {
           this.alertMessage = 'purge database successfully';
@@ -216,6 +222,7 @@ export default {
           }
           this.alertTheme = 'danger';
           this.showAlert = true;
+          this.disableDialog = false;
         });
     },
   },

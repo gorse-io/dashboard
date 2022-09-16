@@ -27,6 +27,9 @@
                 <d-button class="btn-white" @click="search_item"
                   ><i class="material-icons">search</i></d-button
                 >
+                <d-button class="btn-white" @click="previous_page"
+                ><i class="material-icons">arrow_back_ios</i></d-button
+                >
                 <d-button class="btn-white" @click="next_page"
                   ><i class="material-icons">arrow_forward_ios</i></d-button
                 >
@@ -79,14 +82,10 @@
                   </td>
                   <td>{{ item.Comment }}</td>
                   <td>
-                    <router-link
-                      :to="{
-                        name: 'item_neighbors',
-                        params: { item_id: item.ItemId },
-                      }"
-                    >
-                      <d-button size="small" outline>Neighbors</d-button>
-                    </router-link>
+                    <d-button-group>
+                      <d-button size="small" outline @click="list_item_neighbors(item.ItemId)">Neighbors</d-button>
+                      <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)">Delete</d-button>
+                    </d-button-group>
                   </td>
                 </tr>
               </tbody>
@@ -95,50 +94,113 @@
         </div>
       </div>
     </div>
+
+    <d-modal v-if="showDialog" @close="showDialog = false" centered>
+      <d-modal-header>
+        <d-modal-title>Delete Item</d-modal-title>
+      </d-modal-header>
+      <d-modal-body>
+        <div class="mb-3">Are you sure to delete item <span style="font-weight: bold">{{ deleteItemId }}</span>? Please type the ID of the deleted item.</div>
+        <d-input-group>
+          <d-input v-model="confirmItemId"/>
+          <d-input-group-addon append>
+            <d-button theme="danger" outline @click="delete_item">
+              <i class="material-icons">delete</i>
+            </d-button>
+          </d-input-group-addon>
+        </d-input-group>
+        <span style="color: red">{{ deleteItemError }}</span>
+      </d-modal-body>
+    </d-modal>
   </div>
 </template>
 
 <script>
-import moment from "moment";
+import moment from 'moment';
 
-const axios = require("axios");
+const axios = require('axios');
 
 export default {
   data() {
     return {
       items: null,
-      cursor: "",
+      cursors: [],
       item_id: null,
+      showDialog: false,
+      deleteItemId: '',
+      confirmItemId: '',
+      deleteItemError: '',
     };
   },
   mounted() {
-    axios.get("/api/items").then((response) => {
-      this.items = response.data.Items;
-      this.cursor = response.data.Cursor;
-    });
+    this.fetch_page();
   },
   methods: {
-    next_page() {
+    fetch_page() {
+      const cursor = this.cursors.empty ? '' : this.cursors[this.cursors.length - 1];
       axios
-        .get("/api/items", {
+        .get('/api/items', {
           params: {
-            cursor: this.cursor,
+            cursor,
           },
         })
         .then((response) => {
           this.items = response.data.Items;
-          this.cursor = response.data.Cursor;
+          this.cursors.push(response.data.Cursor);
         });
     },
-    format_date_time(timestamp) {
-      if (timestamp == "") {
-        return "";
+    previous_page() {
+      if (this.cursors.length >= 2) {
+        this.cursors.pop();
+        this.cursors.pop();
+      } else if (this.cursors.length === 1) {
+        this.cursors.pop();
       }
-      return moment(String(timestamp)).format("YYYY/MM/DD HH:mm");
+      this.fetch_page();
+    },
+    next_page() {
+      this.fetch_page();
+    },
+    format_date_time(timestamp) {
+      if (timestamp === '') {
+        return '';
+      }
+      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
     search_item() {
       axios.get(`/api/item/${this.item_id}`).then((response) => {
         this.items = [response.data];
+      });
+    },
+    list_item_neighbors(itemId) {
+      this.$router.push({
+        name: 'item_neighbors',
+        params: { item_id: itemId },
+      });
+    },
+    open_delete_item_dialog(itemId) {
+      this.showDialog = true;
+      this.deleteItemId = itemId;
+      this.confirmItemId = '';
+      this.deleteItemError = '';
+    },
+    delete_item() {
+      if (this.deleteItemId !== this.confirmItemId) {
+        this.deleteItemError = 'item ID mismatch';
+        return;
+      }
+      axios.delete(`/api/item/${this.deleteItemId}`).then(() => {
+        this.showDialog = false;
+        if (this.cursors.length >= 1) {
+          this.cursors.pop();
+        }
+        this.fetch_page();
+      }).catch((error) => {
+        if (error.response) {
+          this.deleteItemError = error.response.data;
+        } else {
+          this.deleteItemError = error;
+        }
       });
     },
   },
