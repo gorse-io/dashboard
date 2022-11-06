@@ -19,10 +19,10 @@ const defaultMenuItems = [{
   to: 'https://gorse.io/',
 }, {
   title: 'GitHub',
-  to: 'https://github.com/zhenghaoz/gorse',
+  to: 'https://github.com/gorse-io/gorse',
 }, {
   title: 'Document',
-  to: 'https://docs.gorse.io/',
+  to: 'https://gorse.io/docs',
 }, {
   title: 'API',
   to: '/apidocs/',
