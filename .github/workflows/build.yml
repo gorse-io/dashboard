@@ -29,7 +29,7 @@ jobs:
       - name: Install statik & build embed files
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
-          go get github.com/rakyll/statik
+          go install github.com/rakyll/statik@latest
           statik -src=dist
 
       - name: Commit embed files
