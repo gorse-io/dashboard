@@ -20,9 +20,9 @@
 
 <script>
 import Chart from '../../utils/chart';
-import moment from 'moment';
 
 const axios = require('axios');
+const moment = require('moment');
 
 const defaultChartData = {
   labels: Array.from(new Array(30), (_, i) =>

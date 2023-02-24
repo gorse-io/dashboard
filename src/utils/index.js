@@ -49,7 +49,7 @@ const utils = {
   },
   mapFields(data, placement) {
     if (data.length !== placement.length) {
-      throw 'the length of data and placement must be equal';
+      throw new Error('the length of data and placement must be equal');
     }
     const length = Math.max.apply(null, placement);
     const mapping = new Array(length).fill('_');

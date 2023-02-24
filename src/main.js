@@ -6,6 +6,7 @@ import ShardsVue from 'shards-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import '@/scss/shards-dashboards.scss';
 import '@/assets/scss/date-range.scss';
+import 'material-icons/iconfont/material-icons.css';
 
 // Core
 import App from './App.vue';

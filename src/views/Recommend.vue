@@ -63,9 +63,9 @@ export default {
               feedback.Item.Timestamp = feedback.Timestamp;
               feedbackItems.push(feedback.Item);
             });
-          })
-          this.feedback = feedbackItems.sort((a, b) => (a.Timestamp < b.Timestamp) ? 1 : -1);
-        }))
+          });
+          this.feedback = feedbackItems.sort((a, b) => ((a.Timestamp < b.Timestamp) ? 1 : -1));
+        }));
       });
   },
 };
