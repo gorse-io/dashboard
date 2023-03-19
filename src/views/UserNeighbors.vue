@@ -22,14 +22,9 @@
                     <label>Labels</label>
                   </d-col>
                   <d-col sm="12" md="10">
-                    <d-badge
-                      outline
-                      theme="primary"
-                      v-for="(label, idx) in current_user.Labels"
-                      :key="idx"
-                    >
-                      {{ label }}
-                    </d-badge>
+                    <div>
+                      <highlightjs language='json' :code="JSON.stringify(current_user.Labels, null, 2)" />
+                    </div>
                   </d-col>
                 </d-row>
               </d-list-group-item>
@@ -59,16 +54,9 @@
                 <tr v-for="(user, idx) in users" :key="idx">
                   <td>{{ user.UserId }}</td>
                   <td>
-                    <div>
-                      <d-badge
-                        outline
-                        theme="primary"
-                        v-for="(label, idx) in user.Labels"
-                        :key="idx"
-                      >
-                        {{ label }}
-                      </d-badge>
-                    </div>
+                    <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                      {{ user.Labels }}
+                    </span>
                   </td>
                   <td>{{ user.Score.toFixed(5) }}</td>
                   <td>

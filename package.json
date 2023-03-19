@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@highlightjs/vue-plugin": "1.0.2",
     "axios": "^0.21.1",
     "bootstrap": "^4.1.3",
     "chart.js": "^2.7.2",

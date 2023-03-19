@@ -52,7 +52,7 @@
                   >
                 </d-col>
                 <d-col md="2">
-                  <label for="labelSeparator">Label Separator</label>
+                  <label for="labelSeparator">Categories Separator</label>
                   <d-input
                     id="labelSeparator"
                     type="text"
@@ -60,7 +60,7 @@
                     required
                   />
                   <d-form-invalid-feedback
-                    >Label separator is required!</d-form-invalid-feedback
+                    >Categories separator is required!</d-form-invalid-feedback
                   >
                 </d-col>
               </d-form-row>
@@ -136,17 +136,12 @@
                 <tr v-for="(line, row_idx) in previewBody" :key="row_idx">
                   <td v-for="(value, col_idx) in line" :key="col_idx">
                     <div v-if="mappedColumNames[col_idx] == 'Labels'">
-                      <d-badge
-                        outline
-                        theme="primary"
-                        v-for="(label, idx) in splitLabels(
-                          value,
-                          labelSeparator
-                        )"
-                        :key="idx"
-                      >
-                        {{ label }}
-                      </d-badge>
+                    <span v-if="validateJSON(value) != null" style="color: red;">
+                      {{ validateJSON(value) }}
+                    </span>
+                    <span v-else style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                      {{ parseJSON(value) }}
+                    </span>
                     </div>
                     <div v-else>
                       {{ value }}
@@ -230,6 +225,23 @@ export default {
     },
   },
   methods: {
+    parseJSON(text) {
+      if (text === '') {
+        return null;
+      }
+      return JSON.parse(text);
+    },
+    validateJSON(text) {
+      if (text === '') {
+        return null;
+      }
+      try {
+        JSON.parse(text);
+        return null;
+      } catch (e) {
+        return e.toString();
+      }
+    },
     loadFile(event) {
       const file = event.target.files[0];
       // load file name

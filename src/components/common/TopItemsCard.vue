@@ -29,20 +29,14 @@
           <div class="blog-comments__actions">
             <d-badge
               outline
-              theme="secondary"
               v-for="(label, idx) in item.Categories"
               :key="idx"
             >
               {{ label }}
             </d-badge>
-            <d-badge
-              outline
-              theme="primary"
-              v-for="(label, idx) in item.Labels"
-              :key="idx"
-            >
-              {{ label }}
-            </d-badge>
+            <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+              {{ item.Labels }}
+            </span>
           </div>
 
           <p

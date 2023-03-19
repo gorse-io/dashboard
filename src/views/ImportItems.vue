@@ -52,7 +52,7 @@
                   >
                 </d-col>
                 <d-col md="2">
-                  <label for="labelSeparator">Label Separator</label>
+                  <label for="labelSeparator">Categories Separator</label>
                   <d-input
                     id="labelSeparator"
                     type="text"
@@ -60,7 +60,7 @@
                     required
                   />
                   <d-form-invalid-feedback
-                    >Label separator is required!</d-form-invalid-feedback
+                    >Categories separator is required!</d-form-invalid-feedback
                   >
                 </d-col>
               </d-form-row>
@@ -191,7 +191,7 @@
               <tbody>
                 <tr v-for="(line, row_idx) in previewBody" :key="row_idx">
                   <td v-for="(value, col_idx) in line" :key="col_idx">
-                    <div v-if="mappedColumNames[col_idx] === 'Labels' || mappedColumNames[col_idx] === 'Categories'">
+                    <div v-if="mappedColumNames[col_idx] === 'Categories'">
                       <d-badge
                         outline
                         theme="primary"
@@ -203,6 +203,14 @@
                       >
                         {{ label }}
                       </d-badge>
+                    </div>
+                    <div v-else-if="mappedColumNames[col_idx] === 'Labels'">
+                      <span v-if="validateJSON(value) != null" style="color: red;">
+                        {{ validateJSON(value) }}
+                      </span>
+                      <span v-else style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                        {{ parseJSON(value) }}
+                      </span>
                     </div>
                     <div v-else>
                       {{ value }}
@@ -298,13 +306,30 @@ export default {
     },
   },
   methods: {
+    parseJSON(text) {
+      if (text === '') {
+        return null;
+      }
+      return JSON.parse(text);
+    },
+    validateJSON(text) {
+      if (text === '') {
+        return null;
+      }
+      try {
+        JSON.parse(text);
+        return null;
+      } catch (e) {
+        return e.toString();
+      }
+    },
     loadFile(event) {
       const file = event.target.files[0];
       // load file name
       this.fileName = file.name;
       // load file content
       const reader = new FileReader();
-      reader.readAsText(file.slice(0, 1024));
+      reader.readAsText(file.slice(0, 4096));
       reader.onload = (e) => {
         this.text = e.target.result;
       };

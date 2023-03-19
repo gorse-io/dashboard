@@ -52,16 +52,9 @@
                 <tr v-for="(user, idx) in users" :key="idx">
                   <td>{{ user.UserId }}</td>
                   <td>
-                    <div>
-                      <d-badge
-                        outline
-                        theme="primary"
-                        v-for="(label, idx) in user.Labels"
-                        :key="idx"
-                      >
-                        {{ label }}
-                      </d-badge>
-                    </div>
+                    <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                      {{ user.Labels }}
+                    </span>
                   </td>
                   <td>{{ format_date_time(user.LastActiveTime) }}</td>
                   <td>{{ format_date_time(user.LastUpdateTime) }}</td>

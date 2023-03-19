@@ -2,6 +2,15 @@
 import Vue from 'vue';
 import ShardsVue from 'shards-vue';
 
+// highlight.js
+import hljsVuePlugin from '@highlightjs/vue-plugin'
+import hljs from 'highlight.js/lib/core'
+import json from 'highlight.js/lib/languages/json'
+import 'highlight.js/styles/a11y-dark.css'
+
+hljs.registerLanguage('json', json)
+Vue.use(hljsVuePlugin);
+
 // Styles
 import 'bootstrap/dist/css/bootstrap.css';
 import '@/scss/shards-dashboards.scss';
