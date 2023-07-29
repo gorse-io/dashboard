@@ -1,0 +1,22 @@
+name: test
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: install
+
+      - name: Build for production
+        uses: borales/actions-yarn@v2.0.0
+        with:
+          cmd: build
