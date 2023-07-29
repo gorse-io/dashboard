@@ -37,8 +37,8 @@
                     <span v-if="task.Status == 'Complete'">{{ format_date_time(task.FinishTime) }}</span>
                   </td>
                   <td>
-                    <d-progress v-if="task.Status == 'Running'" :value="task.Done" :max="task.Total" />
-                    <d-progress v-if="task.Status == 'Suspended'" :value="task.Done" :max="task.Total" theme="warning"/>
+                    <d-progress v-if="task.Status == 'Running'" :value="task.Count" :max="task.Total" />
+                    <d-progress v-if="task.Status == 'Suspended'" :value="task.Count" :max="task.Total" theme="warning"/>
                     <d-progress v-if="task.Status == 'Complete'" :value="task.Total" :max="task.Total" theme="success"/>
                     <span style="color:red" v-if="task.Status == 'Failed'">{{ task.Error }}</span>
                   </td>
