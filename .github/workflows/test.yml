@@ -10,13 +10,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      
+
+      - name: Set Node.js 12.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12.x
+
       - name: Install dependencies
-        uses: borales/actions-yarn@v2.0.0
+        uses: borales/actions-yarn@v4
         with:
           cmd: install
 
       - name: Build for production
-        uses: borales/actions-yarn@v2.0.0
+        uses: borales/actions-yarn@v4
         with:
           cmd: build
