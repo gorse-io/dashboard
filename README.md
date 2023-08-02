@@ -12,7 +12,8 @@ An admin dashboard for gorse recommender system derived from [shards-dashboard-v
 2. Install dependencies by running `yarn`.
 3. Run `yarn serve` to start the local development server.
 
-> [Node Version Manager](http://nvm.sh/) is recommended for managing multiple Node versions on a single machine.
+> - The build might fail if you are using newer versions of Node.
+> - [Node Version Manager](http://nvm.sh/) is recommended for managing multiple Node versions on a single machine.
 
 ## Usage
 
