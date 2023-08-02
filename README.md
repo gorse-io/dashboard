@@ -8,8 +8,11 @@ An admin dashboard for gorse recommender system derived from [shards-dashboard-v
 
 ## Quick Start
 
-- Install dependencies by running `yarn`.
-- Run `yarn serve` to start the local development server.
+1. Install Node 12 and `yarn`.
+2. Install dependencies by running `yarn`.
+3. Run `yarn serve` to start the local development server.
+
+> [Node Version Manager](http://nvm.sh/) is recommended for managing multiple Node versions on a single machine.
 
 ## Usage
 
