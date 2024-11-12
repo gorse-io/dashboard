@@ -21,17 +21,12 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <a :href="'/api/bulk/users'">
-                      <d-button class="advance_button" outline
-                        >&nbsp;&nbsp;&nbsp;Export
-                        Users&nbsp;&nbsp;&nbsp;</d-button
-                      >
+                      <d-button class="advance_button" outline>&nbsp;&nbsp;&nbsp;Export
+                        Users&nbsp;&nbsp;&nbsp;</d-button>
                     </a>
                   </d-col>
                   <d-col sm="12" md="10">
-                    <label
-                      >Export users into a csv file. The format is "user_id,
-                      labels".</label
-                    >
+                    <label>Export users into JSON lines.</label>
                   </d-col>
                 </d-row>
               </d-list-group-item>
@@ -39,17 +34,12 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <a :href="'/api/bulk/items'">
-                      <d-button class="advance_button" outline
-                        >&nbsp;&nbsp;&nbsp;Export
-                        Items&nbsp;&nbsp;&nbsp;</d-button
-                      >
+                      <d-button class="advance_button" outline>&nbsp;&nbsp;&nbsp;Export
+                        Items&nbsp;&nbsp;&nbsp;</d-button>
                     </a>
                   </d-col>
                   <d-col sm="12" md="10">
-                    <label
-                      >Export items into a csv file. The format is "item_id, is_hidden, categories,
-                      timestamp, labels, description".</label
-                    >
+                    <label>Export items into JSON lines.</label>
                   </d-col>
                 </d-row>
               </d-list-group-item>
@@ -61,10 +51,7 @@
                     </a>
                   </d-col>
                   <d-col sm="12" md="10">
-                    <label
-                      >Export feedbacks into a csv file. The format is
-                      "feedback_type, user_id, item_id, timestamp".</label
-                    >
+                    <label>Export feedbacks into JSON lines.</label>
                   </d-col>
                 </d-row>
               </d-list-group-item>
@@ -86,10 +73,8 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <router-link :to="{ name: 'import_users' }">
-                      <d-button outline
-                        >&nbsp;&nbsp;&nbsp;Import
-                        Users&nbsp;&nbsp;&nbsp;</d-button
-                      >
+                      <d-button outline>&nbsp;&nbsp;&nbsp;Import
+                        Users&nbsp;&nbsp;&nbsp;</d-button>
                     </router-link>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -101,10 +86,8 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <router-link :to="{ name: 'import_items' }">
-                      <d-button outline
-                        >&nbsp;&nbsp;&nbsp;Import
-                        Items&nbsp;&nbsp;&nbsp;</d-button
-                      >
+                      <d-button outline>&nbsp;&nbsp;&nbsp;Import
+                        Items&nbsp;&nbsp;&nbsp;</d-button>
                     </router-link>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -141,16 +124,15 @@
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
-                    <d-button outline theme="danger" @click.native="handleClick"
-                    >&nbsp;Purge
-                      Database&nbsp;</d-button
-                    >
+                    <d-button outline theme="danger" @click.native="handleClick">&nbsp;Purge
+                      Database&nbsp;</d-button>
                     <d-modal v-if="showDialog" @close="handleClose" centered>
                       <d-modal-header>
                         <d-modal-title>Are you absolutely sure?</d-modal-title>
                       </d-modal-header>
                       <d-modal-body>
-                        <label>This action <span style="color: red; font-weight: bold">cannot</span> be undone. This will permanently:</label>
+                        <label>This action <span style="color: red; font-weight: bold">cannot</span> be undone. This
+                          will permanently:</label>
                         <d-checkbox v-model="checkList" value="delete_users">Delete all users.</d-checkbox>
                         <d-checkbox v-model="checkList" value="delete_items">Delete all items.</d-checkbox>
                         <d-checkbox v-model="checkList" value="delete_feedback">Delete all feedbacks.</d-checkbox>
