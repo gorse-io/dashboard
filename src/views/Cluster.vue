@@ -20,17 +20,17 @@
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">Type</th>
-                  <th scope="col" class="border-0">Name</th>
-                  <th scope="col" class="border-0">Port</th>
+                  <th scope="col" class="border-0">Hostname</th>
+                  <th scope="col" class="border-0">UUID</th>
                   <th scope="col" class="border-0">Version</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(node, idx) in nodes" :key="idx" >
                   <td>{{ node.Type }}</td>
-                  <td>{{ node.Name }}</td>
-                  <td>{{ node.IP }}:{{ node.HttpPort }}</td>
-                  <td>{{ node.BinaryVersion }}</td>
+                  <td>{{ node.Hostname }}</td>
+                  <td>{{ node.UUID }}</td>
+                  <td>{{ node.Version }}</td>
                 </tr>
               </tbody>
             </table>
