@@ -1,23 +1,36 @@
 <template>
   <d-card class="card-small">
+    <d-card-header class="border-bottom">
+      <h6 class="m-0">{{ title }}</h6>
+      <div class="block-handle"></div>
+    </d-card-header>
 
     <div class="card-body border-bottom">
-      <d-input-group prepend="Categories" class="mb-3">
-        <d-select @change="changeCategory">
-          <option v-for="(category, idx) in categories" :key="idx" :value="category">
-            {{ category }}
-          </option>
-        </d-select>
-      </d-input-group>
+      <d-row>
+        <d-col sm="6" md="6">
+          <d-input-group prepend="Recommender" class="mb-3">
+            <d-select @change="changeRecommender" :value="recommender">
+              <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
+                {{ recommender }}
+              </option>
+            </d-select>
+          </d-input-group>
+        </d-col>
+        <d-col sm="6" md="6">
+          <d-input-group prepend="Categories" class="mb-3">
+            <d-select @change="changeCategory">
+              <option v-for="(category, idx) in categories" :key="idx" :value="category">
+                {{ category }}
+              </option>
+            </d-select>
+          </d-input-group>
+        </d-col>
+      </d-row>
     </div>
 
     <d-card-body class="p-0">
       <!-- Top Referrals List Group -->
-      <div
-        v-for="(item, idx) in pageItems"
-        :key="idx"
-        class="blog-comments__item d-flex p-3"
-      >
+      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
         <!-- Content -->
         <div class="blog-comments__content">
           <!-- Content - Title -->
@@ -32,22 +45,16 @@
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
-            <d-badge
-              outline
-              v-for="(label, idx) in item.Categories"
-              :key="idx"
-            >
+            <d-badge outline v-for="(label, idx) in item.Categories" :key="idx">
               {{ label }}
             </d-badge>
-            <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+            <span
+              style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
               {{ item.Labels }}
             </span>
           </div>
 
-          <p
-            class="m-0 my-0 mb-0 text-muted text-semibold"
-            style="font-size: 80%"
-          >
+          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
             {{ item.Timestamp }}
           </p>
         </div>
@@ -56,18 +63,10 @@
 
     <d-card-footer class="border-top">
       <d-button-group class="mb-3">
-        <d-button
-          class="btn-white"
-          @click="prevPage"
-          v-if="this.pageNumber !== 0"
-          ><i class="material-icons">arrow_back_ios</i></d-button
-        >
-        <d-button
-          class="btn-white"
-          @click="nextPage"
-          v-if="this.pageNumber + 1 !== pageCount"
-          ><i class="material-icons">arrow_forward_ios</i></d-button
-        >
+        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
+            class="material-icons">arrow_back_ios</i></d-button>
+        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
+            class="material-icons">arrow_forward_ios</i></d-button>
       </d-button-group>
     </d-card-footer>
   </d-card>
@@ -81,13 +80,13 @@ export default {
   props: {
     title: {
       type: String,
-      default: '--',
+      default: 'Non-personalized Recommendations',
     },
     pageSize: {
       default: 10,
     },
-    api: {
-      type: String,
+    recommenders: {
+      type: Array,
     },
   },
   data() {
@@ -95,13 +94,15 @@ export default {
       items: [],
       pageNumber: 0,
       categories: [''],
+      recommender: this.recommenders[0],
+      category: '',
     };
   },
   mounted() {
     axios.get('/api/dashboard/categories').then((response) => {
       this.categories = [''].concat(response.data);
     });
-    axios.get(this.api, {
+    axios.get('/api/non-personalized/popular/', {
       params: {
         end: this.cacheSize,
       },
@@ -127,9 +128,23 @@ export default {
     nextPage() {
       this.pageNumber += 1;
     },
-    changeCategory(value) {
-      axios.get(this.api + value, {
+    changeRecommender(value) {
+      this.recommender = value;
+      axios.get(`/api/non-personalized/${value}/`, {
         params: {
+          category: this.category,
+          end: this.cacheSize,
+        },
+      })
+        .then((response) => {
+          this.items = response.data;
+        });
+    },
+    changeCategory(value) {
+      this.category = value;
+      axios.get('/api/non-personalized/popular/', {
+        params: {
+          category: value,
           end: this.cacheSize,
         },
       })

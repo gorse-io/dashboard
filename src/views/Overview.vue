@@ -11,7 +11,8 @@
     <!-- Small Stats Blocks -->
     <d-row>
       <d-col lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
-        <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label" :value="stats.value" :tip="stats.tip" :increase="stats.increase" :decrease="stats.decrease" />
+        <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label"
+          :value="stats.value" :tip="stats.tip" :increase="stats.increase" :decrease="stats.decrease" />
       </d-col>
     </d-row>
 
@@ -24,14 +25,7 @@
 
     <d-row>
       <d-col lg="7" md="12" sm="12" class="mb-4">
-        <d-tabs>
-          <d-tab title="Popular Items" active>
-            <bo-top-items :api="'/api/dashboard/popular/'" />
-          </d-tab>
-          <d-tab title="Latest Items">
-            <bo-top-items :api="'/api/dashboard/latest/'" />
-          </d-tab>
-        </d-tabs>
+        <bo-top-items :recommenders="nonPersonalized" />
       </d-col>
 
       <d-col lg="5" md="12" sm="12" class="mb-4">
@@ -60,28 +54,29 @@ export default {
   data() {
     return {
       cacheSize: 100,
+      nonPersonalized: ['popular', 'latest'],
       smallStats:
-       [{
-         label: 'Users',
-         value: '--',
-         tip: '',
-       }, {
-         label: 'Items',
-         value: '--',
-         tip: '',
-       }, {
-         label: 'Total Positive',
-         value: '--',
-         tip: '',
-       }, {
-         label: 'Valid Positive',
-         value: '--',
-         tip: 'A positive feedback is valid only if this user has both positive feedback and negative feedback',
-       }, {
-         label: 'Valid Negative',
-         value: '--',
-         tip: 'A negative feedback is valid only if this user has both positive feedback and negative feedback',
-       }],
+        [{
+          label: 'Users',
+          value: '--',
+          tip: '',
+        }, {
+          label: 'Items',
+          value: '--',
+          tip: '',
+        }, {
+          label: 'Total Positive',
+          value: '--',
+          tip: '',
+        }, {
+          label: 'Valid Positive',
+          value: '--',
+          tip: 'A positive feedback is valid only if this user has both positive feedback and negative feedback',
+        }, {
+          label: 'Valid Negative',
+          value: '--',
+          tip: 'A negative feedback is valid only if this user has both positive feedback and negative feedback',
+        }],
       popularItems: [],
       latestItems: [],
     };
@@ -91,6 +86,10 @@ export default {
     axios.get('/api/dashboard/config')
       .then((response) => {
         this.cacheSize = response.data.database.cache_size;
+        this.nonPersonalized = ['popular', 'latest'];
+        response.data.recommend['non-personalized'].forEach((recommender) => {
+          this.nonPersonalized.push(recommender.name);
+        });
       });
     // load status
     axios.get('/api/dashboard/stats')
