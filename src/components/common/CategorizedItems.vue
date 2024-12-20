@@ -130,7 +130,7 @@ export default {
     },
     changeRecommender(value) {
       this.recommender = value;
-      axios.get(`/api/non-personalized/${value}/`, {
+      axios.get(`/api/dashboard/non-personalized/${value}/`, {
         params: {
           category: this.category,
           end: this.cacheSize,
@@ -142,7 +142,7 @@ export default {
     },
     changeCategory(value) {
       this.category = value;
-      axios.get('/api/non-personalized/popular/', {
+      axios.get('/api/dashboard/non-personalized/popular/', {
         params: {
           category: value,
           end: this.cacheSize,
