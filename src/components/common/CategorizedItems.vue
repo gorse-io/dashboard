@@ -102,7 +102,7 @@ export default {
     axios.get('/api/dashboard/categories').then((response) => {
       this.categories = [''].concat(response.data);
     });
-    axios.get('/api/non-personalized/popular/', {
+    axios.get('/api/dashboard/non-personalized/popular/', {
       params: {
         end: this.cacheSize,
       },
