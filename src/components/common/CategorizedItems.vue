@@ -108,7 +108,7 @@ export default {
       },
     })
       .then((response) => {
-        this.items = response.data;
+        this.items = response.data === null ? [] : response.data;
       });
   },
   computed: {
@@ -137,19 +137,19 @@ export default {
         },
       })
         .then((response) => {
-          this.items = response.data;
+          this.items = response.data === null ? [] : response.data;
         });
     },
     changeCategory(value) {
       this.category = value;
-      axios.get('/api/dashboard/non-personalized/popular/', {
+      axios.get(`/api/dashboard/non-personalized/${this.recommender}/`, {
         params: {
           category: value,
           end: this.cacheSize,
         },
       })
         .then((response) => {
-          this.items = response.data;
+          this.items = response.data === null ? [] : response.data;
         });
     },
   },
