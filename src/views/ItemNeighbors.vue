@@ -48,7 +48,7 @@
                   </d-col>
                   <d-col sm="12" md="10">
                     <div>
-                      <highlightjs language='json' :code="JSON.stringify(current_item.Labels, null, 2)" />
+                      <highlightjs language='json' :code="stringify(current_item.Labels)" />
                     </div>
                   </d-col>
                 </d-row>
@@ -117,7 +117,7 @@
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
                     <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-                      {{ item.Labels }}
+                      {{ fold(item.Labels) }}
                     </span>
                   </td>
                   <td>{{ item.Comment }}</td>
@@ -134,6 +134,7 @@
 
 <script>
 import moment from 'moment';
+import utils from '../utils';
 
 const axios = require('axios');
 
@@ -180,6 +181,8 @@ export default {
           this.items = response.data;
         });
     },
+    fold: utils.fold,
+    stringify: utils.stringify,
   },
 };
 </script>

@@ -50,7 +50,7 @@
             </d-badge>
             <span
               style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-              {{ item.Labels }}
+              {{ fold(item.Labels) }}
             </span>
           </div>
 
@@ -73,6 +73,8 @@
 </template>
 
 <script>
+import utils from '@/utils';
+
 const axios = require('axios');
 
 export default {
@@ -152,6 +154,7 @@ export default {
           this.items = response.data === null ? [] : response.data;
         });
     },
+    fold: utils.fold,
   },
 };
 </script>

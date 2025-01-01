@@ -1,62 +1,30 @@
 const utils = {
-  parseLines(text, sep) {
-    const table = [];
-    let quoted = false;
-    let fields = [];
-    let cell = '';
-    const lines = text.split(/\r?\n/);
-    lines.forEach((line) => {
-      // start of line
-      if (quoted) {
-        cell += '\r\n';
+  fold(o) {
+    const that = this;
+    if (Array.isArray(o)) {
+      if (o.length > 5 && typeof o[0] === 'number') {
+        return `[${o.slice(0, 5).map(v => that.fold(v)).join(', ')}, ...]`;
       }
-      // skip empty line
-      if (line.length === 0) {
-        return;
-      }
-      // parse line
-      for (let i = 0; i < line.length; i += 1) {
-        if (line[i] === sep && !quoted) {
-          // end of field
-          fields.push(cell);
-          cell = '';
-        } else if (line[i] === '"') {
-          if (quoted) {
-            if (i + 1 >= line.length || line[i + 1] !== '"') {
-              // end of quoted
-              quoted = false;
-            } else {
-              i += 1;
-              cell += '"';
-            }
-          } else {
-            // start of quoted
-            quoted = true;
-          }
-        } else {
-          cell += line[i];
-        }
-      }
-      // end of line
-      if (!quoted) {
-        fields.push(cell);
-        table.push(fields);
-        cell = '';
-        fields = [];
-      }
-    });
-    return table;
+      return `[${o.map(v => that.fold(v)).join(', ')}]`;
+    } else if (typeof o === 'object') {
+      let out = '{';
+      out += Object.entries(o).map(([key, value]) => `"${key}": ${that.fold(value)}`).join(', ');
+      out += '}';
+      return out;
+    }
+    return JSON.stringify(o);
   },
-  mapFields(data, placement) {
-    if (data.length !== placement.length) {
-      throw new Error('the length of data and placement must be equal');
+  stringify(o) {
+    const that = this;
+    if (Array.isArray(o)) {
+      return `[${o.map(v => that.fold(v)).join(', ')}]`;
+    } else if (typeof o === 'object') {
+      let out = '{\n';
+      out += Object.entries(o).map(([key, value]) => `  "${key}": ${that.stringify(value)}`).join(',\n');
+      out += '\n}';
+      return out;
     }
-    const length = Math.max.apply(null, placement);
-    const mapping = new Array(length).fill('_');
-    for (let i = 0; i < placement.length; i += 1) {
-      mapping[placement[i]] = data[i];
-    }
-    return mapping.join('');
+    return JSON.stringify(o);
   },
 };
 

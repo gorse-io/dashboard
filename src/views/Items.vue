@@ -70,7 +70,7 @@
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
                     <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-                      {{ item.Labels }}
+                      {{ fold(item.Labels) }}
                     </span>
                   </td>
                   <td>{{ item.Comment }}</td>
@@ -110,6 +110,7 @@
 
 <script>
 import moment from 'moment';
+import utils from '../utils';
 
 const axios = require('axios');
 
@@ -196,6 +197,7 @@ export default {
         }
       });
     },
+    fold: utils.fold,
   },
 };
 </script>

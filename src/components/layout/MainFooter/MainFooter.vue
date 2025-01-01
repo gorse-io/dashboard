@@ -45,7 +45,7 @@ export default {
        */
     copyright: {
       type: String,
-      default: 'Copyright © 2021 zhenghaoz',
+      default: `Copyright © ${new Date().getFullYear()} zhenghaoz`,
     },
     /**
        * Whether the footer should be wrapped in a container, or not.
