@@ -96,7 +96,7 @@ export default {
     this.user_id = this.$route.params.user_id;
   },
   mounted() {
-    axios.get(`/api/dashboard/user/${this.user_id}/neighbors`).then((response) => {
+    axios.get(`/api/dashboard/user-to-user/neighbors/${this.user_id}`).then((response) => {
       this.users = response.data;
     });
     axios.get(`/api/user/${this.user_id}`).then((response) => {

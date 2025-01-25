@@ -152,7 +152,7 @@ export default {
   },
   mounted() {
     axios
-      .get(`/api/dashboard/item/${this.item_id}/neighbors`)
+      .get(`/api/dashboard/item-to-item/neighbors/${this.item_id}`)
       .then((response) => {
         this.items = response.data;
       });
@@ -172,9 +172,10 @@ export default {
     },
     changeCategory(event) {
       axios
-        .get(`/api/dashboard/item/${this.item_id}/neighbors/${event}`, {
+        .get(`/api/dashboard/item-to-item/neighbors/${this.item_id}`, {
           params: {
             n: 100,
+            category: event,
           },
         })
         .then((response) => {
