@@ -76,8 +76,8 @@
                   <td>{{ item.Comment }}</td>
                   <td>
                     <d-button-group>
-                      <d-button size="small" outline @click="list_item_neighbors(item.ItemId)">Neighbors</d-button>
-                      <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)">Delete</d-button>
+                      <d-button size="small" outline @click="view_item(item.ItemId)"><i class="material-icons">visibility</i></d-button>
+                      <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)"><i class="material-icons">delete</i></d-button>
                     </d-button-group>
                   </td>
                 </tr>
@@ -166,9 +166,9 @@ export default {
         this.items = [response.data];
       });
     },
-    list_item_neighbors(itemId) {
-      this.$router.push({
-        name: 'item_neighbors',
+    view_item(itemId) {
+      this.$router.replace({
+        name: 'item',
         params: { item_id: itemId },
       });
     },
