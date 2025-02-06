@@ -152,7 +152,7 @@ export default {
     },
     list_user_neighbors(userId) {
       this.$router.push({
-        name: 'user_neighbors',
+        name: 'user',
         params: { user_id: userId },
       });
     },

@@ -39,7 +39,7 @@
       <div class="col">
         <div class="card card-small mb-4">
           <div class="card-header border-bottom">
-            <h6 class="m-0">Related Items</h6>
+            <h6 class="m-0">User to User</h6>
           </div>
           <div class="card-body p-0 pb-3">
             <table class="table mb-0">

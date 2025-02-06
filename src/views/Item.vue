@@ -22,12 +22,7 @@
                     <label>Categories</label>
                   </d-col>
                   <d-col sm="12" md="10">
-                    <d-badge
-                      outline
-                      theme="secondary"
-                      v-for="(category, idx) in current_item.Categories"
-                      :key="idx"
-                    >
+                    <d-badge outline theme="secondary" v-for="(category, idx) in current_item.Categories" :key="idx">
                       {{ category }}
                     </d-badge>
                   </d-col>
@@ -39,7 +34,7 @@
                   <d-col sm="12" md="10">
                     <label class="text-light">{{
                       format_date_time(current_item.Timestamp)
-                    }}</label>
+                      }}</label>
                   </d-col>
                 </d-row>
                 <d-row>
@@ -72,20 +67,29 @@
       <div class="col">
         <div class="card card-small mb-4">
           <div class="card-header border-bottom">
-            <h6 class="m-0">Related Items</h6>
+            <h6 class="m-0">Item to Item Recommendations</h6>
           </div>
           <div class="card-body border-bottom">
-            <d-input-group prepend="Categories" class="mb-3">
-              <d-select @change="changeCategory">
-                <option
-                  v-for="(category, idx) in categories"
-                  :key="idx"
-                  :value="category"
-                >
-                  {{ category }}
-                </option>
-              </d-select>
-            </d-input-group>
+            <d-row>
+              <d-col sm="6" md="6">
+                <d-input-group prepend="Recommender" class="mb-3">
+                  <d-select @change="changeRecommender" :value="recommender">
+                    <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
+                      {{ recommender }}
+                    </option>
+                  </d-select>
+                </d-input-group>
+              </d-col>
+              <d-col sm="6" md="6">
+                <d-input-group prepend="Categories" class="mb-3">
+                  <d-select @change="changeCategory">
+                    <option v-for="(category, idx) in categories" :key="idx" :value="category">
+                      {{ category }}
+                    </option>
+                  </d-select>
+                </d-input-group>
+              </d-col>
+            </d-row>
           </div>
           <div class="card-body p-0 pb-3">
             <table class="table mb-0">
@@ -104,19 +108,15 @@
                   <td>{{ item.ItemId }}</td>
                   <td>
                     <div>
-                      <d-badge
-                        outline
-                        theme="secondary"
-                        v-for="(category, idx) in item.Categories"
-                        :key="idx"
-                      >
+                      <d-badge outline theme="secondary" v-for="(category, idx) in item.Categories" :key="idx">
                         {{ category }}
                       </d-badge>
                     </div>
                   </td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
-                    <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                    <span
+                      style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
                       {{ fold(item.Labels) }}
                     </span>
                   </td>
@@ -144,7 +144,10 @@ export default {
       item_id: null,
       items: [],
       current_item: null,
+      recommenders: ['neighbors'],
+      recommender: 'neighbors',
       categories: [''],
+      category: '',
     };
   },
   created() {
@@ -152,7 +155,7 @@ export default {
   },
   mounted() {
     axios
-      .get(`/api/dashboard/item-to-item/neighbors/${this.item_id}`)
+      .get(`/api/dashboard/item-to-item/${this.recommender}/${this.item_id}`)
       .then((response) => {
         this.items = response.data;
       });
@@ -162,6 +165,15 @@ export default {
     axios.get('/api/dashboard/categories').then((response) => {
       this.categories = [''].concat(response.data);
     });
+    // load config
+    axios.get('/api/dashboard/config')
+      .then((response) => {
+        this.cacheSize = response.data.database.cache_size;
+        this.recommenders = ['neighbors'];
+        response.data.recommend['item-to-item'].forEach((recommender) => {
+          this.recommenders.push(recommender.name);
+        });
+      });
   },
   methods: {
     format_date_time(timestamp) {
@@ -170,12 +182,24 @@ export default {
       }
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
+    changeRecommender(value) {
+      this.recommender = value;
+      axios
+        .get(`/api/dashboard/item-to-item/${value}/${this.item_id}`, {
+          params: {
+            category: this.category === '' ? null : this.category,
+          },
+        })
+        .then((response) => {
+          this.items = response.data;
+        });
+    },
     changeCategory(event) {
+      this.category = event;
       axios
         .get(`/api/dashboard/item-to-item/neighbors/${this.item_id}`, {
           params: {
-            n: 100,
-            category: event,
+            category: event === '' ? null : event,
           },
         })
         .then((response) => {
