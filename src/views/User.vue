@@ -54,18 +54,17 @@
                 <tr v-for="(user, idx) in users" :key="idx">
                   <td>{{ user.UserId }}</td>
                   <td>
-                    <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                    <span
+                      style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
                       {{ user.Labels }}
                     </span>
                   </td>
                   <td>{{ user.Score.toFixed(5) }}</td>
                   <td>
-                    <router-link
-                      :to="{
-                        name: 'recommend',
-                        params: { user_id: user.UserId },
-                      }"
-                    >
+                    <router-link :to="{
+                      name: 'recommend',
+                      params: { user_id: user.UserId },
+                    }">
                       <d-button size="small" outline>Insight</d-button>
                     </router-link>
                   </td>
