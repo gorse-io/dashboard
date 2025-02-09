@@ -80,7 +80,7 @@ export default {
     fetchNodes() {
       axios({
         method: 'get',
-        url: '/api/dashboard/tasks'
+        url: '/api/dashboard/tasks',
       })
         .then((response) => {
           this.nodes = response.data;

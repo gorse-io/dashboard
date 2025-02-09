@@ -155,26 +155,26 @@ export default {
   mounted() {
     axios({
       method: 'get',
-      url: `/api/dashboard/item-to-item/${this.recommender}/${this.item_id}`
+      url: `/api/dashboard/item-to-item/${this.recommender}/${this.item_id}`,
     }).then((response) => {
       this.items = response.data;
     });
     axios({
       method: 'get',
-      url: `/api/item/${this.item_id}`
+      url: `/api/item/${this.item_id}`,
     }).then((response) => {
       this.current_item = response.data;
     });
     axios({
       method: 'get',
-      url: '/api/dashboard/categories'
+      url: '/api/dashboard/categories',
     }).then((response) => {
       this.categories = [''].concat(response.data);
     });
     // load config
     axios({
       method: 'get',
-      url: '/api/dashboard/config'
+      url: '/api/dashboard/config',
     }).then((response) => {
       this.cacheSize = response.data.database.cache_size;
       this.recommenders = ['neighbors'];

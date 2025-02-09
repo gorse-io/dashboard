@@ -63,7 +63,7 @@ export default {
     fetchNodes() {
       axios({
         method: 'get',
-        url: '/api/dashboard/cluster'
+        url: '/api/dashboard/cluster',
       })
         .then((response) => {
           this.nodes = response.data;

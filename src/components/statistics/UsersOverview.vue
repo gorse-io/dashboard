@@ -69,7 +69,7 @@ export default {
     axios({
       method: 'get',
       url: '/api/dashboard/rates',
-      params: { n: 30 }
+      params: { n: 30 },
     }).then((response) => {
       this.chartData.datasets = [];
       // eslint-disable-next-line no-restricted-syntax

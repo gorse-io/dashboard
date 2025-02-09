@@ -73,11 +73,11 @@ export default {
   mounted() {
     axios({
       method: 'get',
-      url: '/api/dashboard/config'
+      url: '/api/dashboard/config',
     })
       .then((response) => {
         this.config = response.data;
-    });
+      });
   },
 };
 </script>

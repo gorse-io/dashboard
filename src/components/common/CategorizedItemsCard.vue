@@ -86,7 +86,7 @@ export default {
   mounted() {
     axios({
       method: 'get',
-      url: '/api/dashboard/categories'
+      url: '/api/dashboard/categories',
     }).then((response) => {
       this.categories = [''].concat(response.data);
     });

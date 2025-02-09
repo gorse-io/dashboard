@@ -85,7 +85,7 @@ export default {
     // load config
     axios({
       method: 'get',
-      url: '/api/dashboard/config'
+      url: '/api/dashboard/config',
     })
       .then((response) => {
         this.cacheSize = response.data.database.cache_size;
@@ -98,7 +98,7 @@ export default {
     // load status
     axios({
       method: 'get',
-      url: '/api/dashboard/stats'
+      url: '/api/dashboard/stats',
     })
       .then((response) => {
         this.smallStats[0].value = numeral(response.data.NumUsers).format('0,0');

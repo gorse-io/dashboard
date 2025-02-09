@@ -97,13 +97,13 @@ export default {
   mounted() {
     axios({
       method: 'get',
-      url: `/api/dashboard/user-to-user/neighbors/${this.user_id}`
+      url: `/api/dashboard/user-to-user/neighbors/${this.user_id}`,
     }).then((response) => {
       this.users = response.data;
     });
     axios({
       method: 'get',
-      url: `/api/user/${this.user_id}`
+      url: `/api/user/${this.user_id}`,
     }).then((response) => {
       this.current_user = response.data;
     });

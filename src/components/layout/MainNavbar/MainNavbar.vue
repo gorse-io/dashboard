@@ -57,7 +57,7 @@ export default {
   mounted() {
     axios({
       method: 'get',
-      url: '/api/dashboard/userinfo'
+      url: '/api/dashboard/userinfo',
     }).then((response) => {
       this.userInfo = response.data;
     });

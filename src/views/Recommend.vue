@@ -49,7 +49,7 @@ export default {
     // load config
     axios({
       method: 'get',
-      url: '/api/dashboard/config'
+      url: '/api/dashboard/config',
     })
       .then((response) => {
         this.cacheSize = response.data.recommend.cache_size;
@@ -58,20 +58,21 @@ export default {
         this.feedbackTypes.forEach((feedbackType) => {
           requests.push(axios({
             method: 'get',
-            url: `/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`
+            url: `/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`,
           }));
         });
         axios.all(requests).then(axios.spread((...responses) => {
           const feedbackItems = [];
-          responses.forEach((response) => {
-            response.data.forEach((feedback) => {
-              feedback.Item.Timestamp = feedback.Timestamp;
+          responses.forEach((r) => {
+            r.data.forEach((feedback) => {
+              const item = feedback.Item;
+              item.Timestamp = feedback.Timestamp;
               feedbackItems.push(feedback.Item);
             });
           });
           this.feedback = feedbackItems.sort((a, b) => ((a.Timestamp < b.Timestamp) ? 1 : -1));
         }));
       });
-  }
+  },
 };
 </script>
