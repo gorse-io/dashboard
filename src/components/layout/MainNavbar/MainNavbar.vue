@@ -35,7 +35,7 @@
 </template>
 
 <script>
-const axios = require('axios');
+import axios from 'axios';
 
 export default {
   components: {
@@ -55,7 +55,10 @@ export default {
     };
   },
   mounted() {
-    axios.get('/api/dashboard/userinfo').then((response) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/userinfo'
+    }).then((response) => {
       this.userInfo = response.data;
     });
   },

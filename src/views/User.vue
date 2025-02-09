@@ -80,9 +80,8 @@
 </template>
 
 <script>
+import axios from 'axios';
 import moment from 'moment';
-
-const axios = require('axios');
 
 export default {
   data() {
@@ -96,10 +95,16 @@ export default {
     this.user_id = this.$route.params.user_id;
   },
   mounted() {
-    axios.get(`/api/dashboard/user-to-user/neighbors/${this.user_id}`).then((response) => {
+    axios({
+      method: 'get',
+      url: `/api/dashboard/user-to-user/neighbors/${this.user_id}`
+    }).then((response) => {
       this.users = response.data;
     });
-    axios.get(`/api/user/${this.user_id}`).then((response) => {
+    axios({
+      method: 'get',
+      url: `/api/user/${this.user_id}`
+    }).then((response) => {
       this.current_user = response.data;
     });
   },

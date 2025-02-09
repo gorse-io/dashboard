@@ -18,11 +18,7 @@
 
     <d-card-body class="p-0">
       <!-- Top Referrals List Group -->
-      <div
-        v-for="(item, idx) in pageItems"
-        :key="idx"
-        class="blog-comments__item d-flex p-3"
-      >
+      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
         <!-- Content -->
         <div class="blog-comments__content">
           <!-- Content - Title -->
@@ -37,28 +33,15 @@
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
-            <d-badge
-              outline
-              theme="secondary"
-              v-for="(label, idx) in item.Categories"
-              :key="idx"
-            >
+            <d-badge outline theme="secondary" v-for="(label, idx) in item.Categories" :key="idx">
               {{ label }}
             </d-badge>
-            <d-badge
-              outline
-              theme="primary"
-              v-for="(label, idx) in item.Labels"
-              :key="idx"
-            >
+            <d-badge outline theme="primary" v-for="(label, idx) in item.Labels" :key="idx">
               {{ label }}
             </d-badge>
           </div>
 
-          <p
-            class="m-0 my-0 mb-0 text-muted text-semibold"
-            style="font-size: 80%"
-          >
+          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
             {{ item.Timestamp }}
           </p>
         </div>
@@ -67,25 +50,17 @@
 
     <d-card-footer class="border-top">
       <d-button-group class="mb-3">
-        <d-button
-          class="btn-white"
-          @click="prevPage"
-          v-if="this.pageNumber !== 0"
-        ><i class="material-icons">arrow_back_ios</i></d-button
-        >
-        <d-button
-          class="btn-white"
-          @click="nextPage"
-          v-if="this.pageNumber + 1 !== pageCount"
-        ><i class="material-icons">arrow_forward_ios</i></d-button
-        >
+        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
+            class="material-icons">arrow_back_ios</i></d-button>
+        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
+            class="material-icons">arrow_forward_ios</i></d-button>
       </d-button-group>
     </d-card-footer>
   </d-card>
 </template>
 
 <script>
-const axios = require('axios');
+import axios from 'axios';
 
 export default {
   name: 'ao-top-referrals',
@@ -109,10 +84,15 @@ export default {
     };
   },
   mounted() {
-    axios.get('/api/dashboard/categories').then((response) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/categories'
+    }).then((response) => {
       this.categories = [''].concat(response.data);
     });
-    axios.get(this.api, {
+    axios({
+      method: 'get',
+      url: this.api,
       params: {
         end: this.cacheSize,
       },
@@ -139,7 +119,9 @@ export default {
       this.pageNumber += 1;
     },
     changeCategory(value) {
-      axios.get(this.api + value, {
+      axios({
+        method: 'get',
+        url: this.api + value,
         params: {
           end: this.cacheSize,
         },

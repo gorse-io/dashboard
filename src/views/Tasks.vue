@@ -27,7 +27,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(task, idx) in nodes" :key="idx" >
+                <tr v-for="(task, idx) in nodes" :key="idx">
                   <td>{{ task.Name }}</td>
                   <td>{{ task.Status }}</td>
                   <td>
@@ -38,8 +38,10 @@
                   </td>
                   <td>
                     <d-progress v-if="task.Status == 'Running'" :value="task.Count" :max="task.Total" />
-                    <d-progress v-if="task.Status == 'Suspended'" :value="task.Count" :max="task.Total" theme="warning"/>
-                    <d-progress v-if="task.Status == 'Complete'" :value="task.Total" :max="task.Total" theme="success"/>
+                    <d-progress v-if="task.Status == 'Suspended'" :value="task.Count" :max="task.Total"
+                      theme="warning" />
+                    <d-progress v-if="task.Status == 'Complete'" :value="task.Total" :max="task.Total"
+                      theme="success" />
                     <span style="color:red" v-if="task.Status == 'Failed'">{{ task.Error }}</span>
                   </td>
                 </tr>
@@ -55,9 +57,8 @@
 
 
 <script>
+import axios from 'axios';
 import moment from 'moment';
-
-const axios = require('axios');
 
 export default {
   data() {
@@ -77,7 +78,10 @@ export default {
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
     fetchNodes() {
-      axios.get('/api/dashboard/tasks')
+      axios({
+        method: 'get',
+        url: '/api/dashboard/tasks'
+      })
         .then((response) => {
           this.nodes = response.data;
         });

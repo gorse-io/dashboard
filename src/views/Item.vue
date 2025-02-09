@@ -133,10 +133,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 import moment from 'moment';
 import utils from '../utils';
-
-const axios = require('axios');
 
 export default {
   data() {
@@ -154,26 +153,35 @@ export default {
     this.item_id = this.$route.params.item_id;
   },
   mounted() {
-    axios
-      .get(`/api/dashboard/item-to-item/${this.recommender}/${this.item_id}`)
-      .then((response) => {
-        this.items = response.data;
-      });
-    axios.get(`/api/item/${this.item_id}`).then((response) => {
+    axios({
+      method: 'get',
+      url: `/api/dashboard/item-to-item/${this.recommender}/${this.item_id}`
+    }).then((response) => {
+      this.items = response.data;
+    });
+    axios({
+      method: 'get',
+      url: `/api/item/${this.item_id}`
+    }).then((response) => {
       this.current_item = response.data;
     });
-    axios.get('/api/dashboard/categories').then((response) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/categories'
+    }).then((response) => {
       this.categories = [''].concat(response.data);
     });
     // load config
-    axios.get('/api/dashboard/config')
-      .then((response) => {
-        this.cacheSize = response.data.database.cache_size;
-        this.recommenders = ['neighbors'];
-        response.data.recommend['item-to-item'].forEach((recommender) => {
-          this.recommenders.push(recommender.name);
-        });
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config'
+    }).then((response) => {
+      this.cacheSize = response.data.database.cache_size;
+      this.recommenders = ['neighbors'];
+      response.data.recommend['item-to-item'].forEach((recommender) => {
+        this.recommenders.push(recommender.name);
       });
+    });
   },
   methods: {
     format_date_time(timestamp) {
@@ -184,27 +192,27 @@ export default {
     },
     changeRecommender(value) {
       this.recommender = value;
-      axios
-        .get(`/api/dashboard/item-to-item/${value}/${this.item_id}`, {
-          params: {
-            category: this.category === '' ? null : this.category,
-          },
-        })
-        .then((response) => {
-          this.items = response.data;
-        });
+      axios({
+        method: 'get',
+        url: `/api/dashboard/item-to-item/${value}/${this.item_id}`,
+        params: {
+          category: this.category === '' ? null : this.category,
+        },
+      }).then((response) => {
+        this.items = response.data;
+      });
     },
     changeCategory(event) {
       this.category = event;
-      axios
-        .get(`/api/dashboard/item-to-item/neighbors/${this.item_id}`, {
-          params: {
-            category: event === '' ? null : event,
-          },
-        })
-        .then((response) => {
-          this.items = response.data;
-        });
+      axios({
+        method: 'get',
+        url: `/api/dashboard/item-to-item/neighbors/${this.item_id}`,
+        params: {
+          category: event === '' ? null : event,
+        },
+      }).then((response) => {
+        this.items = response.data;
+      });
     },
     fold: utils.fold,
     stringify: utils.stringify,

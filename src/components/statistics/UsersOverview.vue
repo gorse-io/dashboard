@@ -9,19 +9,15 @@
     <d-card-body class="pt-0">
       <!-- Legend & Chart -->
       <div ref="legend"></div>
-      <canvas
-        height="80"
-        ref="canvas"
-        style="max-width: 100% !important"
-      ></canvas>
+      <canvas height="80" ref="canvas" style="max-width: 100% !important"></canvas>
     </d-card-body>
   </d-card>
 </template>
 
 <script>
+import axios from 'axios';
 import Chart from '../../utils/chart';
 
-const axios = require('axios');
 const moment = require('moment');
 
 const defaultChartData = {
@@ -70,7 +66,11 @@ export default {
   mounted() {
     // load click-through rate
     let i = 0;
-    axios.get('/api/dashboard/rates?n=30').then((response) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/rates',
+      params: { n: 30 }
+    }).then((response) => {
       this.chartData.datasets = [];
       // eslint-disable-next-line no-restricted-syntax
       for (const [key, value] of (Object.entries(response.data))) {
@@ -185,4 +185,3 @@ export default {
   },
 };
 </script>
-

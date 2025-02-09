@@ -91,7 +91,7 @@ export default {
       reader.readAsText(file.slice(0, 1024));
       reader.onload = (e) => {
         this.text = e.target.result;
-        this.rows = e.target.result.split('\n').slice(0, -1).map((line) => JSON.parse(line));
+        this.rows = e.target.result.split('\n').slice(0, -1).map(line => JSON.parse(line));
       };
     },
     format_date_time(timestamp) {

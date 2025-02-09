@@ -10,12 +10,12 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Positive Feedback'" :items="feedback"/>
+        <bo-top-items :title="'Positive Feedback'" :items="feedback" />
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
 
-        <bo-user-recommend :user_id = "user_id"/>
+        <bo-user-recommend :user_id="user_id" />
 
 
       </d-col>
@@ -24,10 +24,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 import TopItems from '@/components/common/TopItemsCard.vue';
 import UserRecommend from '@/components/common/UserRecommend.vue';
-
-const axios = require('axios');
 
 export default {
   components: {
@@ -48,13 +47,19 @@ export default {
   },
   mounted() {
     // load config
-    axios.get('/api/dashboard/config')
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config'
+    })
       .then((response) => {
         this.cacheSize = response.data.recommend.cache_size;
         this.feedbackTypes = response.data.recommend.data_source.positive_feedback_types;
         const requests = [];
         this.feedbackTypes.forEach((feedbackType) => {
-          requests.push(axios.get(`/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`));
+          requests.push(axios({
+            method: 'get',
+            url: `/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`
+          }));
         });
         axios.all(requests).then(axios.spread((...responses) => {
           const feedbackItems = [];
@@ -67,6 +72,6 @@ export default {
           this.feedback = feedbackItems.sort((a, b) => ((a.Timestamp < b.Timestamp) ? 1 : -1));
         }));
       });
-  },
+  }
 };
 </script>
