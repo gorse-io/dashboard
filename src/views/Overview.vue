@@ -36,12 +36,12 @@
 </template>
 
 <script>
+import axios from 'axios';
 import SmallStats from '@/components/common/SmallStats.vue';
 import CategorizedItems from '@/components/common/CategorizedItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
 import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
 
-const axios = require('axios');
 const numeral = require('numeral');
 
 export default {
@@ -83,7 +83,10 @@ export default {
   },
   mounted() {
     // load config
-    axios.get('/api/dashboard/config')
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config',
+    })
       .then((response) => {
         this.cacheSize = response.data.database.cache_size;
         this.nonPersonalized = ['popular', 'latest'];
@@ -91,8 +94,12 @@ export default {
           this.nonPersonalized.push(recommender.name);
         });
       });
+
     // load status
-    axios.get('/api/dashboard/stats')
+    axios({
+      method: 'get',
+      url: '/api/dashboard/stats',
+    })
       .then((response) => {
         this.smallStats[0].value = numeral(response.data.NumUsers).format('0,0');
         this.smallStats[1].value = numeral(response.data.NumItems).format('0,0');

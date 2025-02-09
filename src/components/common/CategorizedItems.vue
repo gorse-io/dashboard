@@ -73,9 +73,8 @@
 </template>
 
 <script>
+import axios from 'axios';
 import utils from '@/utils';
-
-const axios = require('axios');
 
 export default {
   name: 'ao-top-referrals',
@@ -101,10 +100,15 @@ export default {
     };
   },
   mounted() {
-    axios.get('/api/dashboard/categories').then((response) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/categories',
+    }).then((response) => {
       this.categories = [''].concat(response.data);
     });
-    axios.get('/api/dashboard/non-personalized/popular/', {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/non-personalized/popular/',
       params: {
         end: this.cacheSize,
       },
@@ -132,7 +136,9 @@ export default {
     },
     changeRecommender(value) {
       this.recommender = value;
-      axios.get(`/api/dashboard/non-personalized/${value}/`, {
+      axios({
+        method: 'get',
+        url: `/api/dashboard/non-personalized/${value}/`,
         params: {
           category: this.category,
           end: this.cacheSize,
@@ -144,7 +150,9 @@ export default {
     },
     changeCategory(value) {
       this.category = value;
-      axios.get(`/api/dashboard/non-personalized/${this.recommender}/`, {
+      axios({
+        method: 'get',
+        url: `/api/dashboard/non-personalized/${this.recommender}/`,
         params: {
           category: value,
           end: this.cacheSize,

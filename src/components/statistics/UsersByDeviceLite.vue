@@ -26,9 +26,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 import moment from 'moment';
 
-const axios = require('axios');
 const jsonPath = require('jsonpath');
 
 export default {
@@ -65,7 +65,10 @@ export default {
     };
   },
   mounted() {
-    axios.get('/api/dashboard/stats').then((res) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/stats',
+    }).then((res) => {
       this.status = res.data;
     });
   },
