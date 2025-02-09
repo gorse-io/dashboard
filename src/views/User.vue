@@ -48,6 +48,7 @@
                   <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Score</th>
+                  <th scope="col" class="border-0"></th>
                 </tr>
               </thead>
               <tbody>

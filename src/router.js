@@ -4,6 +4,7 @@ import Router from 'vue-router';
 import Tasks from './views/Tasks.vue';
 import Overview from './views/Overview.vue';
 import Errors from './views/Errors.vue';
+import Chat from './views/Chat.vue';
 import Cluster from './views/Cluster.vue';
 import Users from './views/Users.vue';
 import Items from './views/Items.vue';
@@ -105,6 +106,11 @@ export default new Router({
       path: '/login',
       name: 'login',
       meta: { layout: 'login' },
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: Chat,
     },
     {
       path: '*',

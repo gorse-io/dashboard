@@ -47,35 +47,12 @@
                     </div>
                   </d-col>
                 </d-row>
-                <d-row class="mb-2">
+                <d-row>
                   <d-col sm="12" md="2">
                     <label>Description</label>
                   </d-col>
                   <d-col sm="12" md="10">
                     <label class="text-light">{{ current_item.Comment }}</label>
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="2">
-                    <d-input-group prepend="Prompt">
-                      <d-select @change="changeRecommender" :value="recommender">
-                        <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
-                          {{ recommender }}
-                        </option>
-                      </d-select>
-                    </d-input-group>
-                  </d-col>
-                  <d-col sm="12" md="10">
-                    <d-input-group>
-                      <d-form-textarea v-model="confirmItemId" :rows="1" :max-rows="100" />
-                      <d-input-group-addon append>
-                        <d-button outline @click="delete_item">
-                          Ask AI
-                        </d-button>
-                      </d-input-group-addon>
-                    </d-input-group>
-                  </d-col>
-                  <d-col sm="12" md="1">
                   </d-col>
                 </d-row>
               </d-list-group-item>
