@@ -4,7 +4,7 @@
       <div class="main-navbar__search w-100 d-none d-md-flex d-lg-flex">
       </div>
       <d-navbar-nav class="border-left flex-row align-right">
-        <li class="nav-item border-right dropdown notifications">
+        <li v-if="chat" class="nav-item border-right dropdown notifications">
           <a class="nav-link nav-link-icon text-center" v-d-toggle.notifications>
             <div class="nav-link-icon__wrapper">
               <router-link :to="{ name: 'chat' }">
@@ -52,6 +52,7 @@ export default {
   data() {
     return {
       userInfo: null,
+      chat: false,
     };
   },
   mounted() {
@@ -60,6 +61,13 @@ export default {
       url: '/api/dashboard/userinfo',
     }).then((response) => {
       this.userInfo = response.data;
+      console.log(response.data);
+    });
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config',
+    }).then((response) => {
+      this.chat = response.data.openai.base_url.length > 0;
     });
   },
 };
