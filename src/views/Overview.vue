@@ -24,11 +24,11 @@
     </d-row>
 
     <d-row>
-      <d-col lg="7" md="12" sm="12" class="mb-4">
+      <d-col lg="8" md="12" sm="12" class="mb-4">
         <bo-top-items :recommenders="nonPersonalized" />
       </d-col>
 
-      <d-col lg="5" md="12" sm="12" class="mb-4">
+      <d-col lg="4" md="12" sm="12" class="mb-4">
         <bo-users-by-device />
       </d-col>
     </d-row>
