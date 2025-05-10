@@ -63,7 +63,7 @@
     </div>
 
     <!-- Default Light Table -->
-    <div class="row">
+    <div class="row" v-if ="recommenders.length > 0">
       <div class="col">
         <div class="card card-small mb-4">
           <div class="card-header border-bottom">
@@ -147,7 +147,7 @@ export default {
       items: [],
       last_modified: undefined,
       current_item: null,
-      recommenders: ['neighbors'],
+      recommenders: [],
       recommender: 'neighbors',
       categories: [''],
       category: '',
@@ -182,10 +182,7 @@ export default {
       url: '/api/dashboard/config',
     }).then((response) => {
       this.cacheSize = response.data.database.cache_size;
-      this.recommenders = ['neighbors'];
-      response.data.recommend['item-to-item'].forEach((recommender) => {
-        this.recommenders.push(recommender.name);
-      });
+      this.recommenders = response.data.recommend['item-to-item'].map(recommender => recommender.name);
     });
   },
   methods: {

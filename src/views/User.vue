@@ -35,7 +35,7 @@
     </div>
 
     <!-- Default Light Table -->
-    <div class="row">
+    <div class="row" v-if="recommenders.length > 0">
       <div class="col">
         <div class="card card-small mb-4">
           <div class="card-header border-bottom">
@@ -92,6 +92,7 @@ export default {
       user_id: null,
       users: [],
       last_modified: undefined,
+      recommenders: [],
       current_user: null,
     };
   },
@@ -111,6 +112,14 @@ export default {
       url: `/api/user/${this.user_id}`,
     }).then((response) => {
       this.current_user = response.data;
+    });
+    // load config
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config',
+    }).then((response) => {
+      this.cacheSize = response.data.database.cache_size;
+      this.recommenders = response.data.recommend['user-to-user'].map(recommender => recommender.name);
     });
   },
   methods: {
