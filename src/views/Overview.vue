@@ -24,11 +24,11 @@
     </d-row>
 
     <d-row>
-      <d-col lg="7" md="12" sm="12" class="mb-4">
+      <d-col lg="8" md="12" sm="12" class="mb-4">
         <bo-top-items :recommenders="nonPersonalized" />
       </d-col>
 
-      <d-col lg="5" md="12" sm="12" class="mb-4">
+      <d-col lg="4" md="12" sm="12" class="mb-4">
         <bo-users-by-device />
       </d-col>
     </d-row>
@@ -36,12 +36,12 @@
 </template>
 
 <script>
+import axios from 'axios';
 import SmallStats from '@/components/common/SmallStats.vue';
 import CategorizedItems from '@/components/common/CategorizedItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
 import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
 
-const axios = require('axios');
 const numeral = require('numeral');
 
 export default {
@@ -59,7 +59,10 @@ export default {
   },
   mounted() {
     // load config
-    axios.get('/api/dashboard/config')
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config',
+    })
       .then((response) => {
         this.cacheSize = response.data.database.cache_size;
         this.nonPersonalized = ['popular', 'latest'];
@@ -67,8 +70,12 @@ export default {
           this.nonPersonalized.push(recommender.name);
         });
       });
+
     // load status
-    axios.get('/api/dashboard/stats')
+    axios({
+      method: 'get',
+      url: '/api/dashboard/stats',
+    })
       .then((response) => {
         this.smallStats[0].value = numeral(response.data.NumUsers).format('0,0');
         this.smallStats[1].value = numeral(response.data.NumItems).format('0,0');

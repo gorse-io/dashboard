@@ -4,6 +4,15 @@
       <div class="main-navbar__search w-100 d-none d-md-flex d-lg-flex">
       </div>
       <d-navbar-nav class="border-left flex-row align-right">
+        <li v-if="chat" class="nav-item border-right dropdown notifications">
+          <a class="nav-link nav-link-icon text-center" v-d-toggle.notifications>
+            <div class="nav-link-icon__wrapper">
+              <router-link :to="{ name: 'chat' }">
+                <i class="material-icons">smart_toy</i>
+              </router-link>
+            </div>
+          </a>
+        </li>
         <li v-if="userInfo != null" class="nav-item dropdown">
           <a class="nav-link text-nowrap px-3" :class="{ 'dropdown-toggle': userInfo.auth_type.length === 0 }"
             v-d-toggle.user-actions>
@@ -26,7 +35,7 @@
 </template>
 
 <script>
-const axios = require('axios');
+import axios from 'axios';
 
 export default {
   components: {
@@ -43,11 +52,22 @@ export default {
   data() {
     return {
       userInfo: null,
+      chat: false,
     };
   },
   mounted() {
-    axios.get('/api/dashboard/userinfo').then((response) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/userinfo',
+    }).then((response) => {
       this.userInfo = response.data;
+      console.log(response.data);
+    });
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config',
+    }).then((response) => {
+      this.chat = response.data.openai.base_url.length > 0;
     });
   },
 };

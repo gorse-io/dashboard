@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
       <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-        <span class="text-uppercase page-subtitle">Overview</span>
         <h3 class="page-title">Items</h3>
       </div>
     </div>
@@ -17,22 +16,13 @@
           </div>
           <div class="card-body border-bottom">
             <d-input-group>
-              <d-input
-                id="item_id"
-                placeholder="Item ID"
-                v-model="item_id"
-                @keyup.enter.native="search_item"
-              />
+              <d-input id="item_id" placeholder="Item ID" v-model="item_id" @keyup.enter.native="search_item" />
               <d-input-group-addon append>
-                <d-button class="btn-white" @click="search_item"
-                  ><i class="material-icons">search</i></d-button
-                >
-                <d-button class="btn-white" @click="previous_page"
-                ><i class="material-icons">arrow_back_ios</i></d-button
-                >
-                <d-button class="btn-white" @click="next_page"
-                  ><i class="material-icons">arrow_forward_ios</i></d-button
-                >
+                <d-button class="btn-white" @click="search_item"><i class="material-icons">search</i></d-button>
+                <d-button class="btn-white" @click="previous_page"><i
+                    class="material-icons">arrow_back_ios</i></d-button>
+                <d-button class="btn-white" @click="next_page"><i
+                    class="material-icons">arrow_forward_ios</i></d-button>
               </d-input-group-addon>
             </d-input-group>
           </div>
@@ -54,12 +44,7 @@
                   <td>{{ item.ItemId }}</td>
                   <td>
                     <div>
-                      <d-badge
-                        outline
-                        theme="secondary"
-                        v-for="(category, idx) in item.Categories"
-                        :key="idx"
-                      >
+                      <d-badge outline theme="secondary" v-for="(category, idx) in item.Categories" :key="idx">
                         {{ category }}
                       </d-badge>
                     </div>
@@ -69,15 +54,18 @@
                   </td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
-                    <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                    <span
+                      style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
                       {{ fold(item.Labels) }}
                     </span>
                   </td>
                   <td>{{ item.Comment }}</td>
                   <td>
                     <d-button-group>
-                      <d-button size="small" outline @click="list_item_neighbors(item.ItemId)">Neighbors</d-button>
-                      <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)">Delete</d-button>
+                      <d-button size="small" outline @click="view_item(item.ItemId)"><i
+                          class="material-icons">visibility</i></d-button>
+                      <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)"><i
+                          class="material-icons">delete</i></d-button>
                     </d-button-group>
                   </td>
                 </tr>
@@ -93,9 +81,10 @@
         <d-modal-title>Delete Item</d-modal-title>
       </d-modal-header>
       <d-modal-body>
-        <div class="mb-3">Are you sure to delete item <span style="font-weight: bold">{{ deleteItemId }}</span>? Please type the ID of the deleted item.</div>
+        <div class="mb-3">Are you sure to delete item <span style="font-weight: bold">{{ deleteItemId }}</span>? Please
+          type the ID of the deleted item.</div>
         <d-input-group>
-          <d-input v-model="confirmItemId"/>
+          <d-input v-model="confirmItemId" />
           <d-input-group-addon append>
             <d-button theme="danger" outline @click="delete_item">
               <i class="material-icons">delete</i>
@@ -109,10 +98,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 import moment from 'moment';
 import utils from '../utils';
-
-const axios = require('axios');
 
 export default {
   data() {
@@ -132,12 +120,13 @@ export default {
   methods: {
     fetch_page() {
       const cursor = this.cursors.empty ? '' : this.cursors[this.cursors.length - 1];
-      axios
-        .get('/api/items', {
-          params: {
-            cursor,
-          },
-        })
+      axios({
+        method: 'get',
+        url: '/api/items',
+        params: {
+          cursor,
+        },
+      })
         .then((response) => {
           this.items = response.data.Items;
           this.cursors.push(response.data.Cursor);
@@ -162,13 +151,17 @@ export default {
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
     search_item() {
-      axios.get(`/api/item/${this.item_id}`).then((response) => {
-        this.items = [response.data];
-      });
+      axios({
+        method: 'get',
+        url: `/api/item/${this.item_id}`,
+      })
+        .then((response) => {
+          this.items = [response.data];
+        });
     },
-    list_item_neighbors(itemId) {
-      this.$router.push({
-        name: 'item_neighbors',
+    view_item(itemId) {
+      this.$router.replace({
+        name: 'item',
         params: { item_id: itemId },
       });
     },
@@ -183,19 +176,23 @@ export default {
         this.deleteItemError = 'item ID mismatch';
         return;
       }
-      axios.delete(`/api/item/${this.deleteItemId}`).then(() => {
-        this.showDialog = false;
-        if (this.cursors.length >= 1) {
-          this.cursors.pop();
-        }
-        this.fetch_page();
-      }).catch((error) => {
-        if (error.response) {
-          this.deleteItemError = error.response.data;
-        } else {
-          this.deleteItemError = error;
-        }
-      });
+      axios({
+        method: 'delete',
+        url: `/api/item/${this.deleteItemId}`,
+      })
+        .then(() => {
+          this.showDialog = false;
+          if (this.cursors.length >= 1) {
+            this.cursors.pop();
+          }
+          this.fetch_page();
+        }).catch((error) => {
+          if (error.response) {
+            this.deleteItemError = error.response.data;
+          } else {
+            this.deleteItemError = error;
+          }
+        });
     },
     fold: utils.fold,
   },

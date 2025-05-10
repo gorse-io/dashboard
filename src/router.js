@@ -4,12 +4,13 @@ import Router from 'vue-router';
 import Tasks from './views/Tasks.vue';
 import Overview from './views/Overview.vue';
 import Errors from './views/Errors.vue';
+import Chat from './views/Chat.vue';
 import Cluster from './views/Cluster.vue';
 import Users from './views/Users.vue';
 import Items from './views/Items.vue';
 import Recommend from './views/Recommend.vue';
-import ItemNeighbors from './views/ItemNeighbors.vue';
-import UserNeighbors from './views/UserNeighbors.vue';
+import Item from './views/Item.vue';
+import User from './views/User.vue';
 import Settings from './views/Settings.vue';
 import Advance from './views/Advance.vue';
 import ImportItems from './views/ImportItems.vue';
@@ -72,14 +73,14 @@ export default new Router({
       component: Recommend,
     },
     {
-      path: '/item_neighbors',
-      name: 'item_neighbors',
-      component: ItemNeighbors,
+      path: '/item/:item_id',
+      name: 'item',
+      component: Item,
     },
     {
-      path: '/user_neighbors',
-      name: 'user_neighbors',
-      component: UserNeighbors,
+      path: '/user/:user_id',
+      name: 'user',
+      component: User,
     },
     {
       path: '/advance',
@@ -105,6 +106,11 @@ export default new Router({
       path: '/login',
       name: 'login',
       meta: { layout: 'login' },
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: Chat,
     },
     {
       path: '*',

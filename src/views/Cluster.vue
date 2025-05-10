@@ -26,7 +26,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(node, idx) in nodes" :key="idx" >
+                <tr v-for="(node, idx) in nodes" :key="idx">
                   <td>{{ node.Type }}</td>
                   <td>{{ node.Hostname }}</td>
                   <td>{{ node.UUID }}</td>
@@ -44,7 +44,7 @@
 
 
 <script>
-const axios = require('axios');
+import axios from 'axios';
 
 export default {
   data() {
@@ -61,7 +61,10 @@ export default {
   },
   methods: {
     fetchNodes() {
-      axios.get('/api/dashboard/cluster')
+      axios({
+        method: 'get',
+        url: '/api/dashboard/cluster',
+      })
         .then((response) => {
           this.nodes = response.data;
         });

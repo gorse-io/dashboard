@@ -62,7 +62,7 @@
 </template>
 
 <script>
-const axios = require('axios');
+import axios from 'axios';
 
 export default {
   data() {
@@ -71,7 +71,10 @@ export default {
     };
   },
   mounted() {
-    axios.get('/api/dashboard/config')
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config',
+    })
       .then((response) => {
         this.config = response.data;
       });

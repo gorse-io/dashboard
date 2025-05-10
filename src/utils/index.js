@@ -14,14 +14,14 @@ const utils = {
     }
     return JSON.stringify(o);
   },
-  stringify(o) {
+  stringify(o, indent = '') {
     const that = this;
     if (Array.isArray(o)) {
       return `[${o.map(v => that.fold(v)).join(', ')}]`;
     } else if (typeof o === 'object') {
       let out = '{\n';
-      out += Object.entries(o).map(([key, value]) => `  "${key}": ${that.stringify(value)}`).join(',\n');
-      out += '\n}';
+      out += Object.entries(o).map(([key, value]) => `${indent}  "${key}": ${that.stringify(value, `${indent}  `)}`).join(',\n');
+      out += `\n${indent}}`;
       return out;
     }
     return JSON.stringify(o);

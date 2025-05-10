@@ -35,43 +35,59 @@
     </div>
 
     <!-- Default Light Table -->
-    <div class="row">
+    <div class="row" v-if="recommenders.length > 0">
       <div class="col">
         <div class="card card-small mb-4">
           <div class="card-header border-bottom">
-            <h6 class="m-0">Related Items</h6>
+            <h6 class="m-0">User to User</h6>
           </div>
-          <div class="card-body p-0 pb-3">
+          <div class="card-body border-bottom">
+            <d-row>
+              <d-col sm="12" md="12">
+                <d-input-group prepend="Recommender" class="mb-3">
+                  <d-select @change="changeRecommender" :value="recommender">
+                    <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
+                      {{ recommender }}
+                    </option>
+                  </d-select>
+                </d-input-group>
+              </d-col>
+            </d-row>
+          </div>
+          <div class="card-body p-0">
             <table class="table mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Labels</th>
                   <th scope="col" class="border-0">Score</th>
+                  <th scope="col" class="border-0"></th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(user, idx) in users" :key="idx">
                   <td>{{ user.UserId }}</td>
                   <td>
-                    <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                    <span
+                      style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
                       {{ user.Labels }}
                     </span>
                   </td>
                   <td>{{ user.Score.toFixed(5) }}</td>
                   <td>
-                    <router-link
-                      :to="{
-                        name: 'recommend',
-                        params: { user_id: user.UserId },
-                      }"
-                    >
-                      <d-button size="small" outline>Insight</d-button>
+                    <router-link :to="{
+                      name: 'recommend',
+                      params: { user_id: user.UserId },
+                    }">
+                      <d-button size="small" outline><i class="material-icons">visibility</i></d-button>
                     </router-link>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="card-footer border-top" v-if="last_modified !== undefined">
+            <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
           </div>
         </div>
       </div>
@@ -80,15 +96,17 @@
 </template>
 
 <script>
+import axios from 'axios';
 import moment from 'moment';
-
-const axios = require('axios');
 
 export default {
   data() {
     return {
       user_id: null,
       users: [],
+      last_modified: undefined,
+      recommenders: [],
+      recommender: null,
       current_user: null,
     };
   },
@@ -96,14 +114,35 @@ export default {
     this.user_id = this.$route.params.user_id;
   },
   mounted() {
-    axios.get(`/api/dashboard/user/${this.user_id}/neighbors`).then((response) => {
-      this.users = response.data;
-    });
-    axios.get(`/api/user/${this.user_id}`).then((response) => {
+    axios({
+      method: 'get',
+      url: `/api/user/${this.user_id}`,
+    }).then((response) => {
       this.current_user = response.data;
+    });
+    // load config
+    axios({
+      method: 'get',
+      url: '/api/dashboard/config',
+    }).then((response) => {
+      this.cacheSize = response.data.database.cache_size;
+      this.recommenders = response.data.recommend['user-to-user'].map(recommender => recommender.name);
+      if (this.recommenders.length > 0) {
+        this.changeRecommender(this.recommenders[0]);
+      }
     });
   },
   methods: {
+    changeRecommender(value) {
+      this.recommender = value;
+      axios({
+        method: 'get',
+        url: `/api/dashboard/user-to-user/${value}/${this.user_id}`,
+      }).then((response) => {
+        this.users = response.data;
+        this.last_modified = response.headers['last-modified'];
+      });
+    },
     format_date_time(timestamp) {
       if (timestamp === '') {
         return '';

@@ -55,27 +55,28 @@
           </div>
 
           <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
-            {{ item.Timestamp }}
+            {{ format_date_time(item.Timestamp) }}
           </p>
         </div>
       </div>
     </d-card-body>
 
-    <d-card-footer class="border-top">
-      <d-button-group class="mb-3">
+    <d-card-footer class="border-top" v-if="last_modified !== undefined">
+      <!-- <d-button-group class="mb-3">
         <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
             class="material-icons">arrow_back_ios</i></d-button>
         <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
             class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group>
+      </d-button-group> -->
+      <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
     </d-card-footer>
   </d-card>
 </template>
 
 <script>
+import axios from 'axios';
+import moment from 'moment';
 import utils from '@/utils';
-
-const axios = require('axios');
 
 export default {
   name: 'ao-top-referrals',
@@ -94,6 +95,7 @@ export default {
   data() {
     return {
       items: [],
+      last_modified: undefined,
       pageNumber: 0,
       categories: [''],
       recommender: this.recommenders[0],
@@ -101,16 +103,22 @@ export default {
     };
   },
   mounted() {
-    axios.get('/api/dashboard/categories').then((response) => {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/categories',
+    }).then((response) => {
       this.categories = [''].concat(response.data);
     });
-    axios.get('/api/dashboard/non-personalized/popular/', {
+    axios({
+      method: 'get',
+      url: '/api/dashboard/non-personalized/popular/',
       params: {
         end: this.cacheSize,
       },
     })
       .then((response) => {
         this.items = response.data === null ? [] : response.data;
+        this.last_modified = response.headers['last-modified'];
       });
   },
   computed: {
@@ -132,7 +140,9 @@ export default {
     },
     changeRecommender(value) {
       this.recommender = value;
-      axios.get(`/api/dashboard/non-personalized/${value}/`, {
+      axios({
+        method: 'get',
+        url: `/api/dashboard/non-personalized/${value}/`,
         params: {
           category: this.category,
           end: this.cacheSize,
@@ -140,11 +150,14 @@ export default {
       })
         .then((response) => {
           this.items = response.data === null ? [] : response.data;
+          this.last_modified = response.headers['last-modified'];
         });
     },
     changeCategory(value) {
       this.category = value;
-      axios.get(`/api/dashboard/non-personalized/${this.recommender}/`, {
+      axios({
+        method: 'get',
+        url: `/api/dashboard/non-personalized/${this.recommender}/`,
         params: {
           category: value,
           end: this.cacheSize,
@@ -152,9 +165,16 @@ export default {
       })
         .then((response) => {
           this.items = response.data === null ? [] : response.data;
+          this.last_modified = response.headers['last-modified'];
         });
     },
     fold: utils.fold,
+    format_date_time(timestamp) {
+      if (timestamp === '') {
+        return '';
+      }
+      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
+    },
   },
 };
 </script>
