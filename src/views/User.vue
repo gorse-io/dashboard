@@ -41,6 +41,19 @@
           <div class="card-header border-bottom">
             <h6 class="m-0">User to User</h6>
           </div>
+          <div class="card-body border-bottom">
+            <d-row>
+              <d-col sm="12" md="12">
+                <d-input-group prepend="Recommender" class="mb-3">
+                  <d-select @change="changeRecommender" :value="recommender">
+                    <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
+                      {{ recommender }}
+                    </option>
+                  </d-select>
+                </d-input-group>
+              </d-col>
+            </d-row>
+          </div>
           <div class="card-body p-0">
             <table class="table mb-0">
               <thead class="bg-light">
@@ -93,6 +106,7 @@ export default {
       users: [],
       last_modified: undefined,
       recommenders: [],
+      recommender: null,
       current_user: null,
     };
   },
@@ -100,13 +114,6 @@ export default {
     this.user_id = this.$route.params.user_id;
   },
   mounted() {
-    axios({
-      method: 'get',
-      url: `/api/dashboard/user-to-user/neighbors/${this.user_id}`,
-    }).then((response) => {
-      this.users = response.data;
-      this.last_modified = response.headers['last-modified'];
-    });
     axios({
       method: 'get',
       url: `/api/user/${this.user_id}`,
@@ -120,9 +127,22 @@ export default {
     }).then((response) => {
       this.cacheSize = response.data.database.cache_size;
       this.recommenders = response.data.recommend['user-to-user'].map(recommender => recommender.name);
+      if (this.recommenders.length > 0) {
+        this.changeRecommender(this.recommenders[0]);
+      }
     });
   },
   methods: {
+    changeRecommender(value) {
+      this.recommender = value;
+      axios({
+        method: 'get',
+        url: `/api/dashboard/user-to-user/${value}/${this.user_id}`,
+      }).then((response) => {
+        this.users = response.data;
+        this.last_modified = response.headers['last-modified'];
+      });
+    },
     format_date_time(timestamp) {
       if (timestamp === '') {
         return '';

@@ -34,7 +34,7 @@
                   <d-col sm="12" md="10">
                     <label class="text-light">{{
                       format_date_time(current_item.Timestamp)
-                      }}</label>
+                    }}</label>
                   </d-col>
                 </d-row>
                 <d-row>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- Default Light Table -->
-    <div class="row" v-if ="recommenders.length > 0">
+    <div class="row" v-if="recommenders.length > 0">
       <div class="col">
         <div class="card card-small mb-4">
           <div class="card-header border-bottom">
@@ -148,7 +148,7 @@ export default {
       last_modified: undefined,
       current_item: null,
       recommenders: [],
-      recommender: 'neighbors',
+      recommender: '',
       categories: [''],
       category: '',
     };
@@ -157,13 +157,6 @@ export default {
     this.item_id = this.$route.params.item_id;
   },
   mounted() {
-    axios({
-      method: 'get',
-      url: `/api/dashboard/item-to-item/${this.recommender}/${this.item_id}`,
-    }).then((response) => {
-      this.items = response.data;
-      this.last_modified = response.headers['last-modified'];
-    });
     axios({
       method: 'get',
       url: `/api/item/${this.item_id}`,
@@ -183,6 +176,9 @@ export default {
     }).then((response) => {
       this.cacheSize = response.data.database.cache_size;
       this.recommenders = response.data.recommend['item-to-item'].map(recommender => recommender.name);
+      if (this.recommenders.length > 0) {
+        this.changeRecommender(this.recommenders[0]);
+      }
     });
   },
   methods: {
