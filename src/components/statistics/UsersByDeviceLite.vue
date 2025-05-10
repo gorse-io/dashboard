@@ -47,8 +47,6 @@ export default {
         { icon: 'dns', name: 'Number of Servers', key: '$.NumServers' },
         { icon: 'tag', name: 'Number of User Labels', key: '$.NumUserLabels' },
         { icon: 'tag', name: 'Number of Item Labels', key: '$.NumItemLabels' },
-        { icon: 'trending_up', name: 'Popular Items Update Time', key: '$.PopularItemsUpdateTime' },
-        { icon: 'trending_up', name: 'Latest Items Update Time', key: '$.LatestItemsUpdateTime' },
         { icon: 'group_work', name: 'Matching Model Fit Time', key: '$.MatchingModelFitTime' },
         { icon: 'group_work', name: 'Matching Model Precision@10', key: '$.MatchingModelScore.Precision' },
         { icon: 'group_work', name: 'Matching Model Recall@10', key: '$.MatchingModelScore.Recall' },
@@ -57,9 +55,6 @@ export default {
         { icon: 'ads_click', name: 'Ranking Model Precision', key: '$.RankingModelScore.Precision' },
         { icon: 'ads_click', name: 'Ranking Model Recall', key: '$.RankingModelScore.Recall' },
         { icon: 'ads_click', name: 'Ranking Model AUC', key: '$.RankingModelScore.AUC' },
-        { icon: 'travel_explore', name: 'User Neighbor Index Recall', key: '$.UserNeighborIndexRecall' },
-        { icon: 'travel_explore', name: 'Item Neighbor Index Recall', key: '$.ItemNeighborIndexRecall' },
-        { icon: 'travel_explore', name: 'Matching Index Recall', key: '$.MatchingIndexRecall' },
       ],
       status: {},
     };
