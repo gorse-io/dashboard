@@ -54,8 +54,8 @@
                     <d-button-group>
                       <d-button size="small" outline @click="list_user_neighbors(user.UserId)">Neighbors</d-button>
                       <d-button size="small" outline @click="list_user_recommend(user.UserId)">Insight</d-button>
-                      <d-button size="small" theme="danger" outline
-                        @click="open_delete_user_dialog(user.UserId)">Delete</d-button>
+                      <d-button size="small" theme="danger" outline @click="open_delete_user_dialog(user.UserId)"><i
+                          class="material-icons">delete</i></d-button>
                     </d-button-group>
                   </td>
                 </tr>

@@ -55,25 +55,27 @@
           </div>
 
           <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
-            {{ item.Timestamp }}
+            {{ format_date_time(item.Timestamp) }}
           </p>
         </div>
       </div>
     </d-card-body>
 
-    <d-card-footer class="border-top">
-      <d-button-group class="mb-3">
+    <d-card-footer class="border-top" v-if="last_modified !== undefined">
+      <!-- <d-button-group class="mb-3">
         <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
             class="material-icons">arrow_back_ios</i></d-button>
         <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
             class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group>
+      </d-button-group> -->
+      <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
     </d-card-footer>
   </d-card>
 </template>
 
 <script>
 import axios from 'axios';
+import moment from 'moment';
 import utils from '@/utils';
 
 export default {
@@ -93,6 +95,7 @@ export default {
   data() {
     return {
       items: [],
+      last_modified: undefined,
       pageNumber: 0,
       categories: [''],
       recommender: this.recommenders[0],
@@ -115,6 +118,7 @@ export default {
     })
       .then((response) => {
         this.items = response.data === null ? [] : response.data;
+        this.last_modified = response.headers['last-modified'];
       });
   },
   computed: {
@@ -146,6 +150,7 @@ export default {
       })
         .then((response) => {
           this.items = response.data === null ? [] : response.data;
+          this.last_modified = response.headers['last-modified'];
         });
     },
     changeCategory(value) {
@@ -160,9 +165,16 @@ export default {
       })
         .then((response) => {
           this.items = response.data === null ? [] : response.data;
+          this.last_modified = response.headers['last-modified'];
         });
     },
     fold: utils.fold,
+    format_date_time(timestamp) {
+      if (timestamp === '') {
+        return '';
+      }
+      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
+    },
   },
 };
 </script>

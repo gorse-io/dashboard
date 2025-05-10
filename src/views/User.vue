@@ -41,7 +41,7 @@
           <div class="card-header border-bottom">
             <h6 class="m-0">User to User</h6>
           </div>
-          <div class="card-body p-0 pb-3">
+          <div class="card-body p-0">
             <table class="table mb-0">
               <thead class="bg-light">
                 <tr>
@@ -66,12 +66,15 @@
                       name: 'recommend',
                       params: { user_id: user.UserId },
                     }">
-                      <d-button size="small" outline>Insight</d-button>
+                      <d-button size="small" outline><i class="material-icons">visibility</i></d-button>
                     </router-link>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="card-footer border-top" v-if="last_modified !== undefined">
+            <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
           </div>
         </div>
       </div>
@@ -88,6 +91,7 @@ export default {
     return {
       user_id: null,
       users: [],
+      last_modified: undefined,
       current_user: null,
     };
   },
@@ -100,6 +104,7 @@ export default {
       url: `/api/dashboard/user-to-user/neighbors/${this.user_id}`,
     }).then((response) => {
       this.users = response.data;
+      this.last_modified = response.headers['last-modified'];
     });
     axios({
       method: 'get',

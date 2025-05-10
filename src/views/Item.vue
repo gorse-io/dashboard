@@ -126,6 +126,9 @@
               </tbody>
             </table>
           </div>
+          <div class="card-footer border-top" v-if="last_modified !== undefined">
+            <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -142,6 +145,7 @@ export default {
     return {
       item_id: null,
       items: [],
+      last_modified: undefined,
       current_item: null,
       recommenders: ['neighbors'],
       recommender: 'neighbors',
@@ -158,6 +162,7 @@ export default {
       url: `/api/dashboard/item-to-item/${this.recommender}/${this.item_id}`,
     }).then((response) => {
       this.items = response.data;
+      this.last_modified = response.headers['last-modified'];
     });
     axios({
       method: 'get',
@@ -200,6 +205,7 @@ export default {
         },
       }).then((response) => {
         this.items = response.data;
+        this.last_modified = response.headers['last-modified'];
       });
     },
     changeCategory(event) {
@@ -212,6 +218,7 @@ export default {
         },
       }).then((response) => {
         this.items = response.data;
+        this.last_modified = response.headers['last-modified'];
       });
     },
     fold: utils.fold,
