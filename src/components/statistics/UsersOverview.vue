@@ -7,6 +7,30 @@
     </d-card-header>
 
     <d-card-body class="pt-0">
+      <d-row class="border-bottom py-2 bg-light">
+
+        <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
+          <d-input-group size="sm" class="date-range d-flex justify-content-right">
+            <d-datepicker v-model="dateRange.from"
+              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" placeholder="Start Date" typeable
+              small />
+            <d-datepicker v-model="dateRange.to" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
+              placeholder="End Date" typeable small />
+            <d-input-group-text slot="append">
+              <i class="material-icons">&#xE916;</i>
+            </d-input-group-text>
+          </d-input-group>
+        </d-col>
+
+        <d-col col sm="6">
+          <d-input-group size="sm" class="d-flex btn-white ml-auto mr-auto ml-sm-auto mr-sm-0 mt-3 mt-sm-0">
+            <d-select :value="timeseries">
+              <option :value="timeseries">{{ timeseries.title }}</option>
+            </d-select>
+          </d-input-group>
+        </d-col>
+
+      </d-row>
       <!-- Legend & Chart -->
       <div ref="legend"></div>
       <canvas height="80" ref="canvas" style="max-width: 100% !important"></canvas>
@@ -17,41 +41,48 @@
 <script>
 import axios from 'axios';
 import Chart from '../../utils/chart';
+import { value } from 'jsonpath';
 
 const moment = require('moment');
-
-const defaultChartData = {
-  labels: Array.from(new Array(30), (_, i) =>
-    moment()
-      .subtract(30 - i, 'days')
-      .format('MM/DD')),
-  datasets: [],
-};
-
-const colors = [
-  '#2196f3',
-  '#f44336',
-  '#ffeb3b',
-  '#4caf50',
-  '#009688',
-  '#e91e63',
-  '#ff9800',
-  '#8bc34a',
-  '#9c27b0',
-  '#795548',
-];
 
 export default {
   name: 'users-overview',
   props: {
     title: {
       type: String,
-      default: 'Positive Feedback Rate',
+      default: 'Recommendation Performance',
     },
     chartData: {
       type: Object,
       default() {
-        return defaultChartData;
+        return {
+          labels: [],
+          datasets: [{
+            label: 'Current Duration',
+            fill: 'start',
+            data: [],
+            backgroundColor: 'rgba(0,123,255,0.1)',
+            borderColor: 'rgba(0,123,255,1)',
+            pointBackgroundColor: '#ffffff',
+            pointHoverBackgroundColor: 'rgb(0,123,255)',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            pointHoverRadius: 3,
+          }/*, {
+            label: 'Past Duration',
+            fill: 'start',
+            data: [],
+            backgroundColor: 'rgba(255,65,105,0.1)',
+            borderColor: 'rgba(255,65,105,1)',
+            pointBackgroundColor: '#ffffff',
+            pointHoverBackgroundColor: 'rgba(255,65,105,1)',
+            borderDash: [3, 3],
+            borderWidth: 1,
+            pointRadius: 0,
+            pointHoverRadius: 2,
+            pointBorderColor: 'rgba(255,65,105,1)',
+          }*/],
+        };
       },
     },
   },
@@ -61,59 +92,40 @@ export default {
         from: null,
         to: null,
       },
+      timeseries: {
+        name: 'cf_ndcg',
+        title: 'Collaborative Filtering - NDCG',
+      },
     };
   },
   mounted() {
-    // load click-through rate
-    let i = 0;
+    const currentEnd = moment();
+    const currentBegin = currentEnd.clone().subtract(7, 'days');
     axios({
       method: 'get',
-      url: '/api/dashboard/rates',
-      params: { n: 30 },
-    }).then((response) => {
-      this.chartData.datasets = [];
-      // eslint-disable-next-line no-restricted-syntax
-      for (const [key, value] of (Object.entries(response.data))) {
-        const color = colors[i];
-        this.chartData.datasets.push({
-          label: key,
-          fill: 'start',
-          data: value.map(x => x.Value).reverse(),
-          backgroundColor: this.hexToRgba(color, 0),
-          borderColor: this.hexToRgba(color, 1),
-          pointBackgroundColor: '#ffffff',
-          pointHoverBackgroundColor: this.hexToRgba(color),
-          borderWidth: 1.5,
-          pointRadius: 0,
-          pointHoverRadius: 3,
-        });
-        if (i === 0) {
-          this.chartData.labels = value.map(x =>
-            moment(x.Timestamp)
-              .format('MM/DD'))
-            .reverse();
-        }
-        i += 1;
-      }
+      url: `/api/dashboard/timeseries/cf_ndcg?begin=${currentBegin.toISOString()}&end=${currentEnd.toISOString()}`,
+    })
+      .then((response) => {
+        this.chartData.labels = response.data.map(item => moment(item.Timestamp).format('MMM DD HH:mm'));
+        this.chartData.datasets[0].data = response.data.map(item => Number(item.Value).toFixed(5));
 
-      const chartOptions = {
-        ...{
-          responsive: true,
-          legend: {
-            position: 'top',
-          },
-          elements: {
-            line: {
-              // A higher value makes the line look skewed at this ratio.
-              tension: 0.3,
+        const chartOptions = {
+          ...{
+            responsive: true,
+            legend: {
+              position: 'top',
             },
-            point: {
-              radius: 0,
+            elements: {
+              line: {
+                // A higher value makes the line look skewed at this ratio.
+                tension: 0.3,
+              },
+              point: {
+                radius: 0,
+              },
             },
-          },
-          scales: {
-            xAxes: [
-              {
+            scales: {
+              xAxes: [{
                 gridLines: false,
                 ticks: {
                   callback(tick, index) {
@@ -121,12 +133,10 @@ export default {
                     return index % 7 !== 0 ? '' : tick;
                   },
                 },
-              },
-            ],
-            yAxes: [
-              {
+              }],
+              yAxes: [{
                 ticks: {
-                  suggestedMax: 1.0,
+                  suggestedMax: Math.max(...this.chartData.datasets[0].data),
                   callback(tick) {
                     if (tick === 0) {
                       return tick;
@@ -135,53 +145,35 @@ export default {
                     return tick > 999 ? `${(tick / 1000).toFixed(1)}K` : tick;
                   },
                 },
-              },
-            ],
+              }],
+            },
+            hover: {
+              mode: 'nearest',
+              intersect: false,
+            },
+            tooltips: {
+              custom: false,
+              mode: 'nearest',
+              intersect: false,
+            },
           },
-          hover: {
-            mode: 'nearest',
-            intersect: false,
-          },
-          tooltips: {
-            custom: false,
-            mode: 'nearest',
-            intersect: false,
-          },
-        },
-        ...this.chartOptions,
-      };
+          ...this.chartOptions,
+        };
 
-      const BlogUsersOverview = new Chart(this.$refs.canvas, {
-        type: 'LineWithLine',
-        data: this.chartData,
-        options: chartOptions,
+        const BlogUsersOverview = new Chart(this.$refs.canvas, {
+          type: 'LineWithLine',
+          data: this.chartData,
+          options: chartOptions,
+        });
+
+        // They can still be triggered on hover.
+        const buoMeta = BlogUsersOverview.getDatasetMeta(0);
+        buoMeta.data[0]._model.radius = 0;
+        buoMeta.data[this.chartData.datasets[0].data.length - 1]._model.radius = 0;
+
+        // Render the chart.
+        BlogUsersOverview.render();
       });
-
-      // They can still be triggered on hover.
-      const buoMeta = BlogUsersOverview.getDatasetMeta(0);
-      buoMeta.data[0]._model.radius = 0;
-      buoMeta.data[
-        this.chartData.datasets[0].data.length - 1
-      ]._model.radius = 0;
-
-      // Render the chart.
-      BlogUsersOverview.render();
-    });
-  },
-  methods: {
-    hexToRgba(hex, a = null) {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      if (result == null) {
-        return null;
-      }
-      const r = parseInt(result[1], 16);
-      const g = parseInt(result[2], 16);
-      const b = parseInt(result[3], 16);
-      if (a == null) {
-        return `rgb(${r},${g},${b})`;
-      }
-      return `rgba(${r},${g},${b},${a})`;
-    },
   },
 };
 </script>
