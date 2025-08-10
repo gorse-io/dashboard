@@ -24,12 +24,8 @@
     </d-row>
 
     <d-row>
-      <d-col lg="8" md="12" sm="12" class="mb-4">
+      <d-col lg="12" md="12" sm="12" class="mb-4">
         <bo-top-items :recommenders="nonPersonalized" />
-      </d-col>
-
-      <d-col lg="4" md="12" sm="12" class="mb-4">
-        <bo-users-by-device />
       </d-col>
     </d-row>
   </d-container>
@@ -42,7 +38,7 @@ import CategorizedItems from '@/components/common/CategorizedItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
 import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
 
-const timeseriesName = ["num_users", "num_items", "num_feedback", "num_pos_feedbacks", "num_neg_feedbacks"];
+const timeseriesName = ['num_users', 'num_items', 'num_feedback', 'num_pos_feedbacks', 'num_neg_feedbacks'];
 
 export default {
   components: {
@@ -60,7 +56,7 @@ export default {
       timeseriesValues: new Array(timeseriesName.length).fill('0'),
       timeseriesPercentages: new Array(timeseriesName.length).fill('0'),
       timeseriesIncrease: new Array(timeseriesName.length).fill(true),
-    }
+    };
   },
   mounted() {
     // load config
@@ -100,7 +96,7 @@ export default {
           return false;
         });
         this.timeseriesUpdate = false;
-      }))
+      }));
   },
   computed: {
     smallStats() {
@@ -130,7 +126,7 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgba(23,198,113,0.1)',
           borderColor: 'rgb(23,198,113)',
-          data: this.timeseriesData[1]
+          data: this.timeseriesData[1],
         }],
       }, {
         label: 'Feedback',
@@ -145,7 +141,7 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgba(255,180,0,0.1)',
           borderColor: 'rgb(255,180,0)',
-          data: this.timeseriesData[2]
+          data: this.timeseriesData[2],
         }],
       }, {
         label: 'Positive Feedback',
@@ -160,7 +156,7 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgba(255,65,105,0.1)',
           borderColor: 'rgb(255,65,105)',
-          data: this.timeseriesData[3]
+          data: this.timeseriesData[3],
         }],
       }, {
         label: 'Negative Feedback',
@@ -175,7 +171,7 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgb(0,123,255,0.1)',
           borderColor: 'rgb(0,123,255)',
-          data: this.timeseriesData[4]
+          data: this.timeseriesData[4],
         }],
       }];
     },
