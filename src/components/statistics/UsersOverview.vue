@@ -7,6 +7,27 @@
     </d-card-header>
 
     <d-card-body class="pt-0">
+      <d-row class="border-bottom py-2 bg-light">
+
+        <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
+          <d-input-group size="sm" class="date-range d-flex justify-content-right">
+            <d-datepicker v-model="dateRange.from"
+              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" placeholder="Start Date" typeable
+              small />
+            <d-datepicker v-model="dateRange.to" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
+              placeholder="End Date" typeable small />
+            <d-input-group-text slot="append">
+              <i class="material-icons">&#xE916;</i>
+            </d-input-group-text>
+          </d-input-group>
+        </d-col>
+
+        <d-col col sm="6">
+          <d-button size="sm" class="d-flex btn-white ml-auto mr-auto ml-sm-auto mr-sm-0 mt-3 mt-sm-0">View Full Report
+            &rarr;</d-button>
+        </d-col>
+
+      </d-row>
       <!-- Legend & Chart -->
       <div ref="legend"></div>
       <canvas height="80" ref="canvas" style="max-width: 100% !important"></canvas>

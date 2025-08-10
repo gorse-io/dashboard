@@ -9,7 +9,7 @@
     </d-row>
 
     <!-- Small Stats Blocks -->
-    <d-row>
+    <d-row v-if="!timeseriesUpdate">
       <d-col lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
         <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label"
           :value="stats.value" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" />
@@ -42,7 +42,7 @@ import CategorizedItems from '@/components/common/CategorizedItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
 import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
 
-const numeral = require('numeral');
+const timeseriesName = ["num_users", "num_items", "num_feedback", "num_pos_feedbacks", "num_neg_feedbacks"];
 
 export default {
   components: {
@@ -55,6 +55,11 @@ export default {
     return {
       cacheSize: 100,
       nonPersonalized: ['popular', 'latest'],
+      timeseriesUpdate: false,
+      timeseriesData: new Array(timeseriesName.length).fill([]),
+      timeseriesValues: new Array(timeseriesName.length).fill('0'),
+      timeseriesPercentages: new Array(timeseriesName.length).fill('0'),
+      timeseriesIncrease: new Array(timeseriesName.length).fill(true),
     }
   },
   mounted() {
@@ -72,25 +77,38 @@ export default {
       });
 
     // load status
-    axios({
+    this.timeseriesUpdate = true;
+    const requests = timeseriesName.map(name => axios({
       method: 'get',
-      url: '/api/dashboard/stats',
-    })
-      .then((response) => {
-        this.smallStats[0].value = numeral(response.data.NumUsers).format('0,0');
-        this.smallStats[1].value = numeral(response.data.NumItems).format('0,0');
-        this.smallStats[2].value = numeral(response.data.NumTotalPosFeedback).format('0,0');
-        this.smallStats[3].value = numeral(response.data.NumValidPosFeedback).format('0,0');
-        this.smallStats[4].value = numeral(response.data.NumValidNegFeedback).format('0,0');
-      });
+      url: `/api/dashboard/timeseries/${name}`,
+    }));
+    axios.all(requests)
+      .then(axios.spread((...responses) => {
+        this.timeseriesData = responses.map(response => response.data.map(item => item.Value));
+        this.timeseriesValues = this.timeseriesData.map((item) => {
+          if (item.length === 0) return '0';
+          return item[item.length - 1].toLocaleString();
+        });
+        this.timeseriesPercentages = this.timeseriesData.map((item) => {
+          if (item.length < 2) return '0';
+          const last = item[item.length - 1];
+          const prev = item[item.length - 2];
+          return last - prev;
+        });
+        this.timeseriesIncrease = this.timeseriesIncrease.map((item, idx) => {
+          if (this.timeseriesPercentages[idx] >= 0) return true;
+          return false;
+        });
+        this.timeseriesUpdate = false;
+      }))
   },
   computed: {
     smallStats() {
       return [{
-        label: 'Posts',
-        value: '2,390',
-        percentage: '4.7%',
-        increase: true,
+        label: 'Users',
+        value: this.timeseriesValues[0],
+        percentage: this.timeseriesPercentages[0],
+        increase: this.timeseriesIncrease[0],
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
@@ -98,13 +116,13 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgba(0, 184, 216, 0.1)',
           borderColor: 'rgb(0, 184, 216)',
-          data: [1, 2, 1, 3, 5, 4, 7],
+          data: this.timeseriesData[0],
         }],
       }, {
-        label: 'Pages',
-        value: '182',
-        percentage: '12.4',
-        increase: true,
+        label: 'Items',
+        value: this.timeseriesValues[1],
+        percentage: this.timeseriesPercentages[1],
+        increase: this.timeseriesIncrease[1],
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
@@ -112,14 +130,14 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgba(23,198,113,0.1)',
           borderColor: 'rgb(23,198,113)',
-          data: [1, 2, 3, 3, 3, 4, 4],
+          data: this.timeseriesData[1]
         }],
       }, {
-        label: 'Comments',
-        value: '8,147',
-        percentage: '3.8%',
-        increase: false,
-        decrease: true,
+        label: 'Feedback',
+        value: this.timeseriesValues[2],
+        percentage: this.timeseriesPercentages[2],
+        increase: this.timeseriesIncrease[2],
+        decrease: !this.timeseriesIncrease[2],
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
@@ -127,14 +145,14 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgba(255,180,0,0.1)',
           borderColor: 'rgb(255,180,0)',
-          data: [2, 3, 3, 3, 4, 3, 3],
+          data: this.timeseriesData[2]
         }],
       }, {
-        label: 'New Customers',
-        value: '29',
-        percentage: '2.71%',
-        increase: false,
-        decrease: true,
+        label: 'Positive Feedback',
+        value: this.timeseriesValues[3],
+        percentage: this.timeseriesPercentages[3],
+        increase: this.timeseriesIncrease[3],
+        decrease: !this.timeseriesIncrease[3],
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
@@ -142,14 +160,14 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgba(255,65,105,0.1)',
           borderColor: 'rgb(255,65,105)',
-          data: [1, 7, 1, 3, 1, 4, 8],
+          data: this.timeseriesData[3]
         }],
       }, {
-        label: 'Subscribers',
-        value: '17,281',
-        percentage: '2.4%',
-        increase: false,
-        decrease: true,
+        label: 'Negative Feedback',
+        value: this.timeseriesValues[4],
+        percentage: this.timeseriesPercentages[4],
+        increase: this.timeseriesIncrease[4],
+        decrease: !this.timeseriesIncrease[4],
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
@@ -157,7 +175,7 @@ export default {
           borderWidth: 1.5,
           backgroundColor: 'rgb(0,123,255,0.1)',
           borderColor: 'rgb(0,123,255)',
-          data: [3, 2, 3, 2, 4, 5, 4],
+          data: this.timeseriesData[4]
         }],
       }];
     },
