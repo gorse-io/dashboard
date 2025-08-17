@@ -8,41 +8,34 @@
 
     <d-card-body class="p-0">
       <!-- Top Referrals List Group -->
-      <div
-        v-for="(item, idx) in pageItems"
-        :key="idx"
-        class="blog-comments__item d-flex p-3"
-      >
+      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
         <!-- Content -->
         <div class="blog-comments__content">
           <!-- Content - Title -->
           <div class="blog-comments__meta text-muted">
-            {{ item.ItemId }}
+            {{ item.Item.ItemId }}
+            <d-badge outline pill theme="secondary" class="float-right">
+              {{ item.FeedbackType + (item.Value > 0 ? '' + item.Value : '') }}
+            </d-badge>
           </div>
 
           <!-- Content - Body -->
           <p class="m-0 my-1 mb-2 text-muted text-semibold">
-            {{ item.Comment }}
+            {{ item.Item.Comment }}
           </p>
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
-            <d-badge
-              outline
-              v-for="(label, idx) in item.Categories"
-              :key="idx"
-            >
+            <d-badge outline v-for="(label, idx) in item.Item.Categories" :key="idx">
               {{ label }}
             </d-badge>
-            <span style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-              {{ fold(item.Labels) }}
+            <span
+              style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+              {{ fold(item.Item.Labels) }}
             </span>
           </div>
 
-          <p
-            class="m-0 my-0 mb-0 text-muted text-semibold"
-            style="font-size: 80%"
-          >
+          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
             {{ item.Timestamp }}
           </p>
         </div>
@@ -51,18 +44,10 @@
 
     <d-card-footer class="border-top">
       <d-button-group class="mb-3">
-        <d-button
-          class="btn-white"
-          @click="prevPage"
-          v-if="this.pageNumber !== 0"
-          ><i class="material-icons">arrow_back_ios</i></d-button
-        >
-        <d-button
-          class="btn-white"
-          @click="nextPage"
-          v-if="this.pageNumber + 1 !== pageCount"
-          ><i class="material-icons">arrow_forward_ios</i></d-button
-        >
+        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
+            class="material-icons">arrow_back_ios</i></d-button>
+        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
+            class="material-icons">arrow_forward_ios</i></d-button>
       </d-button-group>
     </d-card-footer>
   </d-card>
