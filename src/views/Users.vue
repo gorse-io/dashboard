@@ -52,8 +52,10 @@
                   <td>{{ format_date_time(user.LastUpdateTime) }}</td>
                   <td>
                     <d-button-group>
-                      <d-button size="small" outline @click="list_user_neighbors(user.UserId)">Neighbors</d-button>
-                      <d-button size="small" outline @click="list_user_recommend(user.UserId)">Insight</d-button>
+                      <d-button size="small" outline @click="list_user_neighbors(user.UserId)"><i
+                          class="material-icons">visibility</i></d-button>
+                      <d-button size="small" outline @click="list_user_recommend(user.UserId)"><i
+                          class="material-icons">favorite</i></d-button>
                       <d-button size="small" theme="danger" outline @click="open_delete_user_dialog(user.UserId)"><i
                           class="material-icons">delete</i></d-button>
                     </d-button-group>

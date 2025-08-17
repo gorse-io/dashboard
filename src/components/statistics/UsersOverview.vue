@@ -96,32 +96,47 @@ export default {
       timeseries: {
         name: 'cf_ndcg',
         title: 'Collaborative Filtering - NDCG',
+        label: 'NDCG',
       },
       timeseriesOptions: [
         {
           name: 'cf_ndcg',
           title: 'Collaborative Filtering - NDCG',
+          label: 'NDCG',
         },
         {
           name: 'cf_precision',
           title: 'Collaborative Filtering - Precision',
+          label: 'Precision',
         },
         {
           name: 'cf_recall',
           title: 'Collaborative Filtering - Recall',
+          label: 'Recall',
         },
         {
           name: 'ctr_auc',
           title: 'Click-Through Rate - AUC',
-        }
+          label: 'AUC',
+        },
+        {
+          name: 'ctr_precision',
+          title: 'Click-Through Rate - Precision',
+          label: 'Precision',
+        },
+        {
+          name: 'ctr_recall',
+          title: 'Click-Through Rate - Recall',
+          label: 'Recall',
+        },
       ],
     };
   },
   mounted() {
-    this.plot(this.timeseries.name);
+    this.plot(this.timeseries.name, this.timeseries.label);
   },
   methods: {
-    plot(name) {
+    plot(name, label) {
       const currentEnd = moment();
       const currentBegin = currentEnd.clone().subtract(7, 'days');
       axios({
@@ -131,6 +146,7 @@ export default {
         .then((response) => {
           this.chartData.labels = response.data.map(item => moment(item.Timestamp).format('MMM DD HH:mm'));
           this.chartData.datasets[0].data = response.data.map(item => Number(item.Value).toFixed(5));
+          this.chartData.datasets[0].label = label;
 
           const chartOptions = {
             ...{
@@ -200,7 +216,7 @@ export default {
     },
     changeTimeseries(value) {
       this.timeseries = value;
-      this.plot(value.name);
+      this.plot(value.name, value.label);
     },
   },
 };

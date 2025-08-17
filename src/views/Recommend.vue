@@ -10,7 +10,7 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Positive Feedback'" :items="feedback" />
+        <bo-top-items :title="'Feedback'" :items="feedback" />
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
@@ -65,9 +65,7 @@ export default {
           const feedbackItems = [];
           responses.forEach((r) => {
             r.data.forEach((feedback) => {
-              const item = feedback.Item;
-              item.Timestamp = feedback.Timestamp;
-              feedbackItems.push(feedback.Item);
+              feedbackItems.push(feedback);
             });
           });
           this.feedback = feedbackItems.sort((a, b) => ((a.Timestamp < b.Timestamp) ? 1 : -1));
