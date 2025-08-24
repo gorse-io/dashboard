@@ -68,7 +68,7 @@ export default new Router({
       component: Settings,
     },
     {
-      path: '/recommend',
+      path: '/recommend/:user_id',
       name: 'recommend',
       component: Recommend,
     },
