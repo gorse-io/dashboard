@@ -17,8 +17,7 @@
           <a class="nav-link text-nowrap px-3" :class="{ 'dropdown-toggle': userInfo.auth_type.length === 0 }"
             v-d-toggle.user-actions>
             <img class="user-avatar rounded-circle mr-2"
-              :src="userInfo.picture.length > 0 ? userInfo.picture : `https://api.multiavatar.com/${userInfo.name}.png`"
-              alt="User Avatar">
+              :src="userInfo.picture.length > 0 ? userInfo.picture : getAvatar(userInfo.name)" alt="User Avatar">
             <span class="d-none d-md-inline-block">{{ userInfo.name }}</span>
           </a>
           <d-collapse v-if="userInfo.auth_type.length === 0" id="user-actions"
@@ -36,6 +35,7 @@
 
 <script>
 import axios from 'axios';
+import multiavatar from '@multiavatar/multiavatar'
 
 export default {
   components: {
@@ -61,7 +61,6 @@ export default {
       url: '/api/dashboard/userinfo',
     }).then((response) => {
       this.userInfo = response.data;
-      console.log(response.data);
     });
     axios({
       method: 'get',
@@ -70,6 +69,17 @@ export default {
       this.chat = response.data.openai.base_url.length > 0;
     });
   },
+  methods: {
+    getAvatar(name) {
+      const svgCode = multiavatar(name);
+      const parser = new DOMParser();
+      const svg = parser.parseFromString(svgCode, 'image/svg+xml');
+      svg.documentElement.setAttribute('width', '100');
+      svg.documentElement.setAttribute('height', '100');
+      const encodedSvg = encodeURIComponent(svg.documentElement.outerHTML);
+      return `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
+    }
+  }
 };
 </script>
 
