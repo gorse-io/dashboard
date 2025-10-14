@@ -14,10 +14,7 @@
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
-
-        <bo-user-recommend :user_id="user_id" />
-
-
+        <bo-user-recommend :user_id="user_id" :recommenders="recommenders" />
       </d-col>
     </d-row>
   </d-container>
@@ -40,6 +37,7 @@ export default {
       feedback: [],
       recommends: [],
       feedbackTypes: [],
+      recommenders: [''],
     };
   },
   created() {
@@ -70,6 +68,22 @@ export default {
           });
           this.feedback = feedbackItems.sort((a, b) => ((a.Timestamp < b.Timestamp) ? 1 : -1));
         }));
+
+        // List all recommenders
+        let recommenders = ['', 'latest', 'popular'];
+        response.data.recommend['non-personalized'].forEach((r) => {
+          recommenders.push(`non-personalized/${r.name}`);
+        });
+        response.data.recommend['item-to-item'].forEach((r) => {
+          recommenders.push(`item-to-item/${r.name}`);
+        });
+        response.data.recommend['user-to-user'].forEach((r) => {
+          recommenders.push(`user-to-user/${r.name}`);
+        });
+        response.data.recommend['external'].forEach((r) => {
+          recommenders.push(`external/${r.name}`);
+        });
+        this.recommenders = recommenders;
       });
   },
 };
