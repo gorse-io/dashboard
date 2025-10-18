@@ -7,15 +7,25 @@
     </d-card-header>
 
     <d-card-body class="p-0">
+      <div class="card-body border-bottom">
+        <d-select v-model="feedbackType" @change="selectType">
+          <option v-for="feedbaclType in types" :key="feedbaclType" :value="feedbaclType">
+            {{ feedbaclType }}
+          </option>
+        </d-select>
+      </div>
+    </d-card-body>
+
+    <d-card-body class="p-0">
       <!-- Top Referrals List Group -->
-      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
+      <div v-for="(item, idx) in items" :key="idx" class="blog-comments__item d-flex p-3">
         <!-- Content -->
         <div class="blog-comments__content">
           <!-- Content - Title -->
           <div class="blog-comments__meta text-muted">
             {{ item.Item.ItemId }}
             <d-badge outline pill theme="secondary" class="float-right">
-              {{ item.FeedbackType + (item.Value > 0 ? '' + item.Value : '') }}
+              {{ item.FeedbackType + (item.Value > 0 ? ' ' + item.Value : '') }}
             </d-badge>
           </div>
 
@@ -44,9 +54,9 @@
 
     <d-card-footer class="border-top">
       <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
+        <d-button class="btn-white" @click="prevPage" v-if="this.offset !== 0"><i
             class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
+        <d-button class="btn-white" @click="nextPage" v-if="this.items.length == this.pageSize"><i
             class="material-icons">arrow_forward_ios</i></d-button>
       </d-button-group>
     </d-card-footer>
@@ -54,6 +64,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import utils from '@/utils';
 
 export default {
@@ -62,6 +73,9 @@ export default {
     title: {
       type: String,
       default: '--',
+    },
+    user_id: {
+      default: '',
     },
     pageSize: {
       default: 10,
@@ -72,30 +86,48 @@ export default {
         return [];
       },
     },
+    types: {
+      type: Array,
+      default() {
+        return [];
+      },
+    },
   },
   data() {
     return {
-      pageNumber: 0,
+      offset: 0,
+      feedbackType: '',
     };
-  },
-  computed: {
-    pageCount() {
-      return this.items.length / this.pageSize;
-    },
-    pageItems() {
-      const start = this.pageNumber * this.pageSize;
-      const end = Math.min(start + this.pageSize, this.items.length);
-      return this.items.slice(start, end);
-    },
   },
   methods: {
     prevPage() {
-      this.pageNumber -= 1;
+      this.offset = this.offset - this.pageSize;
+      this.selectType(this.feedbackType);
     },
     nextPage() {
-      this.pageNumber += 1;
+      this.offset += this.pageSize;
+      this.selectType(this.feedbackType);
     },
     fold: utils.fold,
+    selectType(value) {
+      if (this.feedbackType !== value) {
+        this.offset = 0;
+        this.feedbackType = value;
+      }
+      axios({
+        method: 'get',
+        url: `/api/dashboard/user/${this.user_id}/feedback/${value}`,
+        params: {
+          offset: this.offset,
+          n: this.pageSize,
+        },
+      }).then((response) => {
+        this.items = response.data;
+      });
+    },
+  },
+  mounted() {
+    this.selectType(this.feedbackType);
   },
 };
 </script>
