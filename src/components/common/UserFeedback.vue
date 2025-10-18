@@ -9,8 +9,8 @@
     <d-card-body class="p-0">
       <div class="card-body border-bottom">
         <d-select v-model="feedbackType" @change="selectType">
-          <option v-for="feedbaclType in types" :key="feedbaclType" :value="feedbaclType">
-            {{ feedbaclType }}
+          <option v-for="feedbackType in types" :key="feedbackType" :value="feedbackType">
+            {{ feedbackType }}
           </option>
         </d-select>
       </div>
