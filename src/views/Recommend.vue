@@ -10,14 +10,11 @@
 
     <d-row>
       <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-top-items :title="'Feedback'" :items="feedback" />
+        <bo-user-feedback :title="'Feedback'" :user_id="user_id" :types="feedbackTypes" />
       </d-col>
 
       <d-col lg="6" md="12" sm="12" class="mb-4">
-
-        <bo-user-recommend :user_id="user_id" />
-
-
+        <bo-user-recommend :user_id="user_id" :recommenders="recommenders" />
       </d-col>
     </d-row>
   </d-container>
@@ -25,12 +22,12 @@
 
 <script>
 import axios from 'axios';
-import TopItems from '@/components/common/TopItemsCard.vue';
+import UserFeedback from '@/components/common/UserFeedback.vue';
 import UserRecommend from '@/components/common/UserRecommend.vue';
 
 export default {
   components: {
-    boTopItems: TopItems,
+    boUserFeedback: UserFeedback,
     boUserRecommend: UserRecommend,
   },
   data() {
@@ -40,6 +37,7 @@ export default {
       feedback: [],
       recommends: [],
       feedbackTypes: [],
+      recommenders: [''],
     };
   },
   created() {
@@ -53,23 +51,26 @@ export default {
     })
       .then((response) => {
         this.cacheSize = response.data.recommend.cache_size;
-        this.feedbackTypes = response.data.recommend.data_source.positive_feedback_types;
-        const requests = [];
-        this.feedbackTypes.forEach((feedbackType) => {
-          requests.push(axios({
-            method: 'get',
-            url: `/api/dashboard/user/${this.user_id}/feedback/${feedbackType}/`,
-          }));
+
+        // List all feedback types
+        this.feedbackTypes = [''].concat(response.data.recommend.data_source.positive_feedback_types).concat(
+          response.data.recommend.data_source.read_feedback_types);
+
+        // List all recommenders
+        let recommenders = ['', 'latest', 'popular'];
+        response.data.recommend['non-personalized'].forEach((r) => {
+          recommenders.push(`non-personalized/${r.name}`);
         });
-        axios.all(requests).then(axios.spread((...responses) => {
-          const feedbackItems = [];
-          responses.forEach((r) => {
-            r.data.forEach((feedback) => {
-              feedbackItems.push(feedback);
-            });
-          });
-          this.feedback = feedbackItems.sort((a, b) => ((a.Timestamp < b.Timestamp) ? 1 : -1));
-        }));
+        response.data.recommend['item-to-item'].forEach((r) => {
+          recommenders.push(`item-to-item/${r.name}`);
+        });
+        response.data.recommend['user-to-user'].forEach((r) => {
+          recommenders.push(`user-to-user/${r.name}`);
+        });
+        response.data.recommend['external'].forEach((r) => {
+          recommenders.push(`external/${r.name}`);
+        });
+        this.recommenders = recommenders;
       });
   },
 };

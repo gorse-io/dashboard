@@ -10,8 +10,8 @@
       <div class="card-body border-bottom">
         <d-row>
           <d-col sm="6"><d-select v-model="recommender" @change="changeRecommend">
-              <option v-for="option in options" :key="option.value" :value="option.value">
-                {{ option.text }}
+              <option v-for="recommend in recommenders" :key="recommend" :value="recommend">
+                {{ recommend }}
               </option>
             </d-select></d-col>
           <d-col sm="6"><d-input-group prepend="Categories" class="mb-3">
@@ -79,6 +79,10 @@ export default {
     user_id: {
       default: '',
     },
+    recommenders: {
+      type: Array,
+      default: () => [''],
+    },
   },
   data() {
     return {
@@ -88,13 +92,6 @@ export default {
       pageNumber: 0,
       recommender: '_',
       category: '',
-      options: [
-        { value: '_', text: 'Recommendation' },
-        { value: 'offline', text: 'Offline Recommendation' },
-        { value: 'collaborative', text: 'Collaborative Recommendation' },
-        { value: 'item_based', text: 'Item-based Recommendation' },
-        { value: 'user_based', text: 'User-based Recommendation' },
-      ],
     };
   },
   computed: {
@@ -117,20 +114,23 @@ export default {
     changeRecommend(value) {
       axios({
         method: 'get',
-        url: `/api/dashboard/recommend/${this.user_id}/${value}/${this.category}`,
+        url: `/api/dashboard/recommend/${this.user_id}/${value}`,
         params: {
           n: 100,
+          category: this.category,
         },
       }).then((response) => {
         this.items = response.data;
       });
     },
     changeCategory(value) {
+      console.log(this.recommender);
       axios({
         method: 'get',
-        url: `/api/dashboard/recommend/${this.user_id}/${this.recommender}/${value}`,
+        url: `/api/dashboard/recommend/${this.user_id}/${this.recommender}`,
         params: {
           n: 100,
+          category: value,
         },
       }).then((response) => {
         this.items = response.data;
