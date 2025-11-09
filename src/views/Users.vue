@@ -33,6 +33,7 @@
                 <tr>
                   <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Labels</th>
+                  <th scope="col" class="border-0">Description</th>
                   <th scope="col" class="border-0">Last Active</th>
                   <th scope="col" class="border-0">Last Update</th>
                   <th scope="col" class="border-0"></th>
@@ -48,6 +49,7 @@
                       {{ user.Labels }}
                     </span>
                   </td>
+                  <td>{{ user.Comment }}</td>
                   <td>{{ format_date_time(user.LastActiveTime) }}</td>
                   <td>{{ format_date_time(user.LastUpdateTime) }}</td>
                   <td>

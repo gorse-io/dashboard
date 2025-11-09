@@ -21,7 +21,7 @@
                     <input type="file" class="custom-file-input" id="csvFile" @change="loadFile" required />
                     <label class="custom-file-label" for="customFile2">{{
                       fileName
-                      }}</label>
+                    }}</label>
                     <d-form-invalid-feedback>Upload local csv file.</d-form-invalid-feedback>
                   </div>
                 </d-col>
@@ -75,6 +75,7 @@ export default {
         'FeedbackType',
         'UserId',
         'ItemId',
+        'Value',
         'Timestamp',
       ],
       rows: [],

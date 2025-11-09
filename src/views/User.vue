@@ -27,6 +27,14 @@
                     </div>
                   </d-col>
                 </d-row>
+                <d-row>
+                  <d-col sm="12" md="2">
+                    <label>Description</label>
+                  </d-col>
+                  <d-col sm="12" md="10">
+                    <label class="text-light">{{ current_user.Comment }}</label>
+                  </d-col>
+                </d-row>
               </d-list-group-item>
             </d-list-group>
           </div>
