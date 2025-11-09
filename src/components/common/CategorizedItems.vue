@@ -114,7 +114,7 @@ export default {
     });
     axios({
       method: 'get',
-      url: '/api/dashboard/non-personalized/popular/',
+      url: '/api/dashboard/latest',
       params: {
         end: this.cacheSize,
       },
@@ -145,7 +145,7 @@ export default {
       this.recommender = value;
       axios({
         method: 'get',
-        url: `/api/dashboard/non-personalized/${value}/`,
+        url: `/api/dashboard/${value}`,
         params: {
           category: this.category,
           end: this.cacheSize,
@@ -160,7 +160,7 @@ export default {
       this.category = value;
       axios({
         method: 'get',
-        url: `/api/dashboard/non-personalized/${this.recommender}/`,
+        url: `/api/dashboard/${this.recommender}`,
         params: {
           category: value,
           end: this.cacheSize,

@@ -50,7 +50,7 @@ export default {
   data() {
     return {
       cacheSize: 100,
-      nonPersonalized: ['popular', 'latest'],
+      nonPersonalized: ['latest'],
       timeseriesUpdate: false,
       timeseriesData: new Array(timeseriesName.length).fill([]),
       timeseriesValues: new Array(timeseriesName.length).fill('0'),
@@ -66,9 +66,9 @@ export default {
     })
       .then((response) => {
         this.cacheSize = response.data.database.cache_size;
-        this.nonPersonalized = ['popular', 'latest'];
+        this.nonPersonalized = ['latest'];
         response.data.recommend['non-personalized'].forEach((recommender) => {
-          this.nonPersonalized.push(recommender.name);
+          this.nonPersonalized.push(`non-personalized/${recommender.name}`);
         });
       });
 

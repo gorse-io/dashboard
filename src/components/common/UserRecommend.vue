@@ -90,7 +90,7 @@ export default {
       pageSize: 10,
       items: [],
       pageNumber: 0,
-      recommender: '_',
+      recommender: '',
       category: '',
     };
   },

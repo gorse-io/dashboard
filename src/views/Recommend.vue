@@ -57,19 +57,27 @@ export default {
           response.data.recommend.data_source.read_feedback_types);
 
         // List all recommenders
-        let recommenders = ['', 'latest', 'popular'];
-        response.data.recommend['non-personalized'].forEach((r) => {
-          recommenders.push(`non-personalized/${r.name}`);
-        });
-        response.data.recommend['item-to-item'].forEach((r) => {
-          recommenders.push(`item-to-item/${r.name}`);
-        });
-        response.data.recommend['user-to-user'].forEach((r) => {
-          recommenders.push(`user-to-user/${r.name}`);
-        });
-        response.data.recommend['external'].forEach((r) => {
-          recommenders.push(`external/${r.name}`);
-        });
+        let recommenders = ['', 'latest', 'collaborative'];
+        if (response.data.recommend['non-personalized']) {
+          response.data.recommend['non-personalized'].forEach((r) => {
+            recommenders.push(`non-personalized/${r.name}`);
+          });
+        }
+        if (response.data.recommend['item-to-item']) {
+          response.data.recommend['item-to-item'].forEach((r) => {
+            recommenders.push(`item-to-item/${r.name}`);
+          });
+        }
+        if (response.data.recommend['user-to-user']) {
+          response.data.recommend['user-to-user'].forEach((r) => {
+            recommenders.push(`user-to-user/${r.name}`);
+          });
+        }
+        if (response.data.recommend['external']) {
+          response.data.recommend['external'].forEach((r) => {
+            recommenders.push(`external/${r.name}`);
+          });
+        }
         this.recommenders = recommenders;
       });
   },
