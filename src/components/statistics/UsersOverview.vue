@@ -43,7 +43,6 @@
 import axios from 'axios';
 import moment from 'moment';
 import Chart from '../../utils/chart';
-import { value } from 'jsonpath';
 
 
 export default {
@@ -52,6 +51,10 @@ export default {
     title: {
       type: String,
       default: 'Recommendation Performance',
+    },
+    positiveFeedbackTypes: {
+      type: Array,
+      default: []
     },
     chartData: {
       type: Object,
@@ -94,56 +97,106 @@ export default {
         to: null,
       },
       timeseries: {
-        name: 'cf_ndcg',
-        title: 'Collaborative Filtering - NDCG',
-        label: 'NDCG',
+        name: 'positive_feedback_ratio',
+        title: 'Positive Feedback Ratio - All',
+        label: 'All',
       },
-      timeseriesOptions: [
-        {
-          name: 'cf_ndcg',
-          title: 'Collaborative Filtering - NDCG',
-          label: 'NDCG',
-        },
-        {
-          name: 'cf_precision',
-          title: 'Collaborative Filtering - Precision',
-          label: 'Precision',
-        },
-        {
-          name: 'cf_recall',
-          title: 'Collaborative Filtering - Recall',
-          label: 'Recall',
-        },
-        {
-          name: 'ctr_auc',
-          title: 'Click-Through Rate - AUC',
-          label: 'AUC',
-        },
-        {
-          name: 'ctr_precision',
-          title: 'Click-Through Rate - Precision',
-          label: 'Precision',
-        },
-        {
-          name: 'ctr_recall',
-          title: 'Click-Through Rate - Recall',
-          label: 'Recall',
-        },
-      ],
+      chartInstance: null,
+      plotRequestId: 0,
+      plotAbortController: null,
     };
   },
   mounted() {
     this.plot(this.timeseries.name, this.timeseries.label);
   },
+  beforeDestroy() {
+    if (this.plotAbortController) {
+      this.plotAbortController.abort();
+      this.plotAbortController = null;
+    }
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+      this.chartInstance = null;
+    }
+  },
+  computed: {
+    timeseriesOptions() {
+      const options = [
+        {
+          name: 'positive_feedback_ratio',
+          title: 'Positive Feedback Ratio - All',
+          label: 'All',
+        },
+      ];
+      if (this.positiveFeedbackTypes.length > 0) {
+        this.positiveFeedbackTypes.forEach((type) => {
+          options.push({
+            name: `positive_feedback_ratio_${type}`,
+            title: `Positive Feedback Ratio - ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+            label: type.charAt(0).toUpperCase() + type.slice(1),
+          });
+        });
+      }
+      options.push({
+        name: 'cf_ndcg',
+        title: 'Collaborative Filtering - NDCG',
+        label: 'NDCG',
+      });
+      options.push({
+        name: 'cf_precision',
+        title: 'Collaborative Filtering - Precision',
+        label: 'Precision',
+      });
+      options.push({
+        name: 'cf_recall',
+        title: 'Collaborative Filtering - Recall',
+        label: 'Recall',
+      });
+      options.push({
+        name: 'ctr_auc',
+        title: 'Click-Through Rate - AUC',
+        label: 'AUC',
+      });
+      options.push({
+        name: 'ctr_precision',
+        title: 'Click-Through Rate - Precision',
+        label: 'Precision',
+      });
+      options.push({
+        name: 'ctr_recall',
+        title: 'Click-Through Rate - Recall',
+        label: 'Recall',
+      });
+      return options;
+    },
+  },
   methods: {
     plot(name, label) {
+      this.plotRequestId += 1;
+      const requestId = this.plotRequestId;
+
+      if (this.plotAbortController) {
+        this.plotAbortController.abort();
+      }
+      this.plotAbortController = new AbortController();
+
+      if (this.chartInstance) {
+        this.chartInstance.destroy();
+        this.chartInstance = null;
+      }
+
       const currentEnd = moment();
       const currentBegin = currentEnd.clone().subtract(7, 'days');
       axios({
         method: 'get',
         url: `/api/dashboard/timeseries/${name}?begin=${currentBegin.toISOString()}&end=${currentEnd.toISOString()}`,
+        signal: this.plotAbortController.signal,
       })
         .then((response) => {
+          if (requestId !== this.plotRequestId) {
+            return;
+          }
+
           this.chartData.labels = response.data.map(item => moment(item.Timestamp).format('MMM DD HH:mm'));
           this.chartData.datasets[0].data = response.data.map(item => Number(item.Value).toFixed(5));
           this.chartData.datasets[0].label = label;
@@ -205,13 +258,25 @@ export default {
             options: chartOptions,
           });
 
+          this.chartInstance = BlogUsersOverview;
+
           // They can still be triggered on hover.
           const buoMeta = BlogUsersOverview.getDatasetMeta(0);
-          buoMeta.data[0]._model.radius = 0;
-          buoMeta.data[this.chartData.datasets[0].data.length - 1]._model.radius = 0;
+          if (buoMeta && buoMeta.data && buoMeta.data.length > 0) {
+            buoMeta.data[0]._model.radius = 0;
+            buoMeta.data[buoMeta.data.length - 1]._model.radius = 0;
+          }
 
           // Render the chart.
           BlogUsersOverview.render();
+        })
+        .catch((error) => {
+          // Ignore cancellations (switching timeseries quickly).
+          if (error && (error.name === 'CanceledError' || error.name === 'AbortError')) {
+            return;
+          }
+          // Swallow other errors to avoid breaking the dashboard UI.
+          // (Optional: hook into a toast/notification system if available.)
         });
     },
     changeTimeseries(value) {

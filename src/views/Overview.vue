@@ -19,7 +19,7 @@
     <d-row>
       <!-- Users Overview -->
       <d-col lg="12" md="12" sm="12" class="mb-4">
-        <bo-users-overview />
+        <bo-users-overview :positiveFeedbackTypes="positiveFeedbackTypes" />
       </d-col>
     </d-row>
 
@@ -56,6 +56,7 @@ export default {
       timeseriesValues: new Array(timeseriesName.length).fill('0'),
       timeseriesPercentages: new Array(timeseriesName.length).fill('0'),
       timeseriesIncrease: new Array(timeseriesName.length).fill(true),
+      positiveFeedbackTypes: []
     };
   },
   mounted() {
@@ -65,6 +66,7 @@ export default {
       url: '/api/dashboard/config',
     })
       .then((response) => {
+        this.positiveFeedbackTypes = response.data.recommend.data_source.positive_feedback_types;
         this.cacheSize = response.data.database.cache_size;
         this.nonPersonalized = ['latest'];
         response.data.recommend['non-personalized'].forEach((recommender) => {
