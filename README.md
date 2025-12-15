@@ -4,7 +4,7 @@
 
 An admin dashboard for gorse recommender system derived from [shards-dashboard-vue](https://github.com/DesignRevision/shards-dashboard-vue).
 
-![](assets/dashboard.jpeg)
+![](assets/dashboard.png)
 
 ## Quick Start
 
