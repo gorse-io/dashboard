@@ -56,7 +56,7 @@ export default {
       timeseriesValues: new Array(timeseriesName.length).fill('0'),
       timeseriesPercentages: new Array(timeseriesName.length).fill('0'),
       timeseriesIncrease: new Array(timeseriesName.length).fill(true),
-      positiveFeedbackTypes: []
+      positiveFeedbackTypes: [],
     };
   },
   mounted() {

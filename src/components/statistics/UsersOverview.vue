@@ -54,7 +54,7 @@ export default {
     },
     positiveFeedbackTypes: {
       type: Array,
-      default: []
+      default: [],
     },
     chartData: {
       type: Object,
@@ -72,7 +72,7 @@ export default {
             borderWidth: 1.5,
             pointRadius: 0,
             pointHoverRadius: 3,
-          }/*, {
+          }, /* , {
             label: 'Past Duration',
             fill: 'start',
             data: [],
@@ -85,7 +85,7 @@ export default {
             pointRadius: 0,
             pointHoverRadius: 2,
             pointBorderColor: 'rgba(255,65,105,1)',
-          }*/],
+          } */],
         };
       },
     },
@@ -273,7 +273,7 @@ export default {
         .catch((error) => {
           // Ignore cancellations (switching timeseries quickly).
           if (error && (error.name === 'CanceledError' || error.name === 'AbortError')) {
-            return;
+
           }
           // Swallow other errors to avoid breaking the dashboard UI.
           // (Optional: hook into a toast/notification system if available.)

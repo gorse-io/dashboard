@@ -35,7 +35,7 @@
 
 <script>
 import axios from 'axios';
-import multiavatar from '@multiavatar/multiavatar'
+import multiavatar from '@multiavatar/multiavatar';
 
 export default {
   components: {
@@ -78,8 +78,8 @@ export default {
       svg.documentElement.setAttribute('height', '100');
       const encodedSvg = encodeURIComponent(svg.documentElement.outerHTML);
       return `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
-    }
-  }
+    },
+  },
 };
 </script>
 
