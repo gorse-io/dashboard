@@ -53,11 +53,10 @@ export default {
         this.cacheSize = response.data.recommend.cache_size;
 
         // List all feedback types
-        this.feedbackTypes = [''].concat(response.data.recommend.data_source.positive_feedback_types).concat(
-          response.data.recommend.data_source.read_feedback_types);
+        this.feedbackTypes = [''].concat(response.data.recommend.data_source.positive_feedback_types).concat(response.data.recommend.data_source.read_feedback_types);
 
         // List all recommenders
-        let recommenders = ['', 'latest', 'collaborative'];
+        const recommenders = ['', 'latest', 'collaborative'];
         if (response.data.recommend['non-personalized']) {
           response.data.recommend['non-personalized'].forEach((r) => {
             recommenders.push(`non-personalized/${r.name}`);
@@ -73,8 +72,8 @@ export default {
             recommenders.push(`user-to-user/${r.name}`);
           });
         }
-        if (response.data.recommend['external']) {
-          response.data.recommend['external'].forEach((r) => {
+        if (response.data.recommend.external) {
+          response.data.recommend.external.forEach((r) => {
             recommenders.push(`external/${r.name}`);
           });
         }
