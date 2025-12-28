@@ -148,6 +148,7 @@ class IconNode extends HtmlNode {
     else if (nodeText.toLowerCase().includes('item to item')) iconName = 'apps';
     else if (nodeText.toLowerCase().includes('collaborative')) iconName = 'group_work';
     else if (nodeText.toLowerCase().includes('nonpersonalized')) iconName = 'public';
+    else if (nodeText.toLowerCase().includes('fallback')) iconName = 'history';
 
     const html = `
       <div class="card-body d-flex align-items-center p-2 shadow-sm rounded border bg-white" style="height: 50px; width: 220px;">
@@ -194,6 +195,11 @@ export default {
       grid: true,
       nodeTextEdit: false,
       edgeTextEdit: false,
+      style: {
+        bezier: {
+          strokeWidth: 1,
+        },
+      },
     });
 
     this.lf.register({
@@ -257,6 +263,8 @@ export default {
       },
       { id: '9', type: 'icon-node', text: 'User to User' },
       { id: '10', type: 'icon-node', text: 'Item to Item' },
+      { id: '11', type: 'icon-node', text: 'Ranker' },
+      { id: '12', type: 'icon-node', text: 'Fallback' },
     ];
 
     const edges = [
@@ -265,6 +273,12 @@ export default {
       { sourceNodeId: '1', targetNodeId: '8', type: 'bezier' },
       { sourceNodeId: '1', targetNodeId: '9', type: 'bezier' },
       { sourceNodeId: '1', targetNodeId: '10', type: 'bezier' },
+      { sourceNodeId: '6', targetNodeId: '11', type: 'bezier' },
+      { sourceNodeId: '7', targetNodeId: '11', type: 'bezier' },
+      { sourceNodeId: '8', targetNodeId: '11', type: 'bezier' },
+      { sourceNodeId: '9', targetNodeId: '11', type: 'bezier' },
+      { sourceNodeId: '10', targetNodeId: '11', type: 'bezier' },
+      { sourceNodeId: '12', targetNodeId: '11', type: 'bezier' },
     ];
 
     const layoutedData = this.layout(nodes, edges);
