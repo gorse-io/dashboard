@@ -5,12 +5,48 @@
       <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
         <h3 class="page-title">RecFlow Editor</h3>
       </div>
+      <div class="col-12 col-sm-8 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
+        <d-button theme="white" class="mr-2" @click="exportFlow">Export</d-button>
+        <d-button theme="primary" @click="saveFlow">Save</d-button>
+      </div>
     </div>
 
     <!-- LogicFlow Container -->
-    <div class="card card-small mb-4">
-      <div class="card-body p-0">
-        <div id="container" class="logic-flow-view"></div>
+    <div class="row">
+      <!-- Node Palette (Left Side) -->
+      <div class="col-md-2 mb-4">
+        <div class="card card-small h-100">
+          <div class="card-header border-bottom">
+            <h6 class="m-0">Components</h6>
+          </div>
+          <div class="card-body p-2">
+            <div 
+              class="d-flex align-items-center p-2 mb-2 border rounded bg-white draggable-node" 
+              style="cursor: grab;"
+              draggable="true" 
+              @dragstart="dragStart($event, 'User to User')">
+              <i class="material-icons mr-2 text-primary">people</i>
+              <span>User to User</span>
+            </div>
+            <div 
+              class="d-flex align-items-center p-2 mb-2 border rounded bg-white draggable-node" 
+              style="cursor: grab;"
+              draggable="true" 
+              @dragstart="dragStart($event, 'Item to Item')">
+              <i class="material-icons mr-2 text-primary">apps</i>
+              <span>Item to Item</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LogicFlow Canvas (Right Side) -->
+      <div class="col-md-10 mb-4">
+        <div class="card card-small h-100">
+          <div class="card-body p-0">
+            <div id="container" class="logic-flow-view" @drop="drop" @dragover.prevent></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -99,6 +135,49 @@
             </div>
           </template>
 
+          <!-- User to User Specific Properties -->
+          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.user_to_user">
+            <h6 class="border-bottom pb-2 mb-3">User to User Settings</h6>
+            <div v-for="(item, index) in nodeForm.properties.recommend.user_to_user" :key="index" class="mb-3 p-2 border rounded">
+              <div class="form-group">
+                <label>Name</label>
+                <d-input v-model="item.name" />
+              </div>
+              <div class="form-group">
+                <label>Type</label>
+                <d-select v-model="item.type">
+                  <option value="embedding">Embedding</option>
+                  <option value="tags">Tags</option>
+                  <option value="items">Items</option>
+                </d-select>
+              </div>
+            </div>
+          </template>
+
+          <!-- Item to Item Specific Properties -->
+          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.item_to_item">
+            <h6 class="border-bottom pb-2 mb-3">Item to Item Settings</h6>
+            <div v-for="(item, index) in nodeForm.properties.recommend.item_to_item" :key="index" class="mb-3 p-2 border rounded">
+              <div class="form-group">
+                <label>Name</label>
+                <d-input v-model="item.name" />
+              </div>
+              <div class="form-group">
+                <label>Type</label>
+                <d-select v-model="item.type">
+                  <option value="embedding">Embedding</option>
+                  <option value="tags">Tags</option>
+                  <option value="users">Users</option>
+                  <option value="chat">Chat</option>
+                </d-select>
+              </div>
+              <div class="form-group" v-if="item.type === 'embedding'">
+                <label>Column</label>
+                <d-input v-model="item.column" />
+              </div>
+            </div>
+          </template>
+
           <div class="text-right pt-3">
             <d-button type="button" theme="secondary" class="mr-2" @click="closeNodeModal">Cancel</d-button>
             <d-button type="submit" theme="primary">Save</d-button>
@@ -106,13 +185,36 @@
         </d-form>
       </d-modal-body>
     </d-modal>
+
+    <!-- Export Modal -->
+    <d-modal v-if="showExportModal" @close="showExportModal = false" centered>
+      <d-modal-header>
+        <d-modal-title>Export JSON</d-modal-title>
+      </d-modal-header>
+      <d-modal-body>
+        <d-textarea v-model="exportData" rows="15" class="w-100" style="font-family: monospace; font-size: 0.85rem;" />
+        <div class="mt-3 text-right">
+           <d-button class="mr-2" theme="white" @click="copyExportData">Copy</d-button>
+           <d-button theme="primary" @click="showExportModal = false">Close</d-button>
+        </div>
+      </d-modal-body>
+    </d-modal>
   </div>
 </template>
 
 <script>
-import LogicFlow, { HtmlNode, HtmlNodeModel } from '@logicflow/core';
+import LogicFlow, { HtmlNode, HtmlNodeModel, BezierEdge, BezierEdgeModel } from '@logicflow/core';
 import '@logicflow/core/dist/index.css';
 import dagre from 'dagre';
+
+class DashedEdgeModel extends BezierEdgeModel {
+  getEdgeStyle() {
+    const style = super.getEdgeStyle();
+    style.strokeDasharray = '5,5';
+    style.stroke = '#007bff';
+    return style;
+  }
+}
 
 class IconNodeModel extends HtmlNodeModel {
   setAttributes() {
@@ -166,6 +268,8 @@ export default {
     return {
       lf: null,
       showNodeModal: false,
+      showExportModal: false,
+      exportData: '',
       nodeForm: {
         id: '',
         text: '',
@@ -185,6 +289,12 @@ export default {
         if (this.nodeForm.properties.recommend.non_personalized) {
           return 'Edit Non-Personalized';
         }
+        if (this.nodeForm.properties.recommend.user_to_user) {
+          return 'Edit User to User';
+        }
+        if (this.nodeForm.properties.recommend.item_to_item) {
+          return 'Edit Item to Item';
+        }
       }
       return 'Edit Node';
     },
@@ -198,6 +308,7 @@ export default {
       style: {
         bezier: {
           strokeWidth: 1,
+          stroke: '#007bff',
         },
       },
     });
@@ -206,6 +317,12 @@ export default {
       type: 'icon-node',
       view: IconNode,
       model: IconNodeModel,
+    });
+
+    this.lf.register({
+      type: 'dashed-edge',
+      view: BezierEdge,
+      model: DashedEdgeModel,
     });
 
     const nodes = [
@@ -261,10 +378,40 @@ export default {
           }
         }
       },
-      { id: '9', type: 'icon-node', text: 'User to User' },
-      { id: '10', type: 'icon-node', text: 'Item to Item' },
+      { 
+        id: '9', 
+        type: 'icon-node', 
+        text: 'User to User',
+        properties: {
+          recommend: {
+            user_to_user: [
+              {
+                name: "neighbors",
+                type: "items"
+              }
+            ]
+          }
+        }
+      },
+      { 
+        id: '10', 
+        type: 'icon-node', 
+        text: 'Item to Item',
+        properties: {
+          recommend: {
+            item_to_item: [
+              {
+                name: "neighbors",
+                type: "embedding",
+                column: "item.Labels.embedding"
+              }
+            ]
+          }
+        }
+      },
       { id: '11', type: 'icon-node', text: 'Ranker' },
       { id: '12', type: 'icon-node', text: 'Fallback' },
+      { id: '13', type: 'icon-node', text: 'Recommend' },
     ];
 
     const edges = [
@@ -278,7 +425,9 @@ export default {
       { sourceNodeId: '8', targetNodeId: '11', type: 'bezier' },
       { sourceNodeId: '9', targetNodeId: '11', type: 'bezier' },
       { sourceNodeId: '10', targetNodeId: '11', type: 'bezier' },
-      { sourceNodeId: '12', targetNodeId: '11', type: 'bezier' },
+      { sourceNodeId: '11', targetNodeId: '13', type: 'bezier' },
+      { sourceNodeId: '12', targetNodeId: '13', type: 'bezier' },
+      { sourceNodeId: '6', targetNodeId: '12', type: 'dashed-edge' },
     ];
 
     const layoutedData = this.layout(nodes, edges);
@@ -295,7 +444,7 @@ export default {
   methods: {
     layout(nodes, edges) {
       const g = new dagre.graphlib.Graph();
-      g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 120 });
+      g.setGraph({ rankdir: 'LR', nodesep: 40, ranksep: 100 });
       g.setDefaultEdgeLabel(() => ({}));
 
       nodes.forEach((node) => {
@@ -344,6 +493,70 @@ export default {
         // The setHtml method reads from props.model which should be updated.
       }
       this.closeNodeModal();
+    },
+    exportFlow() {
+      const data = this.lf.getGraphData();
+      this.exportData = JSON.stringify(data, null, 2);
+      this.showExportModal = true;
+    },
+    copyExportData() {
+      const textarea = document.createElement('textarea');
+      textarea.value = this.exportData;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      alert('Copied to clipboard');
+    },
+    saveFlow() {
+      const data = this.lf.getGraphData();
+      console.log('Saving flow:', data);
+    },
+    dragStart(e, type) {
+      e.dataTransfer.setData('type', type);
+    },
+    drop(e) {
+      e.preventDefault();
+      const type = e.dataTransfer.getData('type');
+      if (type) {
+        const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY);
+        const newNode = {
+          type: 'icon-node',
+          x,
+          y,
+          text: type,
+          properties: {}
+        };
+
+        if (type === 'User to User') {
+          newNode.properties = {
+            recommend: {
+              user_to_user: [
+                {
+                  name: "neighbors",
+                  type: "items"
+                }
+              ]
+            }
+          };
+        } else if (type === 'Item to Item') {
+          newNode.properties = {
+            recommend: {
+              item_to_item: [
+                {
+                  name: "neighbors",
+                  type: "embedding",
+                  column: "item.Labels.embedding"
+                }
+              ]
+            }
+          };
+        }
+        
+        // Generate a random ID
+        newNode.id = Math.random().toString(36).substr(2, 9);
+        this.lf.addNode(newNode);
+      }
     },
   },
 };
