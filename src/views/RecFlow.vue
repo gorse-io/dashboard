@@ -412,6 +412,9 @@ export default {
       grid: true,
       nodeTextEdit: false,
       edgeTextEdit: false,
+      keyboard: {
+        enabled: true,
+      },
       style: {
         bezier: {
           strokeWidth: 1,
@@ -700,13 +703,19 @@ export default {
     },
     updateNode() {
       if (this.nodeForm.id) {
+        // Sync text from name for relevant types
+        const rec = this.nodeForm.properties.recommend;
+        if (rec) {
+          if (rec.user_to_user && rec.user_to_user.length > 0) {
+            this.nodeForm.text = rec.user_to_user[0].name;
+          } else if (rec.item_to_item && rec.item_to_item.length > 0) {
+            this.nodeForm.text = rec.item_to_item[0].name;
+          } else if (rec.non_personalized && rec.non_personalized.length > 0) {
+            this.nodeForm.text = rec.non_personalized[0].name;
+          }
+        }
         this.lf.updateText(this.nodeForm.id, this.nodeForm.text);
         this.lf.setProperties(this.nodeForm.id, this.nodeForm.properties);
-
-        // Force refresh node view to update icon/text if needed (HtmlNode doesn't always auto-update efficiently on property change without a trigger)
-        // A simple way is to re-render, but updateText should trigger re-render of that node.
-        // LogicFlow handles this, but for HtmlNode, sometimes custom DOM manipulation needs care.
-        // The setHtml method reads from props.model which should be updated.
       }
       this.closeNodeModal();
     },
@@ -798,9 +807,14 @@ export default {
         if (targetType) {
           const recommenders = [];
           // Determine source recommender names
-          if (sourceNode.text === 'Latest') {
+          let sourceText = sourceNode.text;
+          if (sourceText && typeof sourceText === 'object') {
+            sourceText = sourceText.value;
+          }
+
+          if (sourceText === 'Latest') {
             recommenders.push('latest');
-          } else if (sourceNode.text === 'Collaborative') {
+          } else if (sourceText === 'Collaborative') {
             recommenders.push('collaborative');
           } else {
             const p = sourceNode.properties && sourceNode.properties.recommend;
@@ -930,10 +944,54 @@ export default {
     dragStart(e, type) {
       e.dataTransfer.setData('type', type);
     },
+    getUniqueName(baseName, type) {
+      const nodes = this.lf.getGraphData().nodes;
+      const existingNames = new Set();
+
+      nodes.forEach((node) => {
+        const props = node.properties;
+        if (!props || !props.recommend) return;
+
+        let name = null;
+        if (type === 'NonPersonalized' && props.recommend.non_personalized && props.recommend.non_personalized.length > 0) {
+          name = props.recommend.non_personalized[0].name;
+        } else if (type === 'User to User' && props.recommend.user_to_user && props.recommend.user_to_user.length > 0) {
+          name = props.recommend.user_to_user[0].name;
+        } else if (type === 'Item to Item' && props.recommend.item_to_item && props.recommend.item_to_item.length > 0) {
+          name = props.recommend.item_to_item[0].name;
+        }
+
+        if (name) {
+          existingNames.add(name);
+        }
+      });
+
+      let uniqueName = baseName;
+      let counter = 1;
+      while (existingNames.has(uniqueName)) {
+        uniqueName = `${baseName}_${counter}`;
+        counter += 1;
+      }
+      return uniqueName;
+    },
     drop(e) {
       e.preventDefault();
       const type = e.dataTransfer.getData('type');
       if (type) {
+        if (type === 'Latest') {
+          const nodes = this.lf.getGraphData().nodes;
+          if (nodes.some(node => node.text === 'Latest' || (typeof node.text === 'object' && node.text.value === 'Latest'))) {
+            this.showDanger('Latest node already exists');
+            return;
+          }
+        } else if (type === 'Collaborative') {
+          const nodes = this.lf.getGraphData().nodes;
+          if (nodes.some(node => node.text === 'Collaborative' || (typeof node.text === 'object' && node.text.value === 'Collaborative'))) {
+            this.showDanger('Collaborative node already exists');
+            return;
+          }
+        }
+
         const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY);
         const newNode = {
           type: 'icon-node',
@@ -944,7 +1002,7 @@ export default {
         };
 
         if (type === 'Latest') {
-          newNode.properties = { readOnly: true };
+          newNode.properties = {};
         } else if (type === 'Collaborative') {
           newNode.properties = {
             recommend: {
@@ -960,11 +1018,13 @@ export default {
             },
           };
         } else if (type === 'NonPersonalized') {
+          const name = this.getUniqueName('new_non_personalized', type);
+          newNode.text = name;
           newNode.properties = {
             recommend: {
               non_personalized: [
                 {
-                  name: 'new_non_personalized',
+                  name,
                   score: '',
                   filter: '',
                 },
@@ -972,22 +1032,26 @@ export default {
             },
           };
         } else if (type === 'User to User') {
+          const name = this.getUniqueName('new_user_to_user', type);
+          newNode.text = name;
           newNode.properties = {
             recommend: {
               user_to_user: [
                 {
-                  name: 'neighbors',
+                  name,
                   type: 'items',
                 },
               ],
             },
           };
         } else if (type === 'Item to Item') {
+          const name = this.getUniqueName('new_item_to_item', type);
+          newNode.text = name;
           newNode.properties = {
             recommend: {
               item_to_item: [
                 {
-                  name: 'neighbors',
+                  name,
                   type: 'embedding',
                   column: 'item.Labels.embedding',
                 },
@@ -999,6 +1063,16 @@ export default {
         // Generate a random ID
         newNode.id = Math.random().toString(36).substr(2, 9);
         this.lf.addNode(newNode);
+
+        if (['NonPersonalized', 'User to User', 'Item to Item', 'Latest', 'Collaborative'].includes(type)) {
+          this.lf.addEdge({
+            sourceNodeId: 'data-source',
+            targetNodeId: newNode.id,
+            sourceAnchorId: 'data-source_1',
+            targetAnchorId: `${newNode.id}_3`,
+            type: 'bezier',
+          });
+        }
       }
     },
   },
