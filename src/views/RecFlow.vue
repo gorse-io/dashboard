@@ -35,6 +35,9 @@
       </div>
     </div>
 
+    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
+      @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
+
     <!-- LogicFlow Container -->
     <div class="card card-small h-100 position-relative mb-4">
       <div class="card-body p-0">
@@ -253,6 +256,7 @@
 import LogicFlow, { HtmlNode, HtmlNodeModel, BezierEdge, BezierEdgeModel } from '@logicflow/core';
 import '@logicflow/core/dist/index.css';
 import dagre from 'dagre';
+import axios from 'axios';
 
 class DashedEdgeModel extends BezierEdgeModel {
   getEdgeStyle() {
@@ -362,184 +366,16 @@ export default {
       showNodeModal: false,
       showExportModal: false,
       exportData: '',
+      alertTheme: 'danger',
+      alertText: null,
+      duration: 5,
+      timeUntilDismissed: 0,
       nodeForm: {
         id: '',
         text: '',
         properties: {},
       },
-      config: {
-        database: {
-          cache_store: 'mysql://gorse:gorse_pass@tcp(mysql:3306)/gorse?parseTime=true',
-          cache_table_prefix: '',
-          data_store: 'mysql://gorse:gorse_pass@tcp(mysql:3306)/gorse?parseTime=true',
-          data_table_prefix: '',
-          mysql: {
-            isolation_level: 'READ-UNCOMMITTED',
-          },
-          table_prefix: '',
-        },
-        gcs: {
-          bucket: '',
-          credentials_file: '',
-          prefix: '',
-        },
-        master: {
-          admin_api_key: '',
-          dashboard_password: 'rjxcpt8957',
-          dashboard_redacted: false,
-          dashboard_user_name: 'zhenghaoz',
-          host: '0.0.0.0',
-          http_cors_domains: [
-            '.*',
-          ],
-          http_cors_methods: [
-            'GET',
-            'POST',
-            'PUT',
-            'DELETE',
-            'PATCH',
-          ],
-          http_host: '0.0.0.0',
-          http_port: 8088,
-          meta_timeout: '10s',
-          n_jobs: 1,
-          port: 8086,
-          ssl_ca: '',
-          ssl_cert: '',
-          ssl_key: '',
-          ssl_mode: false,
-        },
-        oidc: {
-          client_id: '',
-          client_secret: '',
-          enable: false,
-          issuer: '',
-          redirect_url: '',
-        },
-        openai: {
-          auth_token: '',
-          base_url: '',
-          chat_completion_model: '',
-          chat_completion_rpm: 0,
-          chat_completion_tpm: 0,
-          embedding_dimensions: 0,
-          embedding_model: '',
-          embedding_rpm: 0,
-          embedding_tpm: 0,
-          log_file: '',
-        },
-        recommend: {
-          active_user_ttl: 0,
-          cache_expire: '72h',
-          cache_size: 100,
-          collaborative: {
-            early_stopping: {
-              patience: 0,
-            },
-            fit_epoch: 100,
-            fit_period: '1h',
-            optimize_period: '3h',
-            optimize_trials: 10,
-          },
-          context_size: 100,
-          data_source: {
-            item_ttl: 0,
-            positive_feedback_ttl: 0,
-            positive_feedback_types: [
-              'star',
-              'like',
-              'read\u003e=3',
-            ],
-            read_feedback_types: [
-              'read',
-            ],
-          },
-          external: [
-            {
-              name: 'trending',
-              // eslint-disable-next-line no-template-curly-in-string
-              script: 'const response = fetch("https://cdn.jsdelivr.net/gh/isboyjc/github-trending-api/data/daily/all.json");\nif (!response.ok) {\n  throw new Error(`${response.status} ${response.body}`);\n}\nconst data = JSON.parse(response.body);\ndata["items"].map((item) =\u003e {\n  return item["title"].toLowerCase().replace("/", ":");\n})\n',
-            },
-          ],
-          fallback: {
-            recommenders: [
-              'item-to-item/neighbors',
-              'latest',
-            ],
-          },
-          'item-to-item': [
-            {
-              name: 'neighbors',
-              type: 'embedding',
-              column: 'item.Labels.embedding',
-              prompt: '',
-            },
-          ],
-          'non-personalized': [
-            {
-              name: 'most_starred_weekly',
-              score: "count(feedback, .FeedbackType == 'star')",
-              filter: '(now() - item.Timestamp).Hours() \u003c 168',
-            },
-            {
-              name: 'most_starred',
-              score: "count(feedback, .FeedbackType == 'star')",
-            },
-          ],
-          ranker: {
-            cache_expire: '120h',
-            early_stopping: {
-              patience: 0,
-            },
-            fit_epoch: 100,
-            fit_period: '1h',
-            optimize_period: '6h',
-            optimize_trials: 10,
-            recommenders: [
-              'latest',
-              'collaborative',
-              'non-personalized/most_starred_weekly',
-              'item-to-item/neighbors',
-              'user-to-user/neighbors',
-            ],
-            type: 'none',
-          },
-          replacement: {
-            enable_replacement: false,
-            positive_replacement_decay: 0.8,
-            read_replacement_decay: 0.6,
-          },
-          'user-to-user': [
-            {
-              name: 'neighbors',
-              type: 'items',
-              column: '',
-            },
-          ],
-        },
-        s3: {
-          access_key_id: '',
-          bucket: '',
-          endpoint: '',
-          prefix: '',
-          secret_access_key: '',
-        },
-        server: {
-          api_key: 'sk-rjxcpt8957',
-          auto_insert_item: false,
-          auto_insert_user: true,
-          cache_expire: '10s',
-          clock_error: '5s',
-          default_n: 10,
-        },
-        tracing: {
-          collector_endpoint: '',
-          enable_tracing: false,
-          exporter: 'jaeger',
-          ratio: 0,
-          sampler: 'always',
-        },
-      },
+      config: null,
     };
   },
   computed: {
@@ -596,19 +432,40 @@ export default {
       model: DashedEdgeModel,
     });
 
-    const { nodes, edges } = this.generateGraphData();
-    const layoutedData = this.layout(nodes, edges);
-
-    // 渲染数据
-    this.lf.render(layoutedData);
-
-    // 居中显示
-    this.lf.translateCenter();
-
     // Event Listeners
     this.lf.on('node:dbclick', this.handleNodeDbClick);
+
+    axios.get('/api/dashboard/config').then((response) => {
+      this.config = response.data;
+      this.initGraph();
+    }).catch((error) => {
+      console.error(error);
+    });
   },
   methods: {
+    handleTimeChange(time) {
+      this.timeUntilDismissed = time;
+    },
+    showDanger(message) {
+      this.timeUntilDismissed = this.duration;
+      this.alertTheme = 'danger';
+      this.alertText = message;
+    },
+    showSuccess(message) {
+      this.timeUntilDismissed = this.duration;
+      this.alertTheme = 'success';
+      this.alertText = message;
+    },
+    initGraph() {
+      const { nodes, edges } = this.generateGraphData();
+      const layoutedData = this.layout(nodes, edges);
+
+      // 渲染数据
+      this.lf.render(layoutedData);
+
+      // 居中显示
+      this.lf.translateCenter();
+    },
     generateGraphData() {
       const { recommend } = this.config;
       const nodes = [];
@@ -1058,8 +915,14 @@ export default {
       alert('Copied to clipboard');
     },
     saveFlow() {
-      const data = this.lf.getGraphData();
-      console.log('Saving flow:', data);
+      this.syncGraphToConfig();
+      axios.post('/api/dashboard/config', this.config)
+        .then(() => {
+          this.showSuccess('Configuration saved successfully!');
+        })
+        .catch((error) => {
+          this.showDanger(`Failed to save configuration: ${error.message}`);
+        });
     },
     dragStart(e, type) {
       e.dataTransfer.setData('type', type);
