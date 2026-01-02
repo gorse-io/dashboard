@@ -242,7 +242,7 @@
         <d-modal-title>Export TOML</d-modal-title>
       </d-modal-header>
       <d-modal-body>
-        <d-textarea v-model="exportData" rows="15" class="w-100" style="font-family: monospace; font-size: 0.85rem;" />
+        <textarea v-model="exportData" rows="15" class="form-control w-100" style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
         <div class="mt-3 text-right">
           <d-button class="mr-2" theme="white" @click="copyExportData">Copy</d-button>
           <d-button theme="primary" @click="showExportModal = false">Close</d-button>
@@ -712,7 +712,7 @@ export default {
     },
     exportFlow() {
       this.syncGraphToConfig();
-      this.exportData = this.jsonToToml(this.config);
+      this.exportData = this.jsonToToml({ recommend: this.config.recommend });
       this.showExportModal = true;
     },
     syncGraphToConfig() {
@@ -842,6 +842,9 @@ export default {
       // Helper to format primitives
       const formatValue = (v) => {
         if (typeof v === 'string') {
+          if (v.includes('\n')) {
+            return `"""\n${v}"""`;
+          }
           // Escape quotes and backslashes
           return `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
         }
@@ -902,7 +905,7 @@ export default {
           });
         }
       });
-      return output;
+      return output.trim();
     },
     copyExportData() {
       const textarea = document.createElement('textarea');
