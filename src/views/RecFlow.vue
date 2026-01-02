@@ -4,27 +4,27 @@
     <div class="page-header row no-gutters py-4">
       <div class="col-12 col-sm-8 text-center text-sm-left mb-0 d-flex align-items-center">
         <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'Latest')">
+          draggable="true" @dragstart="dragStart($event, 'latest')">
           <i class="material-icons mr-2 text-primary">new_releases</i>
           <span>Latest</span>
         </div>
         <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'Collaborative')">
+          draggable="true" @dragstart="dragStart($event, 'collaborative')">
           <i class="material-icons mr-2 text-primary">group_work</i>
           <span>Collaborative</span>
         </div>
         <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'NonPersonalized')">
+          draggable="true" @dragstart="dragStart($event, 'non-personalized')">
           <i class="material-icons mr-2 text-primary">public</i>
           <span>Non-Personalized</span>
         </div>
         <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'User to User')">
+          draggable="true" @dragstart="dragStart($event, 'user-to-user')">
           <i class="material-icons mr-2 text-primary">people</i>
           <span>User to User</span>
         </div>
         <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'Item to Item')">
+          draggable="true" @dragstart="dragStart($event, 'item-to-item')">
           <i class="material-icons mr-2 text-primary">apps</i>
           <span>Item to Item</span>
         </div>
@@ -54,59 +54,59 @@
       <d-modal-body>
         <d-form @submit.prevent="updateNode">
           <!-- Data Source Specific Properties -->
-          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.data_source">
+          <template v-if="nodeForm.type === 'data-source'">
             <div class="form-group">
               <label>Positive Feedback Types (comma separated)</label>
-              <d-input :value="nodeForm.properties.recommend.data_source.positive_feedback_types.join(',')"
-                @input="val => nodeForm.properties.recommend.data_source.positive_feedback_types = val.split(',').map(s => s.trim())" />
+              <d-input :value="nodeForm.properties.positive_feedback_types.join(',')"
+                @input="val => nodeForm.properties.positive_feedback_types = val.split(',').map(s => s.trim())" />
             </div>
             <div class="form-group">
               <label>Read Feedback Types (comma separated)</label>
-              <d-input :value="nodeForm.properties.recommend.data_source.read_feedback_types.join(',')"
-                @input="val => nodeForm.properties.recommend.data_source.read_feedback_types = val.split(',').map(s => s.trim())" />
+              <d-input :value="nodeForm.properties.read_feedback_types.join(',')"
+                @input="val => nodeForm.properties.read_feedback_types = val.split(',').map(s => s.trim())" />
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Positive Feedback TTL</label>
                 <d-input type="number"
-                  v-model.number="nodeForm.properties.recommend.data_source.positive_feedback_ttl" />
+                  v-model.number="nodeForm.properties.positive_feedback_ttl" />
               </div>
               <div class="form-group col-md-6">
                 <label>Item TTL</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.data_source.item_ttl" />
+                <d-input type="number" v-model.number="nodeForm.properties.item_ttl" />
               </div>
             </div>
           </template>
 
           <!-- Recommend Global Properties -->
-          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.cache_size !== undefined">
+          <template v-if="nodeForm.type === 'recommend'">
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Cache Size</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.cache_size" />
+                <d-input type="number" v-model.number="nodeForm.properties.cache_size" />
               </div>
               <div class="form-group col-md-6">
                 <label>Cache Expire</label>
-                <d-input v-model="nodeForm.properties.recommend.cache_expire" />
+                <d-input v-model="nodeForm.properties.cache_expire" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Active User TTL</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.active_user_ttl" />
+                <d-input type="number" v-model.number="nodeForm.properties.active_user_ttl" />
               </div>
               <div class="form-group col-md-6">
                 <label>Context Size</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.context_size" />
+                <d-input type="number" v-model.number="nodeForm.properties.context_size" />
               </div>
             </div>
           </template>
 
           <!-- Ranker Specific Properties -->
-          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.ranker">
+          <template v-if="nodeForm.type === 'ranker'">
             <div class="form-group">
               <label>Type</label>
-              <d-select v-model="nodeForm.properties.recommend.ranker.type">
+              <d-select v-model="nodeForm.properties.type">
                 <option value="none">None</option>
                 <option value="fm">FM</option>
               </d-select>
@@ -114,91 +114,91 @@
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Fit Period</label>
-                <d-input v-model="nodeForm.properties.recommend.ranker.fit_period" />
+                <d-input v-model="nodeForm.properties.fit_period" />
               </div>
               <div class="form-group col-md-6">
                 <label>Fit Epoch</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.ranker.fit_epoch" />
+                <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Optimize Period</label>
-                <d-input v-model="nodeForm.properties.recommend.ranker.optimize_period" />
+                <d-input v-model="nodeForm.properties.optimize_period" />
               </div>
               <div class="form-group col-md-6">
                 <label>Optimize Trials</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.ranker.optimize_trials" />
+                <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Cache Expire</label>
-                <d-input v-model="nodeForm.properties.recommend.ranker.cache_expire" />
+                <d-input v-model="nodeForm.properties.cache_expire" />
               </div>
               <div class="form-group col-md-6">
                 <label>Early Stopping Patience</label>
                 <d-input type="number"
-                  v-model.number="nodeForm.properties.recommend.ranker.early_stopping.patience" />
+                  v-model.number="nodeForm.properties.early_stopping.patience" />
               </div>
             </div>
           </template>
 
           <!-- Collaborative Specific Properties -->
-          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.collaborative">
+          <template v-if="nodeForm.type === 'collaborative'">
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Fit Period</label>
-                <d-input v-model="nodeForm.properties.recommend.collaborative.fit_period" />
+                <d-input v-model="nodeForm.properties.fit_period" />
               </div>
               <div class="form-group col-md-6">
                 <label>Fit Epoch</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.collaborative.fit_epoch" />
+                <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Optimize Period</label>
-                <d-input v-model="nodeForm.properties.recommend.collaborative.optimize_period" />
+                <d-input v-model="nodeForm.properties.optimize_period" />
               </div>
               <div class="form-group col-md-6">
                 <label>Optimize Trials</label>
-                <d-input type="number" v-model.number="nodeForm.properties.recommend.collaborative.optimize_trials" />
+                <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
               </div>
             </div>
             <div class="form-group">
               <label>Early Stopping Patience</label>
               <d-input type="number"
-                v-model.number="nodeForm.properties.recommend.collaborative.early_stopping.patience" />
+                v-model.number="nodeForm.properties.early_stopping.patience" />
             </div>
           </template>
 
           <!-- Non-Personalized Specific Properties -->
-          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.non_personalized && nodeForm.properties.recommend.non_personalized.length > 0">
+          <template v-if="nodeForm.type === 'non-personalized'">
             <div class="form-group">
               <label>Name</label>
-              <d-input v-model="nodeForm.properties.recommend.non_personalized[0].name" />
+              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
             <div class="form-group">
               <label>Score Formula</label>
-              <d-input v-model="nodeForm.properties.recommend.non_personalized[0].score" />
+              <d-input v-model="nodeForm.properties.score" />
             </div>
             <div class="form-group">
               <label>Filter Expression</label>
-              <d-input v-model="nodeForm.properties.recommend.non_personalized[0].filter" />
+              <d-input v-model="nodeForm.properties.filter" />
             </div>
           </template>
 
           <!-- User to User Specific Properties -->
-          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.user_to_user && nodeForm.properties.recommend.user_to_user.length > 0">
+          <template v-if="nodeForm.type === 'user-to-user'">
             <h6 class="border-bottom pb-2 mb-3">User to User Settings</h6>
             <div class="form-group">
               <label>Name</label>
-              <d-input v-model="nodeForm.properties.recommend.user_to_user[0].name" />
+              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
             <div class="form-group">
               <label>Type</label>
-              <d-select v-model="nodeForm.properties.recommend.user_to_user[0].type">
+              <d-select v-model="nodeForm.properties.type">
                 <option value="embedding">Embedding</option>
                 <option value="tags">Tags</option>
                 <option value="items">Items</option>
@@ -207,24 +207,24 @@
           </template>
 
           <!-- Item to Item Specific Properties -->
-          <template v-if="nodeForm.properties.recommend && nodeForm.properties.recommend.item_to_item && nodeForm.properties.recommend.item_to_item.length > 0">
+          <template v-if="nodeForm.type === 'item-to-item'">
             <h6 class="border-bottom pb-2 mb-3">Item to Item Settings</h6>
             <div class="form-group">
               <label>Name</label>
-              <d-input v-model="nodeForm.properties.recommend.item_to_item[0].name" />
+              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
             <div class="form-group">
               <label>Type</label>
-              <d-select v-model="nodeForm.properties.recommend.item_to_item[0].type">
+              <d-select v-model="nodeForm.properties.type">
                 <option value="embedding">Embedding</option>
                 <option value="tags">Tags</option>
                 <option value="users">Users</option>
                 <option value="chat">Chat</option>
               </d-select>
             </div>
-            <div class="form-group" v-if="nodeForm.properties.recommend.item_to_item[0].type === 'embedding'">
+            <div class="form-group" v-if="nodeForm.properties.type === 'embedding'">
               <label>Column</label>
-              <d-input v-model="nodeForm.properties.recommend.item_to_item[0].column" />
+              <d-input v-model="nodeForm.properties.column" />
             </div>
           </template>
 
@@ -270,21 +270,14 @@ class DashedEdgeModel extends BezierEdgeModel {
 class IconNodeModel extends HtmlNodeModel {
   setAttributes() {
     this.width = 270;
-    const { properties, text } = this;
+    const { properties, text, type } = this;
     const nodeText = typeof text === 'object' ? text.value : text;
-    const rec = properties && properties.recommend;
 
-    if (rec) {
-      if (rec.data_source) {
-        this.width = 150;
-      } else if (nodeText === 'Recommend' || rec.cache_size !== undefined) {
-        this.width = 160;
-      } else if (rec.ranker || rec.fallback || nodeText === 'Ranker' || nodeText === 'Fallback') {
-        this.width = 120;
-      }
-    } else if (nodeText === 'Recommend') {
+    if (type === 'data-source') {
+      this.width = 150;
+    } else if (type === 'recommend') {
       this.width = 160;
-    } else if (nodeText === 'Ranker' || nodeText === 'Fallback') {
+    } else if (type === 'ranker' || type === 'fallback') {
       this.width = 120;
     }
 
@@ -301,50 +294,32 @@ class IconNodeModel extends HtmlNodeModel {
 
 class IconNode extends HtmlNode {
   setHtml(rootEl) {
-    const { text, properties } = this.props.model;
+    const { text, properties, type } = this.props.model;
     const el = document.createElement('div');
     el.className = 'card';
 
-    // Determine icon based on properties or text fallback
+    // Determine icon based on type
     let iconName = 'settings'; // Default icon
     let nodeText = '';
     if (text) {
       nodeText = typeof text === 'object' ? text.value : text;
     }
 
-    const rec = properties && properties.recommend;
-    if (rec) {
-      if (rec.data_source) iconName = 'database';
-      else if (rec.user_to_user && rec.user_to_user.length > 0) iconName = 'people';
-      else if (rec.item_to_item && rec.item_to_item.length > 0) iconName = 'apps';
-      else if (rec.non_personalized && rec.non_personalized.length > 0) iconName = 'public';
-      else if (rec.collaborative) iconName = 'group_work';
-      else if (rec.ranker) iconName = 'sort';
-      else if (rec.fallback) iconName = 'history';
-    }
-
-    // Fallback for nodes without structured properties (like Latest, Start, End)
-    // Also covers the initial drag-and-drop state where properties might be simpler
-    if (iconName === 'settings') {
-      if (nodeText.toLowerCase().includes('data source')) iconName = 'database';
-      else if (nodeText.toLowerCase().includes('start')) iconName = 'play_circle_filled';
-      else if (nodeText.toLowerCase().includes('end')) iconName = 'stop';
-      else if (nodeText.toLowerCase().includes('filter')) iconName = 'filter_alt';
-      else if (nodeText.toLowerCase().includes('rank')) iconName = 'sort';
-      else if (nodeText.toLowerCase().includes('latest')) iconName = 'new_releases';
-      else if (nodeText.toLowerCase().includes('user to user')) iconName = 'people';
-      else if (nodeText.toLowerCase().includes('item to item')) iconName = 'apps';
-      else if (nodeText.toLowerCase().includes('collaborative')) iconName = 'group_work';
-      else if (nodeText.toLowerCase().includes('nonpersonalized')) iconName = 'public';
-      else if (nodeText.toLowerCase().includes('fallback')) iconName = 'history';
-    }
+    if (type === 'data-source') iconName = 'database';
+    else if (type === 'user-to-user') iconName = 'people';
+    else if (type === 'item-to-item') iconName = 'apps';
+    else if (type === 'non-personalized') iconName = 'public';
+    else if (type === 'collaborative') iconName = 'group_work';
+    else if (type === 'ranker') iconName = 'sort';
+    else if (type === 'fallback') iconName = 'history';
+    else if (type === 'latest') iconName = 'new_releases';
 
     let width = 270;
-    if (iconName === 'database') {
+    if (type === 'data-source') {
       width = 150;
-    } else if (nodeText === 'Recommend') {
+    } else if (type === 'recommend') {
       width = 160;
-    } else if (iconName === 'sort' || iconName === 'history') {
+    } else if (type === 'ranker' || type === 'fallback') {
       width = 120;
     }
 
@@ -372,6 +347,7 @@ export default {
       timeUntilDismissed: 0,
       nodeForm: {
         id: '',
+        type: '',
         text: '',
         properties: {},
       },
@@ -380,30 +356,24 @@ export default {
   },
   computed: {
     modalTitle() {
-      if (this.nodeForm.properties && this.nodeForm.properties.recommend) {
-        if (this.nodeForm.properties.recommend.data_source) {
+      switch (this.nodeForm.type) {
+        case 'data-source':
           return 'Edit Data Source';
-        }
-        if (this.nodeForm.properties.recommend.cache_size !== undefined) {
+        case 'recommend':
           return 'Edit Recommend';
-        }
-        if (this.nodeForm.properties.recommend.ranker) {
+        case 'ranker':
           return 'Edit Ranker';
-        }
-        if (this.nodeForm.properties.recommend.collaborative) {
+        case 'collaborative':
           return 'Edit Collaborative';
-        }
-        if (this.nodeForm.properties.recommend.non_personalized) {
+        case 'non-personalized':
           return 'Edit Non-Personalized';
-        }
-        if (this.nodeForm.properties.recommend.user_to_user) {
+        case 'user-to-user':
           return 'Edit User to User';
-        }
-        if (this.nodeForm.properties.recommend.item_to_item) {
+        case 'item-to-item':
           return 'Edit Item to Item';
-        }
+        default:
+          return 'Edit Node';
       }
-      return 'Edit Node';
     },
   },
   mounted() {
@@ -424,15 +394,30 @@ export default {
     });
 
     this.lf.register({
-      type: 'icon-node',
-      view: IconNode,
-      model: IconNodeModel,
-    });
-
-    this.lf.register({
       type: 'dashed-edge',
       view: BezierEdge,
       model: DashedEdgeModel,
+    });
+
+    const nodeTypes = [
+      'data-source',
+      'ranker',
+      'fallback',
+      'recommend',
+      'latest',
+      'collaborative',
+      'non-personalized',
+      'user-to-user',
+      'item-to-item',
+      'icon-node', // Keep generic fallback
+    ];
+
+    nodeTypes.forEach((type) => {
+      this.lf.register({
+        type,
+        view: IconNode,
+        model: IconNodeModel,
+      });
     });
 
     // Event Listeners
@@ -477,51 +462,45 @@ export default {
       // 1. Fixed Nodes
       nodes.push({
         id: 'data-source',
-        type: 'icon-node',
+        type: 'data-source',
         text: 'Data Source',
         properties: {
           fixedName: true,
-          recommend: {
-            data_source: recommend.data_source,
-          },
+          ...recommend.data_source,
         },
       });
 
       nodes.push({
         id: 'ranker',
-        type: 'icon-node',
+        type: 'ranker',
         text: 'Ranker',
         properties: {
-          recommend: {
-            ranker: recommend.ranker,
-          },
+          fixedName: true,
+          ...recommend.ranker,
         },
       });
 
       nodes.push({
         id: 'fallback',
-        type: 'icon-node',
+        type: 'fallback',
         text: 'Fallback',
         properties: {
-          recommend: {
-            fallback: recommend.fallback,
-          },
+          fixedName: true,
+          ...recommend.fallback,
         },
       });
 
       nodes.push({
         id: 'recommend',
-        type: 'icon-node',
+        type: 'recommend',
         text: 'Recommend',
         properties: {
           fixedName: true,
-          recommend: {
-            cache_size: recommend.cache_size,
-            cache_expire: recommend.cache_expire,
-            active_user_ttl: recommend.active_user_ttl,
-            context_size: recommend.context_size,
-            replacement: recommend.replacement,
-          },
+          cache_size: recommend.cache_size,
+          cache_expire: recommend.cache_expire,
+          active_user_ttl: recommend.active_user_ttl,
+          context_size: recommend.context_size,
+          replacement: recommend.replacement,
         },
       });
 
@@ -536,7 +515,7 @@ export default {
       // Latest
       const latestNode = {
         id: 'latest',
-        type: 'icon-node',
+        type: 'latest',
         text: 'Latest',
         properties: { readOnly: true },
       };
@@ -548,13 +527,11 @@ export default {
       if (recommend.collaborative) {
         const collabNode = {
           id: 'collaborative',
-          type: 'icon-node',
+          type: 'collaborative',
           text: 'Collaborative',
           properties: {
             fixedName: true,
-            recommend: {
-              collaborative: recommend.collaborative,
-            },
+            ...recommend.collaborative,
           },
         };
         nodes.push(collabNode);
@@ -568,12 +545,10 @@ export default {
           const id = `non-personalized-${item.name}`;
           const node = {
             id,
-            type: 'icon-node',
+            type: 'non-personalized',
             text: item.name,
             properties: {
-              recommend: {
-                non_personalized: [item],
-              },
+              ...item,
             },
           };
           nodes.push(node);
@@ -588,12 +563,10 @@ export default {
           const id = `user-to-user-${item.name}`;
           const node = {
             id,
-            type: 'icon-node',
+            type: 'user-to-user',
             text: item.name,
             properties: {
-              recommend: {
-                user_to_user: [item],
-              },
+              ...item,
             },
           };
           nodes.push(node);
@@ -608,12 +581,10 @@ export default {
           const id = `item-to-item-${item.name}`;
           const node = {
             id,
-            type: 'icon-node',
+            type: 'item-to-item',
             text: item.name,
             properties: {
-              recommend: {
-                item_to_item: [item],
-              },
+              ...item,
             },
           };
           nodes.push(node);
@@ -655,12 +626,11 @@ export default {
 
       nodes.forEach((node) => {
         let width = 270;
-        const rec = node.properties && node.properties.recommend;
-        if (node.text === 'Data Source' || (rec && rec.data_source)) {
+        if (node.type === 'data-source') {
           width = 150;
-        } else if (node.text === 'Recommend' || (rec && rec.cache_size !== undefined)) {
+        } else if (node.type === 'recommend') {
           width = 160;
-        } else if (node.text === 'Ranker' || node.text === 'Fallback' || (rec && (rec.ranker || rec.fallback))) {
+        } else if (node.type === 'ranker' || node.type === 'fallback') {
           width = 120;
         }
         g.setNode(node.id, { width, height: 60 });
@@ -691,12 +661,23 @@ export default {
       if (data.text) {
         text = typeof data.text === 'object' ? data.text.value : data.text;
       }
+      this.originalText = text;
       this.nodeForm = JSON.parse(JSON.stringify({
         id: data.id,
+        type: data.type,
         text,
         properties: data.properties || {},
       }));
       this.showNodeModal = true;
+    },
+    syncNodeName(name) {
+      this.nodeForm.text = name;
+      if (this.nodeForm.properties) {
+        this.nodeForm.properties.name = name;
+      }
+      if (this.nodeForm.id) {
+        this.lf.updateText(this.nodeForm.id, name);
+      }
     },
     closeNodeModal() {
       this.showNodeModal = false;
@@ -704,14 +685,10 @@ export default {
     updateNode() {
       if (this.nodeForm.id) {
         // Sync text from name for relevant types
-        const rec = this.nodeForm.properties.recommend;
+        const rec = this.nodeForm.properties;
         if (rec) {
-          if (rec.user_to_user && rec.user_to_user.length > 0) {
-            this.nodeForm.text = rec.user_to_user[0].name;
-          } else if (rec.item_to_item && rec.item_to_item.length > 0) {
-            this.nodeForm.text = rec.item_to_item[0].name;
-          } else if (rec.non_personalized && rec.non_personalized.length > 0) {
-            this.nodeForm.text = rec.non_personalized[0].name;
+          if (this.nodeForm.type === 'user-to-user' || this.nodeForm.type === 'item-to-item' || this.nodeForm.type === 'non-personalized') {
+            this.nodeForm.text = rec.name;
           }
         }
         this.lf.updateText(this.nodeForm.id, this.nodeForm.text);
@@ -746,41 +723,34 @@ export default {
       // 1. Process Nodes
       data.nodes.forEach((node) => {
         const props = node.properties;
-        if (!props || !props.recommend) return;
+        if (!props) return;
 
-        if (props.recommend.data_source) {
-          newRecommend.data_source = props.recommend.data_source;
-        }
-        if (props.recommend.collaborative) {
-          newRecommend.collaborative = props.recommend.collaborative;
-        }
-        if (props.recommend.non_personalized) {
-          newRecommend['non-personalized'].push(...props.recommend.non_personalized);
-        }
-        if (props.recommend.user_to_user) {
-          newRecommend['user-to-user'].push(...props.recommend.user_to_user);
-        }
-        if (props.recommend.item_to_item) {
-          newRecommend['item-to-item'].push(...props.recommend.item_to_item);
-        }
-        // Handle global properties from 'recommend' node
-        if (node.text && typeof node.text === 'string' && node.text.toLowerCase() === 'recommend') {
-          if (props.recommend.cache_size !== undefined) newRecommend.cache_size = props.recommend.cache_size;
-          if (props.recommend.cache_expire !== undefined) newRecommend.cache_expire = props.recommend.cache_expire;
-          if (props.recommend.active_user_ttl !== undefined) newRecommend.active_user_ttl = props.recommend.active_user_ttl;
-          if (props.recommend.context_size !== undefined) newRecommend.context_size = props.recommend.context_size;
-          if (props.recommend.replacement) newRecommend.replacement = props.recommend.replacement;
-          if (props.recommend.external) newRecommend.external = props.recommend.external;
-        }
-        // Handle Ranker/Fallback properties
-        if (props.recommend.ranker) {
-          Object.assign(newRecommend.ranker, props.recommend.ranker);
-          // Clear recommenders to be rebuilt from edges, unless we want to keep properties' ones?
-          // The edge traversal below will populate valid connections.
+        if (node.type === 'data-source') {
+          newRecommend.data_source = { ...props };
+          delete newRecommend.data_source.fixedName;
+        } else if (node.type === 'collaborative') {
+          newRecommend.collaborative = { ...props };
+          delete newRecommend.collaborative.fixedName;
+        } else if (node.type === 'non-personalized') {
+          newRecommend['non-personalized'].push({ ...props });
+        } else if (node.type === 'user-to-user') {
+          newRecommend['user-to-user'].push({ ...props });
+        } else if (node.type === 'item-to-item') {
+          newRecommend['item-to-item'].push({ ...props });
+        } else if (node.type === 'recommend') {
+          if (props.cache_size !== undefined) newRecommend.cache_size = props.cache_size;
+          if (props.cache_expire !== undefined) newRecommend.cache_expire = props.cache_expire;
+          if (props.active_user_ttl !== undefined) newRecommend.active_user_ttl = props.active_user_ttl;
+          if (props.context_size !== undefined) newRecommend.context_size = props.context_size;
+          if (props.replacement) newRecommend.replacement = props.replacement;
+          if (props.external) newRecommend.external = props.external;
+        } else if (node.type === 'ranker') {
+          Object.assign(newRecommend.ranker, props);
+          delete newRecommend.ranker.fixedName;
           newRecommend.ranker.recommenders = [];
-        }
-        if (props.recommend.fallback) {
-          Object.assign(newRecommend.fallback, props.recommend.fallback);
+        } else if (node.type === 'fallback') {
+          Object.assign(newRecommend.fallback, props);
+          delete newRecommend.fallback.fixedName;
           newRecommend.fallback.recommenders = [];
         }
       });
@@ -814,19 +784,17 @@ export default {
 
           if (sourceText === 'Latest') {
             recommenders.push('latest');
-          } else if (sourceText === 'Collaborative') {
+          } else if (sourceNode.type === 'collaborative') {
             recommenders.push('collaborative');
           } else {
-            const p = sourceNode.properties && sourceNode.properties.recommend;
+            const p = sourceNode.properties;
             if (p) {
-              if (p.non_personalized) {
-                p.non_personalized.forEach(i => recommenders.push(`non-personalized/${i.name}`));
-              }
-              if (p.user_to_user) {
-                p.user_to_user.forEach(i => recommenders.push(`user-to-user/${i.name}`));
-              }
-              if (p.item_to_item) {
-                p.item_to_item.forEach(i => recommenders.push(`item-to-item/${i.name}`));
+              if (sourceNode.type === 'non-personalized') {
+                recommenders.push(`non-personalized/${p.name}`);
+              } else if (sourceNode.type === 'user-to-user') {
+                recommenders.push(`user-to-user/${p.name}`);
+              } else if (sourceNode.type === 'item-to-item') {
+                recommenders.push(`item-to-item/${p.name}`);
               }
             }
           }
@@ -978,15 +946,15 @@ export default {
       e.preventDefault();
       const type = e.dataTransfer.getData('type');
       if (type) {
-        if (type === 'Latest') {
+        if (type === 'latest') {
           const nodes = this.lf.getGraphData().nodes;
-          if (nodes.some(node => node.text === 'Latest' || (typeof node.text === 'object' && node.text.value === 'Latest'))) {
+          if (nodes.some(node => node.type === 'latest')) {
             this.showDanger('Latest node already exists');
             return;
           }
-        } else if (type === 'Collaborative') {
+        } else if (type === 'collaborative') {
           const nodes = this.lf.getGraphData().nodes;
-          if (nodes.some(node => node.text === 'Collaborative' || (typeof node.text === 'object' && node.text.value === 'Collaborative'))) {
+          if (nodes.some(node => node.type === 'collaborative')) {
             this.showDanger('Collaborative node already exists');
             return;
           }
@@ -994,69 +962,47 @@ export default {
 
         const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY);
         const newNode = {
-          type: 'icon-node',
+          type,
           x,
           y,
           text: type,
           properties: {},
         };
 
-        if (type === 'Latest') {
+        if (type === 'latest') {
           newNode.properties = {};
-        } else if (type === 'Collaborative') {
+        } else if (type === 'collaborative') {
           newNode.properties = {
-            recommend: {
-              collaborative: {
-                fit_period: '60m',
-                fit_epoch: 10,
-                optimize_period: '60m',
-                optimize_trials: 10,
-                early_stopping: {
-                  patience: 10,
-                },
-              },
+            fit_period: '60m',
+            fit_epoch: 10,
+            optimize_period: '60m',
+            optimize_trials: 10,
+            early_stopping: {
+              patience: 10,
             },
           };
-        } else if (type === 'NonPersonalized') {
+        } else if (type === 'non-personalized') {
           const name = this.getUniqueName('new_non_personalized', type);
           newNode.text = name;
           newNode.properties = {
-            recommend: {
-              non_personalized: [
-                {
-                  name,
-                  score: '',
-                  filter: '',
-                },
-              ],
-            },
+            name,
+            score: '',
+            filter: '',
           };
-        } else if (type === 'User to User') {
+        } else if (type === 'user-to-user') {
           const name = this.getUniqueName('new_user_to_user', type);
           newNode.text = name;
           newNode.properties = {
-            recommend: {
-              user_to_user: [
-                {
-                  name,
-                  type: 'items',
-                },
-              ],
-            },
+            name,
+            type: 'items',
           };
-        } else if (type === 'Item to Item') {
+        } else if (type === 'item-to-item') {
           const name = this.getUniqueName('new_item_to_item', type);
           newNode.text = name;
           newNode.properties = {
-            recommend: {
-              item_to_item: [
-                {
-                  name,
-                  type: 'embedding',
-                  column: 'item.Labels.embedding',
-                },
-              ],
-            },
+            name,
+            type: 'embedding',
+            column: 'item.Labels.embedding',
           };
         }
 
@@ -1064,7 +1010,7 @@ export default {
         newNode.id = Math.random().toString(36).substr(2, 9);
         this.lf.addNode(newNode);
 
-        if (['NonPersonalized', 'User to User', 'Item to Item', 'Latest', 'Collaborative'].includes(type)) {
+        if (['non-personalized', 'user-to-user', 'item-to-item', 'latest', 'collaborative'].includes(type)) {
           this.lf.addEdge({
             sourceNodeId: 'data-source',
             targetNodeId: newNode.id,
