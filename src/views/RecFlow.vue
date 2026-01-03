@@ -749,7 +749,7 @@ export default {
 
         // Merge: Keep existing order, add new ones at the end
         const merged = [...existingRecommenders.filter(r => connectedRecommenders.includes(r))];
-        connectedRecommenders.forEach(r => {
+        connectedRecommenders.forEach((r) => {
           if (!merged.includes(r)) {
             merged.push(r);
           }
@@ -770,7 +770,7 @@ export default {
       const nodeMap = graphData.nodes.reduce((acc, n) => ({ ...acc, [n.id]: n }), {});
       const recommenders = [];
 
-      graphData.edges.forEach(edge => {
+      graphData.edges.forEach((edge) => {
         if (edge.targetNodeId === nodeId) {
           const sourceNode = nodeMap[edge.sourceNodeId];
           if (sourceNode) {
@@ -786,18 +786,18 @@ export default {
         return 'latest';
       } else if (sourceNode.type === 'collaborative') {
         return 'collaborative';
-      } else {
-        const p = sourceNode.properties;
-        if (p && p.name) {
-          if (sourceNode.type === 'non-personalized') {
-            return `non-personalized/${p.name}`;
-          } else if (sourceNode.type === 'user-to-user') {
-            return `user-to-user/${p.name}`;
-          } else if (sourceNode.type === 'item-to-item') {
-            return `item-to-item/${p.name}`;
-          }
+      }
+      const p = sourceNode.properties;
+      if (p && p.name) {
+        if (sourceNode.type === 'non-personalized') {
+          return `non-personalized/${p.name}`;
+        } else if (sourceNode.type === 'user-to-user') {
+          return `user-to-user/${p.name}`;
+        } else if (sourceNode.type === 'item-to-item') {
+          return `item-to-item/${p.name}`;
         }
       }
+
       return null;
     },
     moveRecommender(index, direction) {
@@ -925,7 +925,7 @@ export default {
       });
 
       // Assign to config with property order respect
-      ['ranker', 'fallback'].forEach(type => {
+      ['ranker', 'fallback'].forEach((type) => {
         const connected = connections[type];
         // Find the corresponding node in graph data to get properties
         const node = data.nodes.find(n => n.type === type);
@@ -935,7 +935,7 @@ export default {
           // Use saved order, filter out disconnected
           finalOrder = node.properties.recommenders.filter(r => connected.includes(r));
           // Append any new connections not in saved order
-          connected.forEach(r => {
+          connected.forEach((r) => {
             if (!finalOrder.includes(r)) {
               finalOrder.push(r);
             }
@@ -1094,7 +1094,7 @@ export default {
           }
         }
 
-        const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY);
+        const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY).canvasOverlayPosition;
         const newNode = {
           type,
           x,
