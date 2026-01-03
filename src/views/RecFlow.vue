@@ -68,8 +68,7 @@
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label>Positive Feedback TTL</label>
-                <d-input type="number"
-                  v-model.number="nodeForm.properties.positive_feedback_ttl" />
+                <d-input type="number" v-model.number="nodeForm.properties.positive_feedback_ttl" />
               </div>
               <div class="form-group col-md-6">
                 <label>Item TTL</label>
@@ -138,8 +137,7 @@
               </div>
               <div class="form-group col-md-6">
                 <label>Early Stopping Patience</label>
-                <d-input type="number"
-                  v-model.number="nodeForm.properties.early_stopping.patience" />
+                <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
               </div>
             </div>
           </template>
@@ -168,8 +166,7 @@
             </div>
             <div class="form-group">
               <label>Early Stopping Patience</label>
-              <d-input type="number"
-                v-model.number="nodeForm.properties.early_stopping.patience" />
+              <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
             </div>
           </template>
 
@@ -242,7 +239,8 @@
         <d-modal-title>Export TOML</d-modal-title>
       </d-modal-header>
       <d-modal-body>
-        <textarea v-model="exportData" rows="15" class="form-control w-100" style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
+        <textarea v-model="exportData" rows="15" class="form-control w-100"
+          style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
         <div class="mt-3 text-right">
           <d-button class="mr-2" theme="white" @click="copyExportData">Copy</d-button>
           <d-button theme="primary" @click="showExportModal = false">Close</d-button>
@@ -283,6 +281,11 @@ class IconNodeModel extends HtmlNodeModel {
 
     this.height = 50;
     this.text.editable = false;
+
+    // Prevent deletion of essential nodes
+    if (['data-source', 'recommend', 'ranker', 'fallback'].includes(type)) {
+      this.deletable = false;
+    }
   }
 
   getTextStyle() {
@@ -422,6 +425,20 @@ export default {
 
     // Event Listeners
     this.lf.on('node:dbclick', this.handleNodeDbClick);
+
+    // Keyboard Shortcuts
+    this.lf.keyboard.on(['backspace', 'delete'], () => {
+      const { nodes, edges } = this.lf.getSelectElements(true);
+      nodes.forEach((node) => {
+        const nodeModel = this.lf.getNodeModelById(node.id);
+        if (nodeModel && nodeModel.deletable !== false) {
+          this.lf.deleteNode(node.id);
+        }
+      });
+      edges.forEach((edge) => {
+        this.lf.deleteEdge(edge.id);
+      });
+    });
 
     axios.get('/api/dashboard/config').then((response) => {
       this.config = response.data;
