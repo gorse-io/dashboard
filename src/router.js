@@ -16,6 +16,7 @@ import Advance from './views/Advance.vue';
 import ImportItems from './views/ImportItems.vue';
 import ImportUsers from './views/ImportUsers.vue';
 import ImportFeedback from './views/ImportFeedback.vue';
+import RecFlow from './views/RecFlow.vue';
 
 Vue.use(Router);
 
@@ -111,6 +112,11 @@ export default new Router({
       path: '/chat',
       name: 'chat',
       component: Chat,
+    },
+    {
+      path: '/recflow',
+      name: 'recflow',
+      component: RecFlow,
     },
     {
       path: '*',

@@ -37,6 +37,12 @@ export default function () {
       name: 'advance',
     },
   }, {
+    title: 'RecFlow',
+    htmlBefore: '<i class="material-icons">build</i>',
+    to: {
+      name: 'recflow',
+    },
+  }, {
     title: 'Settings',
     htmlBefore: '<i class="material-icons">settings</i>',
     to: {
