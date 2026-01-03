@@ -77,6 +77,32 @@
             </div>
           </template>
 
+          <!-- Fallback Specific Properties -->
+          <template v-if="nodeForm.type === 'fallback'">
+            <div class="form-group">
+              <label>Recommenders</label>
+              <d-list-group>
+                <d-list-group-item v-for="(rec, index) in nodeForm.properties.recommenders" :key="rec"
+                  class="d-flex align-items-center border">
+                  <span class="mr-auto">{{ rec }}</span>
+                  <d-input-group-addon append>
+                    <d-button class="btn-white" @click="moveRecommender(index, -1)" :disabled="index === 0">
+                      <i class="material-icons">arrow_upward</i>
+                    </d-button>
+                    <d-button class="btn-white" @click="moveRecommender(index, 1)"
+                      :disabled="index === nodeForm.properties.recommenders.length - 1">
+                      <i class="material-icons">arrow_downward</i>
+                    </d-button>
+                  </d-input-group-addon>
+                </d-list-group-item>
+              </d-list-group>
+              <div v-if="!nodeForm.properties.recommenders || nodeForm.properties.recommenders.length === 0"
+                class="text-muted font-italic">
+                No connected recommenders.
+              </div>
+            </div>
+          </template>
+
           <!-- Recommend Global Properties -->
           <template v-if="nodeForm.type === 'recommend'">
             <div class="form-row">
@@ -106,7 +132,6 @@
             <div class="form-group">
               <label>Type</label>
               <d-select v-model="nodeForm.properties.type">
-                <option value="none">None</option>
                 <option value="fm">FM</option>
               </d-select>
             </div>
@@ -188,7 +213,6 @@
 
           <!-- User to User Specific Properties -->
           <template v-if="nodeForm.type === 'user-to-user'">
-            <h6 class="border-bottom pb-2 mb-3">User to User Settings</h6>
             <div class="form-group">
               <label>Name</label>
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
@@ -201,11 +225,15 @@
                 <option value="items">Items</option>
               </d-select>
             </div>
+            <div class="form-group"
+              v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
+              <label>Column</label>
+              <d-input v-model="nodeForm.properties.column" />
+            </div>
           </template>
 
           <!-- Item to Item Specific Properties -->
           <template v-if="nodeForm.type === 'item-to-item'">
-            <h6 class="border-bottom pb-2 mb-3">Item to Item Settings</h6>
             <div class="form-group">
               <label>Name</label>
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
@@ -216,10 +244,10 @@
                 <option value="embedding">Embedding</option>
                 <option value="tags">Tags</option>
                 <option value="users">Users</option>
-                <option value="chat">Chat</option>
               </d-select>
             </div>
-            <div class="form-group" v-if="nodeForm.properties.type === 'embedding'">
+            <div class="form-group"
+              v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
               <label>Column</label>
               <d-input v-model="nodeForm.properties.column" />
             </div>
@@ -297,6 +325,7 @@ class IconNodeModel extends HtmlNodeModel {
 
 class IconNode extends HtmlNode {
   setHtml(rootEl) {
+    rootEl.innerHTML = '';
     const { text, properties, type } = this.props.model;
     const el = document.createElement('div');
     el.className = 'card';
@@ -304,7 +333,9 @@ class IconNode extends HtmlNode {
     // Determine icon based on type
     let iconName = 'settings'; // Default icon
     let nodeText = '';
-    if (text) {
+    if (properties && properties.name) {
+      nodeText = properties.name;
+    } else if (text) {
       nodeText = typeof text === 'object' ? text.value : text;
     }
 
@@ -374,6 +405,8 @@ export default {
           return 'Edit User to User';
         case 'item-to-item':
           return 'Edit Item to Item';
+        case 'fallback':
+          return 'Edit Fallback';
         default:
           return 'Edit Node';
       }
@@ -385,10 +418,15 @@ export default {
       grid: true,
       nodeTextEdit: false,
       edgeTextEdit: false,
+      edgeType: 'bezier',
       keyboard: {
         enabled: true,
       },
       style: {
+        edge: {
+          stroke: '#007bff',
+          strokeWidth: 1,
+        },
         bezier: {
           strokeWidth: 1,
           stroke: '#007bff',
@@ -426,16 +464,38 @@ export default {
     // Event Listeners
     this.lf.on('node:dbclick', this.handleNodeDbClick);
 
+    this.lf.on('edge:add,connection:add,edge:exchange-node', ({ data }) => {
+      if (data.targetNodeId === 'fallback' && data.type !== 'dashed-edge') {
+        this.lf.changeEdgeType(data.id, 'dashed-edge');
+      } else if (data.targetNodeId !== 'fallback' && data.type === 'dashed-edge') {
+        this.lf.changeEdgeType(data.id, 'bezier');
+      }
+    });
+
     // Keyboard Shortcuts
     this.lf.keyboard.on(['backspace', 'delete'], () => {
       const { nodes, edges } = this.lf.getSelectElements(true);
+      const deletedNodeIds = new Set();
+
       nodes.forEach((node) => {
         const nodeModel = this.lf.getNodeModelById(node.id);
         if (nodeModel && nodeModel.deletable !== false) {
           this.lf.deleteNode(node.id);
+          deletedNodeIds.add(node.id);
         }
       });
+
       edges.forEach((edge) => {
+        const sourceNodeModel = this.lf.getNodeModelById(edge.sourceNodeId);
+        const targetNodeModel = this.lf.getNodeModelById(edge.targetNodeId);
+        // Prevent deleting edges from Data Source unless the node itself is deleted
+        if (sourceNodeModel && sourceNodeModel.type === 'data-source' && !deletedNodeIds.has(edge.sourceNodeId)) {
+          return;
+        }
+        // Prevent deleting edges connected to Recommend node
+        if (targetNodeModel && targetNodeModel.type === 'recommend') {
+          return;
+        }
         this.lf.deleteEdge(edge.id);
       });
     });
@@ -679,13 +739,74 @@ export default {
         text = typeof data.text === 'object' ? data.text.value : data.text;
       }
       this.originalText = text;
+
+      const properties = data.properties || {};
+
+      // For fallback nodes, populate recommenders list with order
+      if (data.type === 'fallback') {
+        const connectedRecommenders = this.getConnectedRecommenders(data.id);
+        const existingRecommenders = properties.recommenders || [];
+
+        // Merge: Keep existing order, add new ones at the end
+        const merged = [...existingRecommenders.filter(r => connectedRecommenders.includes(r))];
+        connectedRecommenders.forEach(r => {
+          if (!merged.includes(r)) {
+            merged.push(r);
+          }
+        });
+        properties.recommenders = merged;
+      }
+
       this.nodeForm = JSON.parse(JSON.stringify({
         id: data.id,
         type: data.type,
         text,
-        properties: data.properties || {},
+        properties,
       }));
       this.showNodeModal = true;
+    },
+    getConnectedRecommenders(nodeId) {
+      const graphData = this.lf.getGraphData();
+      const nodeMap = graphData.nodes.reduce((acc, n) => ({ ...acc, [n.id]: n }), {});
+      const recommenders = [];
+
+      graphData.edges.forEach(edge => {
+        if (edge.targetNodeId === nodeId) {
+          const sourceNode = nodeMap[edge.sourceNodeId];
+          if (sourceNode) {
+            const name = this.getRecommenderName(sourceNode);
+            if (name) recommenders.push(name);
+          }
+        }
+      });
+      return recommenders;
+    },
+    getRecommenderName(sourceNode) {
+      if (sourceNode.type === 'latest') {
+        return 'latest';
+      } else if (sourceNode.type === 'collaborative') {
+        return 'collaborative';
+      } else {
+        const p = sourceNode.properties;
+        if (p && p.name) {
+          if (sourceNode.type === 'non-personalized') {
+            return `non-personalized/${p.name}`;
+          } else if (sourceNode.type === 'user-to-user') {
+            return `user-to-user/${p.name}`;
+          } else if (sourceNode.type === 'item-to-item') {
+            return `item-to-item/${p.name}`;
+          }
+        }
+      }
+      return null;
+    },
+    moveRecommender(index, direction) {
+      const list = this.nodeForm.properties.recommenders;
+      const newIndex = index + direction;
+      if (newIndex >= 0 && newIndex < list.length) {
+        const item = list.splice(index, 1)[0];
+        list.splice(newIndex, 0, item);
+      }
     },
     syncNodeName(name) {
       this.nodeForm.text = name;
@@ -694,6 +815,7 @@ export default {
       }
       if (this.nodeForm.id) {
         this.lf.updateText(this.nodeForm.id, name);
+        this.lf.setProperties(this.nodeForm.id, { ...this.nodeForm.properties });
       }
     },
     closeNodeModal() {
@@ -709,7 +831,7 @@ export default {
           }
         }
         this.lf.updateText(this.nodeForm.id, this.nodeForm.text);
-        this.lf.setProperties(this.nodeForm.id, this.nodeForm.properties);
+        this.lf.setProperties(this.nodeForm.id, { ...this.nodeForm.properties });
       }
       this.closeNodeModal();
     },
@@ -779,57 +901,52 @@ export default {
         nodeMap[node.id] = node;
       });
 
+      // Build connections map
+      const connections = { ranker: [], fallback: [] };
+
       data.edges.forEach((edge) => {
         const targetNode = nodeMap[edge.targetNodeId];
         const sourceNode = nodeMap[edge.sourceNodeId];
         if (!targetNode || !sourceNode) return;
 
         let targetType = '';
-        if (targetNode.text === 'Ranker' || (targetNode.properties && targetNode.properties.recommend && targetNode.properties.recommend.ranker)) {
+        if (targetNode.type === 'ranker') {
           targetType = 'ranker';
-        } else if (targetNode.text === 'Fallback' || (targetNode.properties && targetNode.properties.recommend && targetNode.properties.recommend.fallback)) {
+        } else if (targetNode.type === 'fallback') {
           targetType = 'fallback';
         }
 
         if (targetType) {
-          const recommenders = [];
-          // Determine source recommender names
-          let sourceText = sourceNode.text;
-          if (sourceText && typeof sourceText === 'object') {
-            sourceText = sourceText.value;
-          }
-
-          if (sourceText === 'Latest') {
-            recommenders.push('latest');
-          } else if (sourceNode.type === 'collaborative') {
-            recommenders.push('collaborative');
-          } else {
-            const p = sourceNode.properties;
-            if (p) {
-              if (sourceNode.type === 'non-personalized') {
-                recommenders.push(`non-personalized/${p.name}`);
-              } else if (sourceNode.type === 'user-to-user') {
-                recommenders.push(`user-to-user/${p.name}`);
-              } else if (sourceNode.type === 'item-to-item') {
-                recommenders.push(`item-to-item/${p.name}`);
-              }
-            }
-          }
-
-          if (targetType === 'ranker') {
-            newRecommend.ranker.recommenders.push(...recommenders);
-          } else {
-            newRecommend.fallback.recommenders.push(...recommenders);
+          const recName = this.getRecommenderName(sourceNode);
+          if (recName) {
+            connections[targetType].push(recName);
           }
         }
       });
 
-      // Unique recommenders
-      newRecommend.ranker.recommenders = [...new Set(newRecommend.ranker.recommenders)];
-      newRecommend.fallback.recommenders = [...new Set(newRecommend.fallback.recommenders)];
+      // Assign to config with property order respect
+      ['ranker', 'fallback'].forEach(type => {
+        const connected = connections[type];
+        // Find the corresponding node in graph data to get properties
+        const node = data.nodes.find(n => n.type === type);
+        let finalOrder = [];
 
-      // Update config
-      this.config.recommend = newRecommend;
+        if (node && node.properties && node.properties.recommenders) {
+          // Use saved order, filter out disconnected
+          finalOrder = node.properties.recommenders.filter(r => connected.includes(r));
+          // Append any new connections not in saved order
+          connected.forEach(r => {
+            if (!finalOrder.includes(r)) {
+              finalOrder.push(r);
+            }
+          });
+        } else {
+          finalOrder = connected;
+        }
+
+        // De-duplicate just in case
+        newRecommend[type].recommenders = [...new Set(finalOrder)];
+      });
     },
     jsonToToml(obj) {
       let output = '';
@@ -987,9 +1104,12 @@ export default {
         };
 
         if (type === 'latest') {
-          newNode.properties = {};
+          newNode.text = 'Latest';
+          newNode.properties = { readOnly: true };
         } else if (type === 'collaborative') {
+          newNode.text = 'Collaborative';
           newNode.properties = {
+            fixedName: true,
             fit_period: '60m',
             fit_epoch: 10,
             optimize_period: '60m',
