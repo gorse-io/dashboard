@@ -920,7 +920,11 @@ export default {
       }).then((response) => {
         this.previewResult = JSON.stringify(response.data, null, 2);
       }).catch((error) => {
-        this.previewError = error.message;
+        if (error.response && error.response.data) {
+          this.previewError = error.response.data;
+        } else {
+          this.previewError = error.message;
+        }
       }).finally(() => {
         this.previewLoading = false;
       });
