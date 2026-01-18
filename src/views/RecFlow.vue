@@ -23,10 +23,15 @@
           <i class="material-icons mr-2 text-primary">people</i>
           <span>User to User</span>
         </div>
-        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'item-to-item')">
           <i class="material-icons mr-2 text-primary">apps</i>
           <span>Item to Item</span>
+        </div>
+        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+          draggable="true" @dragstart="dragStart($event, 'external')">
+          <i class="material-icons mr-2 text-primary">cloud_queue</i>
+          <span>External</span>
         </div>
       </div>
       <div class="col-12 col-sm-4 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
@@ -47,7 +52,7 @@
     </div>
 
     <!-- Node Property Modal -->
-    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered>
+    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered :size="nodeForm.type === 'external' ? 'lg' : null">
       <d-modal-header>
         <d-modal-title>{{ modalTitle }}</d-modal-title>
       </d-modal-header>
@@ -253,6 +258,35 @@
             </div>
           </template>
 
+          <!-- External Recommender Properties -->
+          <template v-if="nodeForm.type === 'external'">
+            <div class="form-group">
+              <label>Name</label>
+              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
+            </div>
+            <div class="form-group">
+              <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
+              <div ref="monacoEditor" class="monaco-container"></div>
+              <small class="text-muted" v-if="monacoError">{{ monacoError }}</small>
+            </div>
+            <div class="form-group">
+              <d-input-group>
+                <d-input placeholder="User ID" v-model="previewUserId" />
+                <d-input-group-addon append>
+                  <d-button type="button" theme="primary" @click="runExternalScript" :disabled="previewLoading">
+                    <i class="material-icons">play_arrow</i>
+                  </d-button>
+                </d-input-group-addon>
+              </d-input-group>
+            </div>
+            <div class="form-group" v-if="previewResult || previewError">
+              <label>Result</label>
+              <pre class="bg-light p-2 rounded border" v-if="!previewError"
+                style="max-height: 200px; overflow: auto;">{{ previewResult }}</pre>
+              <d-alert theme="danger" show v-else>{{ previewError }}</d-alert>
+            </div>
+          </template>
+
           <div class="text-right pt-3">
             <d-button type="button" theme="secondary" class="mr-2" @click="closeNodeModal">Cancel</d-button>
             <d-button type="submit" theme="primary">Save</d-button>
@@ -347,6 +381,7 @@ class IconNode extends HtmlNode {
     else if (type === 'ranker') iconName = 'sort';
     else if (type === 'fallback') iconName = 'history';
     else if (type === 'latest') iconName = 'new_releases';
+    else if (type === 'external') iconName = 'cloud_queue';
 
     let width = 270;
     if (type === 'data-source') {
@@ -386,6 +421,13 @@ export default {
         properties: {},
       },
       config: null,
+      monaco: null,
+      monacoEditor: null,
+      monacoError: '',
+      previewUserId: '',
+      previewResult: null,
+      previewError: null,
+      previewLoading: false,
     };
   },
   computed: {
@@ -405,10 +447,23 @@ export default {
           return 'Edit User to User';
         case 'item-to-item':
           return 'Edit Item to Item';
+        case 'external':
+          return 'Edit External';
         case 'fallback':
           return 'Edit Fallback';
         default:
           return 'Edit Node';
+      }
+    },
+  },
+  watch: {
+    showNodeModal(val) {
+      if (val && this.nodeForm.type === 'external') {
+        this.$nextTick(() => {
+          this.initMonaco();
+        });
+      } else if (!val) {
+        this.disposeMonaco();
       }
     },
   },
@@ -450,6 +505,7 @@ export default {
       'non-personalized',
       'user-to-user',
       'item-to-item',
+      'external',
       'icon-node', // Keep generic fallback
     ];
 
@@ -670,6 +726,24 @@ export default {
         });
       }
 
+      // External
+      if (recommend.external) {
+        recommend.external.forEach((item) => {
+          const id = `external-${item.name}`;
+          const node = {
+            id,
+            type: 'external',
+            text: item.name,
+            properties: {
+              ...item,
+            },
+          };
+          nodes.push(node);
+          sourceNodeMap[`external/${item.name}`] = id;
+          edges.push({ sourceNodeId: 'data-source', targetNodeId: id, type: 'bezier' });
+        });
+      }
+
       // 3. Connect Sources to Ranker
       const rankerRecommenders = recommend.ranker.recommenders || [];
       rankerRecommenders.forEach((rec) => {
@@ -786,6 +860,8 @@ export default {
         return 'latest';
       } else if (sourceNode.type === 'collaborative') {
         return 'collaborative';
+      } else if (sourceNode.type === 'external') {
+        return sourceNode.properties && sourceNode.properties.name ? `external/${sourceNode.properties.name}` : null;
       }
       const p = sourceNode.properties;
       if (p && p.name) {
@@ -820,13 +896,41 @@ export default {
     },
     closeNodeModal() {
       this.showNodeModal = false;
+      this.previewUserId = '';
+      this.previewResult = null;
+      this.previewError = null;
+      this.previewLoading = false;
+      this.disposeMonaco();
+    },
+    runExternalScript() {
+      this.previewLoading = true;
+      this.previewError = null;
+      this.previewResult = null;
+
+      const script = this.nodeForm.properties.script || '';
+      // Base64 encode the script
+      const encodedScript = window.btoa(encodeURIComponent(script).replace(/%([0-9A-F]{2})/g,
+        (match, p1) => String.fromCharCode(`0x${p1}`)));
+
+      axios.get('/api/dashboard/external', {
+        params: {
+          'user-id': this.previewUserId,
+          script: encodedScript,
+        },
+      }).then((response) => {
+        this.previewResult = JSON.stringify(response.data, null, 2);
+      }).catch((error) => {
+        this.previewError = error.message;
+      }).finally(() => {
+        this.previewLoading = false;
+      });
     },
     updateNode() {
       if (this.nodeForm.id) {
         // Sync text from name for relevant types
         const rec = this.nodeForm.properties;
         if (rec) {
-          if (this.nodeForm.type === 'user-to-user' || this.nodeForm.type === 'item-to-item' || this.nodeForm.type === 'non-personalized') {
+          if (['user-to-user', 'item-to-item', 'non-personalized', 'external'].includes(this.nodeForm.type)) {
             this.nodeForm.text = rec.name;
           }
         }
@@ -840,6 +944,41 @@ export default {
       this.exportData = this.jsonToToml({ recommend: this.config.recommend });
       this.showExportModal = true;
     },
+    async initMonaco() {
+      try {
+        this.monacoError = '';
+        if (!this.monaco) {
+          this.monaco = await import('monaco-editor');
+        }
+        const monaco = this.monaco;
+        const container = this.$refs.monacoEditor;
+        if (!container) return;
+        if (this.monacoEditor) {
+          this.monacoEditor.setValue(this.nodeForm.properties.script || '');
+          return;
+        }
+        this.monacoEditor = monaco.editor.create(container, {
+          value: this.nodeForm.properties.script || '',
+          language: 'javascript',
+          automaticLayout: true,
+          minimap: { enabled: false },
+          fontSize: 13,
+          lineNumbers: 'on',
+          theme: 'vs',
+        });
+        this.monacoEditor.onDidChangeModelContent(() => {
+          this.nodeForm.properties.script = this.monacoEditor.getValue();
+        });
+      } catch (err) {
+        this.monacoError = err.message || 'Failed to load Monaco editor';
+      }
+    },
+    disposeMonaco() {
+      if (this.monacoEditor) {
+        this.monacoEditor.dispose();
+        this.monacoEditor = null;
+      }
+    },
     syncGraphToConfig() {
       const data = this.lf.getGraphData();
       const newRecommend = {
@@ -849,6 +988,7 @@ export default {
         'non-personalized': [],
         'user-to-user': [],
         'item-to-item': [],
+        external: [],
         ranker: {
           ...this.config.recommend.ranker,
           recommenders: [],
@@ -876,6 +1016,8 @@ export default {
           newRecommend['user-to-user'].push({ ...props });
         } else if (node.type === 'item-to-item') {
           newRecommend['item-to-item'].push({ ...props });
+        } else if (node.type === 'external') {
+          newRecommend.external.push({ ...props });
         } else if (node.type === 'recommend') {
           if (props.cache_size !== undefined) newRecommend.cache_size = props.cache_size;
           if (props.cache_expire !== undefined) newRecommend.cache_expire = props.cache_expire;
@@ -947,6 +1089,8 @@ export default {
         // De-duplicate just in case
         newRecommend[type].recommenders = [...new Set(finalOrder)];
       });
+
+      this.config.recommend = newRecommend;
     },
     jsonToToml(obj) {
       let output = '';
@@ -1051,20 +1195,13 @@ export default {
       const existingNames = new Set();
 
       nodes.forEach((node) => {
-        const props = node.properties;
-        if (!props || !props.recommend) return;
-
-        let name = null;
-        if (type === 'NonPersonalized' && props.recommend.non_personalized && props.recommend.non_personalized.length > 0) {
-          name = props.recommend.non_personalized[0].name;
-        } else if (type === 'User to User' && props.recommend.user_to_user && props.recommend.user_to_user.length > 0) {
-          name = props.recommend.user_to_user[0].name;
-        } else if (type === 'Item to Item' && props.recommend.item_to_item && props.recommend.item_to_item.length > 0) {
-          name = props.recommend.item_to_item[0].name;
-        }
-
-        if (name) {
-          existingNames.add(name);
+        if (node.type !== type) return;
+        const props = node.properties || {};
+        if (props.name) {
+          existingNames.add(props.name);
+        } else if (node.text) {
+          const text = typeof node.text === 'object' ? node.text.value : node.text;
+          existingNames.add(text);
         }
       });
 
@@ -1141,13 +1278,20 @@ export default {
             type: 'embedding',
             column: 'item.Labels.embedding',
           };
+        } else if (type === 'external') {
+          const name = this.getUniqueName('new_external', type);
+          newNode.text = name;
+          newNode.properties = {
+            name,
+            script: '',
+          };
         }
 
         // Generate a random ID
         newNode.id = Math.random().toString(36).substr(2, 9);
         this.lf.addNode(newNode);
 
-        if (['non-personalized', 'user-to-user', 'item-to-item', 'latest', 'collaborative'].includes(type)) {
+        if (['non-personalized', 'user-to-user', 'item-to-item', 'latest', 'collaborative', 'external'].includes(type)) {
           this.lf.addEdge({
             sourceNodeId: 'data-source',
             targetNodeId: newNode.id,
@@ -1166,5 +1310,11 @@ export default {
 .logic-flow-view {
   height: 75vh;
   width: 100%;
+}
+
+.monaco-container {
+  height: 260px;
+  border: 1px solid #e1e5eb;
+  border-radius: 4px;
 }
 </style>

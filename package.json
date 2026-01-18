@@ -21,6 +21,7 @@
     "jsonpath": "^1.1.1",
     "material-icons": "^1.13.1",
     "moment": "^2.29.1",
+    "monaco-editor": "0.30.1",
     "numeral": "^2.0.6",
     "nunjucks": "^3.2.4",
     "shards-ui": "^2.1.0",
