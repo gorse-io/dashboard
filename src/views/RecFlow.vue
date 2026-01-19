@@ -138,38 +138,60 @@
               <label>Type</label>
               <d-select v-model="nodeForm.properties.type">
                 <option value="fm">FM</option>
+                <option value="llm">LLM</option>
               </d-select>
             </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label>Fit Period</label>
-                <d-input v-model="nodeForm.properties.fit_period" />
-              </div>
-              <div class="form-group col-md-6">
-                <label>Fit Epoch</label>
-                <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label>Optimize Period</label>
-                <d-input v-model="nodeForm.properties.optimize_period" />
-              </div>
-              <div class="form-group col-md-6">
-                <label>Optimize Trials</label>
-                <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label>Cache Expire</label>
-                <d-input v-model="nodeForm.properties.cache_expire" />
-              </div>
-              <div class="form-group col-md-6">
-                <label>Early Stopping Patience</label>
-                <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
+            <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
+              <label>Prompt</label>
+              <textarea
+                class="form-control"
+                rows="6"
+                v-model="nodeForm.properties.prompt"
+                style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"
+              ></textarea>
+              <div class="mt-3">
+                <d-input-group>
+                  <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
+                  <d-input-group-addon append>
+                    <d-button type="button" theme="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
+                      <i class="material-icons">play_arrow</i>
+                    </d-button>
+                  </d-input-group-addon>
+                </d-input-group>
               </div>
             </div>
+            <template v-else>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Fit Period</label>
+                  <d-input v-model="nodeForm.properties.fit_period" />
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Fit Epoch</label>
+                  <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Optimize Period</label>
+                  <d-input v-model="nodeForm.properties.optimize_period" />
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Optimize Trials</label>
+                  <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Cache Expire</label>
+                  <d-input v-model="nodeForm.properties.cache_expire" />
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Early Stopping Patience</label>
+                  <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
+                </div>
+              </div>
+            </template>
           </template>
 
           <!-- Collaborative Specific Properties -->
@@ -428,6 +450,8 @@ export default {
       previewResult: null,
       previewError: null,
       previewLoading: false,
+      rankerPreviewUserId: '',
+      rankerPreviewLoading: false,
     };
   },
   computed: {
@@ -900,6 +924,8 @@ export default {
       this.previewResult = null;
       this.previewError = null;
       this.previewLoading = false;
+      this.rankerPreviewUserId = '';
+      this.rankerPreviewLoading = false;
       this.disposeMonaco();
     },
     runExternalScript() {
@@ -909,8 +935,10 @@ export default {
 
       const script = this.nodeForm.properties.script || '';
       // Base64 encode the script
-      const encodedScript = window.btoa(encodeURIComponent(script).replace(/%([0-9A-F]{2})/g,
-        (match, p1) => String.fromCharCode(`0x${p1}`)));
+      const encodedScript = window.btoa(encodeURIComponent(script).replace(
+        /%([0-9A-F]{2})/g,
+        (match, p1) => String.fromCharCode(`0x${p1}`),
+      ));
 
       axios.get('/api/dashboard/external', {
         params: {
@@ -982,6 +1010,11 @@ export default {
         this.monacoEditor.dispose();
         this.monacoEditor = null;
       }
+    },
+    previewRanker() {
+      // TODO: wire up ranker preview API
+      this.rankerPreviewLoading = true;
+      this.rankerPreviewLoading = false;
     },
     syncGraphToConfig() {
       const data = this.lf.getGraphData();
