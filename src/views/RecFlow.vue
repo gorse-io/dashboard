@@ -2,7 +2,7 @@
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-8 text-center text-sm-left mb-0 d-flex align-items-center">
+      <div class="col-12 col-sm-9 text-center text-sm-left mb-0 d-flex align-items-center">
         <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'latest')">
           <i class="material-icons mr-2 text-primary">new_releases</i>
@@ -28,13 +28,18 @@
           <i class="material-icons mr-2 text-primary">apps</i>
           <span>Item to Item</span>
         </div>
-        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'external')">
           <i class="material-icons mr-2 text-primary">cloud_queue</i>
           <span>External</span>
         </div>
+        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+          draggable="true" @dragstart="dragStart($event, 'ranker')">
+          <i class="material-icons mr-2 text-primary">sort</i>
+          <span>Ranker</span>
+        </div>
       </div>
-      <div class="col-12 col-sm-4 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
+      <div class="col-12 col-sm-3 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
         <d-button theme="white" class="mr-2" @click="exportFlow">Export</d-button>
         <d-button theme="primary" @click="saveFlow">Save</d-button>
       </div>
@@ -52,7 +57,8 @@
     </div>
 
     <!-- Node Property Modal -->
-    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered :size="nodeForm.type === 'external' ? 'lg' : null">
+    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered
+      :size="(nodeForm.type === 'external' || nodeForm.type === 'ranker') ? 'lg' : null">
       <d-modal-header>
         <d-modal-title>{{ modalTitle }}</d-modal-title>
       </d-modal-header>
@@ -138,38 +144,73 @@
               <label>Type</label>
               <d-select v-model="nodeForm.properties.type">
                 <option value="fm">FM</option>
+                <option value="llm">LLM</option>
               </d-select>
             </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label>Fit Period</label>
-                <d-input v-model="nodeForm.properties.fit_period" />
+            <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Prompt Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                      target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
+                  <textarea class="form-control" rows="8" v-model="nodeForm.properties.prompt"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
+                  <div class="mt-1">
+                    <d-input-group>
+                      <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
+                      <d-input-group-addon append>
+                        <d-button type="button" theme="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
+                          <i class="material-icons">play_arrow</i>
+                        </d-button>
+                      </d-input-group-addon>
+                    </d-input-group>
+                  </div>
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Prompt Preview</label>
+                  <textarea class="form-control" rows="10" readonly
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult }}</textarea>
+                </div>
               </div>
-              <div class="form-group col-md-6">
-                <label>Fit Epoch</label>
-                <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
+              <div class="form-group" v-if="rankerResult || rankerResultError || rankerPreviewError">
+                <label>Result</label>
+                <textarea class="form-control" rows="6" readonly v-if="rankerResult && !rankerResultError"
+                  style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerResult }}</textarea>
+                <d-alert theme="danger" show class="mt-2" v-if="rankerPreviewError">{{ rankerPreviewError }}</d-alert>
+                <d-alert theme="danger" show class="mt-2" v-if="rankerResultError">{{ rankerResultError }}</d-alert>
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label>Optimize Period</label>
-                <d-input v-model="nodeForm.properties.optimize_period" />
+            <template v-else>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Fit Period</label>
+                  <d-input v-model="nodeForm.properties.fit_period" />
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Fit Epoch</label>
+                  <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
+                </div>
               </div>
-              <div class="form-group col-md-6">
-                <label>Optimize Trials</label>
-                <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Optimize Period</label>
+                  <d-input v-model="nodeForm.properties.optimize_period" />
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Optimize Trials</label>
+                  <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
+                </div>
               </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label>Cache Expire</label>
-                <d-input v-model="nodeForm.properties.cache_expire" />
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Cache Expire</label>
+                  <d-input v-model="nodeForm.properties.cache_expire" />
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Early Stopping Patience</label>
+                  <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
+                </div>
               </div>
-              <div class="form-group col-md-6">
-                <label>Early Stopping Patience</label>
-                <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
-              </div>
-            </div>
+            </template>
           </template>
 
           <!-- Collaborative Specific Properties -->
@@ -265,7 +306,8 @@
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
             <div class="form-group">
-              <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
+              <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank"
+                  class="ml-1"><i class="material-icons">help_outline</i></a></label>
               <div ref="monacoEditor" class="monaco-container"></div>
               <small class="text-muted" v-if="monacoError">{{ monacoError }}</small>
             </div>
@@ -345,7 +387,7 @@ class IconNodeModel extends HtmlNodeModel {
     this.text.editable = false;
 
     // Prevent deletion of essential nodes
-    if (['data-source', 'recommend', 'ranker', 'fallback'].includes(type)) {
+    if (['data-source', 'recommend', 'fallback'].includes(type)) {
       this.deletable = false;
     }
   }
@@ -428,6 +470,12 @@ export default {
       previewResult: null,
       previewError: null,
       previewLoading: false,
+      rankerPreviewUserId: '',
+      rankerPreviewResult: null,
+      rankerResult: null,
+      rankerPreviewError: null,
+      rankerPreviewLoading: false,
+      rankerResultError: null,
     };
   },
   computed: {
@@ -521,6 +569,30 @@ export default {
     this.lf.on('node:dbclick', this.handleNodeDbClick);
 
     this.lf.on('edge:add,connection:add,edge:exchange-node', ({ data }) => {
+      const sourceModel = this.lf.getNodeModelById(data.sourceNodeId);
+      const targetModel = this.lf.getNodeModelById(data.targetNodeId);
+      const hasRanker = this.lf.getGraphData().nodes.some(n => n.type === 'ranker');
+
+      if (sourceModel && targetModel && targetModel.type === 'recommend' && this.isRecommenderType(sourceModel.type)) {
+        if (hasRanker) {
+          this.lf.deleteEdge(data.id);
+          this.showDanger('Ranker exists: Recommender nodes must connect to Ranker, not Recommend.');
+          return;
+        }
+
+        const recommendEdges = this.lf.getGraphData().edges.filter((edge) => {
+          if (edge.id === data.id) return false;
+          const src = this.lf.getNodeModelById(edge.sourceNodeId);
+          return edge.targetNodeId === 'recommend' && src && this.isRecommenderType(src.type);
+        });
+
+        if (recommendEdges.length >= 1) {
+          this.lf.deleteEdge(data.id);
+          this.showDanger('Ranker is disabled: only one Recommender can connect to Recommend.');
+          return;
+        }
+      }
+
       if (data.targetNodeId === 'fallback' && data.type !== 'dashed-edge') {
         this.lf.changeEdgeType(data.id, 'dashed-edge');
       } else if (data.targetNodeId !== 'fallback' && data.type === 'dashed-edge') {
@@ -532,10 +604,19 @@ export default {
     this.lf.keyboard.on(['backspace', 'delete'], () => {
       const { nodes, edges } = this.lf.getSelectElements(true);
       const deletedNodeIds = new Set();
+      const deletedRankerIds = new Set();
+
+      const graphData = this.lf.getGraphData();
+      const rankerIncoming = graphData.edges
+        .filter(e => e.targetNodeId === 'ranker')
+        .map(e => e.sourceNodeId);
 
       nodes.forEach((node) => {
         const nodeModel = this.lf.getNodeModelById(node.id);
         if (nodeModel && nodeModel.deletable !== false) {
+          if (nodeModel.type === 'ranker') {
+            deletedRankerIds.add(node.id);
+          }
           this.lf.deleteNode(node.id);
           deletedNodeIds.add(node.id);
         }
@@ -554,6 +635,24 @@ export default {
         }
         this.lf.deleteEdge(edge.id);
       });
+
+      if (deletedRankerIds.size > 0) {
+        const existingRecommendEdges = this.lf.getGraphData().edges.filter((edge) => {
+          const src = this.lf.getNodeModelById(edge.sourceNodeId);
+          return edge.targetNodeId === 'recommend' && src && this.isRecommenderType(src.type);
+        });
+
+        if (existingRecommendEdges.length === 0) {
+          const candidate = rankerIncoming.find(sourceId => !deletedNodeIds.has(sourceId));
+          if (candidate) {
+            this.lf.addEdge({
+              sourceNodeId: candidate,
+              targetNodeId: 'recommend',
+              type: 'bezier',
+            });
+          }
+        }
+      }
     });
 
     axios.get('/api/dashboard/config').then((response) => {
@@ -591,6 +690,7 @@ export default {
       const { recommend } = this.config;
       const nodes = [];
       const edges = [];
+      const rankerEnabled = recommend.ranker && recommend.ranker.type !== 'none';
 
       // 1. Fixed Nodes
       nodes.push({
@@ -603,15 +703,17 @@ export default {
         },
       });
 
-      nodes.push({
-        id: 'ranker',
-        type: 'ranker',
-        text: 'Ranker',
-        properties: {
-          fixedName: true,
-          ...recommend.ranker,
-        },
-      });
+      if (rankerEnabled) {
+        nodes.push({
+          id: 'ranker',
+          type: 'ranker',
+          text: 'Ranker',
+          properties: {
+            fixedName: true,
+            ...recommend.ranker,
+          },
+        });
+      }
 
       nodes.push({
         id: 'fallback',
@@ -638,7 +740,9 @@ export default {
       });
 
       // Ranker -> Recommend
-      edges.push({ sourceNodeId: 'ranker', targetNodeId: 'recommend', type: 'bezier' });
+      if (rankerEnabled) {
+        edges.push({ sourceNodeId: 'ranker', targetNodeId: 'recommend', type: 'bezier' });
+      }
       // Fallback -> Recommend
       edges.push({ sourceNodeId: 'fallback', targetNodeId: 'recommend', type: 'bezier' });
 
@@ -744,17 +848,42 @@ export default {
         });
       }
 
-      // 3. Connect Sources to Ranker
-      const rankerRecommenders = recommend.ranker.recommenders || [];
-      rankerRecommenders.forEach((rec) => {
-        const nodeId = sourceNodeMap[rec];
-        if (nodeId) {
-          const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'ranker');
-          if (!exists) {
-            edges.push({ sourceNodeId: nodeId, targetNodeId: 'ranker', type: 'bezier' });
+      const rankerRecommenders = (recommend.ranker && recommend.ranker.recommenders) || [];
+
+      if (!rankerEnabled) {
+        let directNodeId = null;
+        for (let i = 0; i < rankerRecommenders.length; i += 1) {
+          const nodeId = sourceNodeMap[rankerRecommenders[i]];
+          if (nodeId) {
+            directNodeId = nodeId;
+            break;
           }
         }
-      });
+        if (!directNodeId) {
+          const fallbackCandidate = Object.values(sourceNodeMap)[0];
+          directNodeId = fallbackCandidate || null;
+        }
+
+        if (directNodeId) {
+          const exists = edges.some(e => e.sourceNodeId === directNodeId && e.targetNodeId === 'recommend');
+          if (!exists) {
+            edges.push({ sourceNodeId: directNodeId, targetNodeId: 'recommend', type: 'bezier' });
+          }
+        }
+      }
+
+      // 3. Connect Sources to Ranker
+      if (rankerEnabled) {
+        rankerRecommenders.forEach((rec) => {
+          const nodeId = sourceNodeMap[rec];
+          if (nodeId) {
+            const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'ranker');
+            if (!exists) {
+              edges.push({ sourceNodeId: nodeId, targetNodeId: 'ranker', type: 'bezier' });
+            }
+          }
+        });
+      }
 
       // 4. Connect Sources to Fallback
       const fallbackRecommenders = recommend.fallback.recommenders || [];
@@ -876,6 +1005,10 @@ export default {
 
       return null;
     },
+    isRecommenderType(type) {
+      return ['latest', 'collaborative', 'non-personalized', 'user-to-user', 'item-to-item', 'external']
+        .includes(type);
+    },
     moveRecommender(index, direction) {
       const list = this.nodeForm.properties.recommenders;
       const newIndex = index + direction;
@@ -900,6 +1033,12 @@ export default {
       this.previewResult = null;
       this.previewError = null;
       this.previewLoading = false;
+      this.rankerPreviewUserId = '';
+      this.rankerPreviewResult = null;
+      this.rankerResult = null;
+      this.rankerPreviewError = null;
+      this.rankerPreviewLoading = false;
+      this.rankerResultError = null;
       this.disposeMonaco();
     },
     runExternalScript() {
@@ -909,8 +1048,10 @@ export default {
 
       const script = this.nodeForm.properties.script || '';
       // Base64 encode the script
-      const encodedScript = window.btoa(encodeURIComponent(script).replace(/%([0-9A-F]{2})/g,
-        (match, p1) => String.fromCharCode(`0x${p1}`)));
+      const encodedScript = window.btoa(encodeURIComponent(script).replace(
+        /%([0-9A-F]{2})/g,
+        (match, p1) => String.fromCharCode(`0x${p1}`),
+      ));
 
       axios.get('/api/dashboard/external', {
         params: {
@@ -983,6 +1124,76 @@ export default {
         this.monacoEditor = null;
       }
     },
+    previewRanker() {
+      this.rankerPreviewLoading = true;
+      this.rankerPreviewError = null;
+      this.rankerPreviewResult = null;
+      this.rankerResult = null;
+      this.rankerResultError = null;
+
+      const prompt = this.nodeForm.properties.prompt || '';
+      const encodedPrompt = window.btoa(encodeURIComponent(prompt).replace(
+        /%([0-9A-F]{2})/g,
+        (match, p1) => String.fromCharCode(`0x${p1}`),
+      ));
+
+      axios.get('/api/dashboard/ranker/prompt', {
+        params: {
+          prompt: encodedPrompt,
+          'user-id': this.rankerPreviewUserId,
+        },
+        headers: {
+          accept: 'application/json',
+        },
+      }).then((response) => {
+        const rendered = response.data;
+        const renderedText = typeof rendered === 'string' ? rendered : JSON.stringify(rendered, null, 2);
+        this.rankerPreviewResult = renderedText;
+
+        return axios({
+          method: 'post',
+          url: '/api/chat',
+          data: renderedText,
+          responseType: 'stream',
+          adapter: 'fetch',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        });
+      }).then((response) => {
+        if (!response || !response.data) return;
+        const reader = response.data.getReader();
+        const decoder = new TextDecoder();
+        this.rankerResult = '';
+
+        const readChunk = () => reader.read().then(({ done, value }) => {
+          if (done) return;
+          this.rankerResult += decoder.decode(value, { stream: true });
+          return readChunk();
+        });
+
+        return readChunk();
+      }).catch((error) => {
+        if (error.response && error.response.data) {
+          const errorText = typeof error.response.data === 'string'
+            ? error.response.data
+            : JSON.stringify(error.response.data, null, 2);
+          if (!this.rankerPreviewResult) {
+            this.rankerPreviewError = errorText;
+          } else {
+            this.rankerResultError = errorText;
+          }
+        } else {
+          if (!this.rankerPreviewResult) {
+            this.rankerPreviewError = error.message;
+          } else {
+            this.rankerResultError = error.message;
+          }
+        }
+      }).finally(() => {
+        this.rankerPreviewLoading = false;
+      });
+    },
     syncGraphToConfig() {
       const data = this.lf.getGraphData();
       const newRecommend = {
@@ -1048,7 +1259,7 @@ export default {
       });
 
       // Build connections map
-      const connections = { ranker: [], fallback: [] };
+      const connections = { ranker: [], fallback: [], recommend: [] };
 
       data.edges.forEach((edge) => {
         const targetNode = nodeMap[edge.targetNodeId];
@@ -1060,6 +1271,8 @@ export default {
           targetType = 'ranker';
         } else if (targetNode.type === 'fallback') {
           targetType = 'fallback';
+        } else if (targetNode.type === 'recommend') {
+          targetType = 'recommend';
         }
 
         if (targetType) {
@@ -1071,6 +1284,15 @@ export default {
       });
 
       // Assign to config with property order respect
+      const hasRankerNode = data.nodes.some(n => n.type === 'ranker');
+      if (!hasRankerNode) {
+        newRecommend.ranker = {
+          ...newRecommend.ranker,
+          type: 'none',
+          recommenders: [],
+        };
+      }
+
       ['ranker', 'fallback'].forEach((type) => {
         const connected = connections[type];
         // Find the corresponding node in graph data to get properties
@@ -1093,6 +1315,12 @@ export default {
         // De-duplicate just in case
         newRecommend[type].recommenders = [...new Set(finalOrder)];
       });
+
+      if (!hasRankerNode) {
+        const connected = connections.recommend;
+        const unique = [...new Set(connected)];
+        newRecommend.ranker.recommenders = unique.length > 0 ? [unique[0]] : [];
+      }
 
       this.config.recommend = newRecommend;
     },
@@ -1233,6 +1461,12 @@ export default {
             this.showDanger('Collaborative node already exists');
             return;
           }
+        } else if (type === 'ranker') {
+          const nodes = this.lf.getGraphData().nodes;
+          if (nodes.some(node => node.type === 'ranker')) {
+            this.showDanger('Ranker node already exists');
+            return;
+          }
         }
 
         const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY).canvasOverlayPosition;
@@ -1258,6 +1492,18 @@ export default {
             early_stopping: {
               patience: 10,
             },
+          };
+        } else if (type === 'ranker') {
+          newNode.text = 'Ranker';
+          newNode.properties = {
+            fixedName: true,
+            type: 'fm',
+            cache_expire: '120h',
+            recommenders: ['latest', 'collaborative', 'non-personalized/most_starred_weekly', 'item-to-item/neighbors', 'user-to-user/neighbors'],
+            fit_period: '60m',
+            fit_epoch: 100,
+            optimize_period: '360m',
+            optimize_trials: 10,
           };
         } else if (type === 'non-personalized') {
           const name = this.getUniqueName('new_non_personalized', type);
@@ -1294,6 +1540,37 @@ export default {
         // Generate a random ID
         newNode.id = Math.random().toString(36).substr(2, 9);
         this.lf.addNode(newNode);
+
+        if (type === 'ranker') {
+          const nodes = this.lf.getGraphData().nodes;
+          const recommendNode = nodes.find(node => node.type === 'recommend');
+          if (recommendNode) {
+            const hasEdge = this.lf.getGraphData().edges.some(edge => edge.sourceNodeId === newNode.id
+              && edge.targetNodeId === recommendNode.id);
+            if (!hasEdge) {
+              this.lf.addEdge({
+                sourceNodeId: newNode.id,
+                targetNodeId: recommendNode.id,
+                type: 'bezier',
+              });
+            }
+          }
+
+          const graphData = this.lf.getGraphData();
+          graphData.edges.forEach((edge) => {
+            const sourceNode = graphData.nodes.find(n => n.id === edge.sourceNodeId);
+            if (!sourceNode || !this.isRecommenderType(sourceNode.type)) return;
+            const targetNode = graphData.nodes.find(n => n.id === edge.targetNodeId);
+            if (targetNode && targetNode.type === 'recommend') {
+              this.lf.deleteEdge(edge.id);
+              this.lf.addEdge({
+                sourceNodeId: edge.sourceNodeId,
+                targetNodeId: newNode.id,
+                type: 'bezier',
+              });
+            }
+          });
+        }
 
         if (['non-personalized', 'user-to-user', 'item-to-item', 'latest', 'collaborative', 'external'].includes(type)) {
           this.lf.addEdge({
