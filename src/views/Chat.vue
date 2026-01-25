@@ -18,20 +18,13 @@
               <d-list-group-item class="p-3">
                 <d-row class="mb-3">
                   <d-col sm="12" md="12">
-                    <d-form-textarea :rows="3" :max-rows="6" @input="render_prompt($event)">
+                    <d-form-textarea :rows="3" :max-rows="6" v-model="prompt">
                     </d-form-textarea>
                   </d-col>
                 </d-row>
                 <d-row>
                   <d-col sm="12" md="12" class="text-right">
                     <d-button outline @click="send">Send</d-button>
-                  </d-col>
-                </d-row>
-                <d-row v-if="prompt">
-                  <d-col sm="12" md="12">
-                    <div class="p-3 mt-3 border rounded">
-                      <div v-html="prompt"></div>
-                    </div>
                   </d-col>
                 </d-row>
                 <d-row v-if="message">
@@ -52,14 +45,12 @@
 
 <script>
 import axios from 'axios';
-import nunjucks from 'nunjucks';
 
 export default {
   data() {
     return {
       prompt: '',
       message: '',
-      context: {},
     };
   },
   methods: {
@@ -89,9 +80,6 @@ export default {
       }).catch((error) => {
         this.message = error;
       });
-    },
-    render_prompt(event) {
-      this.prompt = nunjucks.renderString(event, this.context);
     },
   },
 };
