@@ -2,7 +2,7 @@
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-8 text-center text-sm-left mb-0 d-flex align-items-center">
+      <div class="col-12 col-sm-9 text-center text-sm-left mb-0 d-flex align-items-center">
         <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'latest')">
           <i class="material-icons mr-2 text-primary">new_releases</i>
@@ -28,13 +28,18 @@
           <i class="material-icons mr-2 text-primary">apps</i>
           <span>Item to Item</span>
         </div>
-        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'external')">
           <i class="material-icons mr-2 text-primary">cloud_queue</i>
           <span>External</span>
         </div>
+        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+          draggable="true" @dragstart="dragStart($event, 'ranker')">
+          <i class="material-icons mr-2 text-primary">sort</i>
+          <span>Ranker</span>
+        </div>
       </div>
-      <div class="col-12 col-sm-4 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
+      <div class="col-12 col-sm-3 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
         <d-button theme="white" class="mr-2" @click="exportFlow">Export</d-button>
         <d-button theme="primary" @click="saveFlow">Save</d-button>
       </div>
@@ -143,12 +148,8 @@
             </div>
             <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
               <label>Prompt</label>
-              <textarea
-                class="form-control"
-                rows="6"
-                v-model="nodeForm.properties.prompt"
-                style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"
-              ></textarea>
+              <textarea class="form-control" rows="6" v-model="nodeForm.properties.prompt"
+                style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
               <div class="mt-3">
                 <d-input-group>
                   <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
@@ -287,7 +288,8 @@
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
             <div class="form-group">
-              <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
+              <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank"
+                  class="ml-1"><i class="material-icons">help_outline</i></a></label>
               <div ref="monacoEditor" class="monaco-container"></div>
               <small class="text-muted" v-if="monacoError">{{ monacoError }}</small>
             </div>
@@ -367,7 +369,7 @@ class IconNodeModel extends HtmlNodeModel {
     this.text.editable = false;
 
     // Prevent deletion of essential nodes
-    if (['data-source', 'recommend', 'ranker', 'fallback'].includes(type)) {
+    if (['data-source', 'recommend', 'fallback'].includes(type)) {
       this.deletable = false;
     }
   }
@@ -545,6 +547,30 @@ export default {
     this.lf.on('node:dbclick', this.handleNodeDbClick);
 
     this.lf.on('edge:add,connection:add,edge:exchange-node', ({ data }) => {
+      const sourceModel = this.lf.getNodeModelById(data.sourceNodeId);
+      const targetModel = this.lf.getNodeModelById(data.targetNodeId);
+      const hasRanker = this.lf.getGraphData().nodes.some(n => n.type === 'ranker');
+
+      if (sourceModel && targetModel && targetModel.type === 'recommend' && this.isRecommenderType(sourceModel.type)) {
+        if (hasRanker) {
+          this.lf.deleteEdge(data.id);
+          this.showDanger('Ranker exists: Recommender nodes must connect to Ranker, not Recommend.');
+          return;
+        }
+
+        const recommendEdges = this.lf.getGraphData().edges.filter((edge) => {
+          if (edge.id === data.id) return false;
+          const src = this.lf.getNodeModelById(edge.sourceNodeId);
+          return edge.targetNodeId === 'recommend' && src && this.isRecommenderType(src.type);
+        });
+
+        if (recommendEdges.length >= 1) {
+          this.lf.deleteEdge(data.id);
+          this.showDanger('Ranker is disabled: only one Recommender can connect to Recommend.');
+          return;
+        }
+      }
+
       if (data.targetNodeId === 'fallback' && data.type !== 'dashed-edge') {
         this.lf.changeEdgeType(data.id, 'dashed-edge');
       } else if (data.targetNodeId !== 'fallback' && data.type === 'dashed-edge') {
@@ -556,10 +582,19 @@ export default {
     this.lf.keyboard.on(['backspace', 'delete'], () => {
       const { nodes, edges } = this.lf.getSelectElements(true);
       const deletedNodeIds = new Set();
+      const deletedRankerIds = new Set();
+
+      const graphData = this.lf.getGraphData();
+      const rankerIncoming = graphData.edges
+        .filter(e => e.targetNodeId === 'ranker')
+        .map(e => e.sourceNodeId);
 
       nodes.forEach((node) => {
         const nodeModel = this.lf.getNodeModelById(node.id);
         if (nodeModel && nodeModel.deletable !== false) {
+          if (nodeModel.type === 'ranker') {
+            deletedRankerIds.add(node.id);
+          }
           this.lf.deleteNode(node.id);
           deletedNodeIds.add(node.id);
         }
@@ -578,6 +613,24 @@ export default {
         }
         this.lf.deleteEdge(edge.id);
       });
+
+      if (deletedRankerIds.size > 0) {
+        const existingRecommendEdges = this.lf.getGraphData().edges.filter((edge) => {
+          const src = this.lf.getNodeModelById(edge.sourceNodeId);
+          return edge.targetNodeId === 'recommend' && src && this.isRecommenderType(src.type);
+        });
+
+        if (existingRecommendEdges.length === 0) {
+          const candidate = rankerIncoming.find(sourceId => !deletedNodeIds.has(sourceId));
+          if (candidate) {
+            this.lf.addEdge({
+              sourceNodeId: candidate,
+              targetNodeId: 'recommend',
+              type: 'bezier',
+            });
+          }
+        }
+      }
     });
 
     axios.get('/api/dashboard/config').then((response) => {
@@ -615,6 +668,7 @@ export default {
       const { recommend } = this.config;
       const nodes = [];
       const edges = [];
+      const rankerEnabled = recommend.ranker && recommend.ranker.type !== 'none';
 
       // 1. Fixed Nodes
       nodes.push({
@@ -627,15 +681,17 @@ export default {
         },
       });
 
-      nodes.push({
-        id: 'ranker',
-        type: 'ranker',
-        text: 'Ranker',
-        properties: {
-          fixedName: true,
-          ...recommend.ranker,
-        },
-      });
+      if (rankerEnabled) {
+        nodes.push({
+          id: 'ranker',
+          type: 'ranker',
+          text: 'Ranker',
+          properties: {
+            fixedName: true,
+            ...recommend.ranker,
+          },
+        });
+      }
 
       nodes.push({
         id: 'fallback',
@@ -662,7 +718,9 @@ export default {
       });
 
       // Ranker -> Recommend
-      edges.push({ sourceNodeId: 'ranker', targetNodeId: 'recommend', type: 'bezier' });
+      if (rankerEnabled) {
+        edges.push({ sourceNodeId: 'ranker', targetNodeId: 'recommend', type: 'bezier' });
+      }
       // Fallback -> Recommend
       edges.push({ sourceNodeId: 'fallback', targetNodeId: 'recommend', type: 'bezier' });
 
@@ -768,17 +826,42 @@ export default {
         });
       }
 
-      // 3. Connect Sources to Ranker
-      const rankerRecommenders = recommend.ranker.recommenders || [];
-      rankerRecommenders.forEach((rec) => {
-        const nodeId = sourceNodeMap[rec];
-        if (nodeId) {
-          const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'ranker');
-          if (!exists) {
-            edges.push({ sourceNodeId: nodeId, targetNodeId: 'ranker', type: 'bezier' });
+      const rankerRecommenders = (recommend.ranker && recommend.ranker.recommenders) || [];
+
+      if (!rankerEnabled) {
+        let directNodeId = null;
+        for (let i = 0; i < rankerRecommenders.length; i += 1) {
+          const nodeId = sourceNodeMap[rankerRecommenders[i]];
+          if (nodeId) {
+            directNodeId = nodeId;
+            break;
           }
         }
-      });
+        if (!directNodeId) {
+          const fallbackCandidate = Object.values(sourceNodeMap)[0];
+          directNodeId = fallbackCandidate || null;
+        }
+
+        if (directNodeId) {
+          const exists = edges.some(e => e.sourceNodeId === directNodeId && e.targetNodeId === 'recommend');
+          if (!exists) {
+            edges.push({ sourceNodeId: directNodeId, targetNodeId: 'recommend', type: 'bezier' });
+          }
+        }
+      }
+
+      // 3. Connect Sources to Ranker
+      if (rankerEnabled) {
+        rankerRecommenders.forEach((rec) => {
+          const nodeId = sourceNodeMap[rec];
+          if (nodeId) {
+            const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'ranker');
+            if (!exists) {
+              edges.push({ sourceNodeId: nodeId, targetNodeId: 'ranker', type: 'bezier' });
+            }
+          }
+        });
+      }
 
       // 4. Connect Sources to Fallback
       const fallbackRecommenders = recommend.fallback.recommenders || [];
@@ -899,6 +982,10 @@ export default {
       }
 
       return null;
+    },
+    isRecommenderType(type) {
+      return ['latest', 'collaborative', 'non-personalized', 'user-to-user', 'item-to-item', 'external']
+        .includes(type);
     },
     moveRecommender(index, direction) {
       const list = this.nodeForm.properties.recommenders;
@@ -1081,7 +1168,7 @@ export default {
       });
 
       // Build connections map
-      const connections = { ranker: [], fallback: [] };
+      const connections = { ranker: [], fallback: [], recommend: [] };
 
       data.edges.forEach((edge) => {
         const targetNode = nodeMap[edge.targetNodeId];
@@ -1093,6 +1180,8 @@ export default {
           targetType = 'ranker';
         } else if (targetNode.type === 'fallback') {
           targetType = 'fallback';
+        } else if (targetNode.type === 'recommend') {
+          targetType = 'recommend';
         }
 
         if (targetType) {
@@ -1104,6 +1193,15 @@ export default {
       });
 
       // Assign to config with property order respect
+      const hasRankerNode = data.nodes.some(n => n.type === 'ranker');
+      if (!hasRankerNode) {
+        newRecommend.ranker = {
+          ...newRecommend.ranker,
+          type: 'none',
+          recommenders: [],
+        };
+      }
+
       ['ranker', 'fallback'].forEach((type) => {
         const connected = connections[type];
         // Find the corresponding node in graph data to get properties
@@ -1126,6 +1224,12 @@ export default {
         // De-duplicate just in case
         newRecommend[type].recommenders = [...new Set(finalOrder)];
       });
+
+      if (!hasRankerNode) {
+        const connected = connections.recommend;
+        const unique = [...new Set(connected)];
+        newRecommend.ranker.recommenders = unique.length > 0 ? [unique[0]] : [];
+      }
 
       this.config.recommend = newRecommend;
     },
@@ -1266,6 +1370,12 @@ export default {
             this.showDanger('Collaborative node already exists');
             return;
           }
+        } else if (type === 'ranker') {
+          const nodes = this.lf.getGraphData().nodes;
+          if (nodes.some(node => node.type === 'ranker')) {
+            this.showDanger('Ranker node already exists');
+            return;
+          }
         }
 
         const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY).canvasOverlayPosition;
@@ -1291,6 +1401,18 @@ export default {
             early_stopping: {
               patience: 10,
             },
+          };
+        } else if (type === 'ranker') {
+          newNode.text = 'Ranker';
+          newNode.properties = {
+            fixedName: true,
+            type: 'fm',
+            cache_expire: '120h',
+            recommenders: ['latest', 'collaborative', 'non-personalized/most_starred_weekly', 'item-to-item/neighbors', 'user-to-user/neighbors'],
+            fit_period: '60m',
+            fit_epoch: 100,
+            optimize_period: '360m',
+            optimize_trials: 10,
           };
         } else if (type === 'non-personalized') {
           const name = this.getUniqueName('new_non_personalized', type);
@@ -1327,6 +1449,37 @@ export default {
         // Generate a random ID
         newNode.id = Math.random().toString(36).substr(2, 9);
         this.lf.addNode(newNode);
+
+        if (type === 'ranker') {
+          const nodes = this.lf.getGraphData().nodes;
+          const recommendNode = nodes.find(node => node.type === 'recommend');
+          if (recommendNode) {
+            const hasEdge = this.lf.getGraphData().edges.some(edge => edge.sourceNodeId === newNode.id
+              && edge.targetNodeId === recommendNode.id);
+            if (!hasEdge) {
+              this.lf.addEdge({
+                sourceNodeId: newNode.id,
+                targetNodeId: recommendNode.id,
+                type: 'bezier',
+              });
+            }
+          }
+
+          const graphData = this.lf.getGraphData();
+          graphData.edges.forEach((edge) => {
+            const sourceNode = graphData.nodes.find(n => n.id === edge.sourceNodeId);
+            if (!sourceNode || !this.isRecommenderType(sourceNode.type)) return;
+            const targetNode = graphData.nodes.find(n => n.id === edge.targetNodeId);
+            if (targetNode && targetNode.type === 'recommend') {
+              this.lf.deleteEdge(edge.id);
+              this.lf.addEdge({
+                sourceNodeId: edge.sourceNodeId,
+                targetNodeId: newNode.id,
+                type: 'bezier',
+              });
+            }
+          });
+        }
 
         if (['non-personalized', 'user-to-user', 'item-to-item', 'latest', 'collaborative', 'external'].includes(type)) {
           this.lf.addEdge({
