@@ -171,10 +171,12 @@
                     style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult }}</textarea>
                 </div>
               </div>
-              <div class="form-group" v-if="rankerPreviewResult">
+              <div class="form-group" v-if="rankerResult || rankerResultError || rankerPreviewError">
                 <label>Result</label>
-                <textarea class="form-control" rows="6" readonly
-                  style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult }}</textarea>
+                <textarea class="form-control" rows="6" readonly v-if="rankerResult && !rankerResultError"
+                  style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerResult }}</textarea>
+                <d-alert theme="danger" show class="mt-2" v-if="rankerPreviewError">{{ rankerPreviewError }}</d-alert>
+                <d-alert theme="danger" show class="mt-2" v-if="rankerResultError">{{ rankerResultError }}</d-alert>
               </div>
             </div>
             <template v-else>
@@ -470,8 +472,10 @@ export default {
       previewLoading: false,
       rankerPreviewUserId: '',
       rankerPreviewResult: null,
+      rankerResult: null,
       rankerPreviewError: null,
       rankerPreviewLoading: false,
+      rankerResultError: null,
     };
   },
   computed: {
@@ -1031,8 +1035,10 @@ export default {
       this.previewLoading = false;
       this.rankerPreviewUserId = '';
       this.rankerPreviewResult = null;
+      this.rankerResult = null;
       this.rankerPreviewError = null;
       this.rankerPreviewLoading = false;
+      this.rankerResultError = null;
       this.disposeMonaco();
     },
     runExternalScript() {
@@ -1122,18 +1128,67 @@ export default {
       this.rankerPreviewLoading = true;
       this.rankerPreviewError = null;
       this.rankerPreviewResult = null;
+      this.rankerResult = null;
+      this.rankerResultError = null;
 
-      axios.get('/api/dashboard/latest', {
+      const prompt = this.nodeForm.properties.prompt || '';
+      const encodedPrompt = window.btoa(encodeURIComponent(prompt).replace(
+        /%([0-9A-F]{2})/g,
+        (match, p1) => String.fromCharCode(`0x${p1}`),
+      ));
+
+      axios.get('/api/dashboard/ranker/prompt', {
         params: {
+          prompt: encodedPrompt,
           'user-id': this.rankerPreviewUserId,
         },
+        headers: {
+          accept: 'application/json',
+        },
       }).then((response) => {
-        this.rankerPreviewResult = JSON.stringify(response.data, null, 2);
+        const rendered = response.data;
+        const renderedText = typeof rendered === 'string' ? rendered : JSON.stringify(rendered, null, 2);
+        this.rankerPreviewResult = renderedText;
+
+        return axios({
+          method: 'post',
+          url: '/api/chat',
+          data: renderedText,
+          responseType: 'stream',
+          adapter: 'fetch',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        });
+      }).then((response) => {
+        if (!response || !response.data) return;
+        const reader = response.data.getReader();
+        const decoder = new TextDecoder();
+        this.rankerResult = '';
+
+        const readChunk = () => reader.read().then(({ done, value }) => {
+          if (done) return;
+          this.rankerResult += decoder.decode(value, { stream: true });
+          return readChunk();
+        });
+
+        return readChunk();
       }).catch((error) => {
         if (error.response && error.response.data) {
-          this.rankerPreviewError = error.response.data;
+          const errorText = typeof error.response.data === 'string'
+            ? error.response.data
+            : JSON.stringify(error.response.data, null, 2);
+          if (!this.rankerPreviewResult) {
+            this.rankerPreviewError = errorText;
+          } else {
+            this.rankerResultError = errorText;
+          }
         } else {
-          this.rankerPreviewError = error.message;
+          if (!this.rankerPreviewResult) {
+            this.rankerPreviewError = error.message;
+          } else {
+            this.rankerResultError = error.message;
+          }
         }
       }).finally(() => {
         this.rankerPreviewLoading = false;
