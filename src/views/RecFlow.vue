@@ -57,7 +57,8 @@
     </div>
 
     <!-- Node Property Modal -->
-    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered :size="nodeForm.type === 'external' ? 'lg' : null">
+    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered
+      :size="(nodeForm.type === 'external' || nodeForm.type === 'ranker') ? 'lg' : null">
       <d-modal-header>
         <d-modal-title>{{ modalTitle }}</d-modal-title>
       </d-modal-header>
@@ -147,18 +148,33 @@
               </d-select>
             </div>
             <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
-              <label>Prompt</label>
-              <textarea class="form-control" rows="6" v-model="nodeForm.properties.prompt"
-                style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
-              <div class="mt-3">
-                <d-input-group>
-                  <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
-                  <d-input-group-addon append>
-                    <d-button type="button" theme="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
-                      <i class="material-icons">play_arrow</i>
-                    </d-button>
-                  </d-input-group-addon>
-                </d-input-group>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Prompt Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                      target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
+                  <textarea class="form-control" rows="8" v-model="nodeForm.properties.prompt"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
+                  <div class="mt-1">
+                    <d-input-group>
+                      <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
+                      <d-input-group-addon append>
+                        <d-button type="button" theme="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
+                          <i class="material-icons">play_arrow</i>
+                        </d-button>
+                      </d-input-group-addon>
+                    </d-input-group>
+                  </div>
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Prompt Preview</label>
+                  <textarea class="form-control" rows="10" readonly
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult }}</textarea>
+                </div>
+              </div>
+              <div class="form-group" v-if="rankerPreviewResult">
+                <label>Result</label>
+                <textarea class="form-control" rows="6" readonly
+                  style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult }}</textarea>
               </div>
             </div>
             <template v-else>
@@ -453,6 +469,8 @@ export default {
       previewError: null,
       previewLoading: false,
       rankerPreviewUserId: '',
+      rankerPreviewResult: null,
+      rankerPreviewError: null,
       rankerPreviewLoading: false,
     };
   },
@@ -1012,6 +1030,8 @@ export default {
       this.previewError = null;
       this.previewLoading = false;
       this.rankerPreviewUserId = '';
+      this.rankerPreviewResult = null;
+      this.rankerPreviewError = null;
       this.rankerPreviewLoading = false;
       this.disposeMonaco();
     },
@@ -1099,9 +1119,25 @@ export default {
       }
     },
     previewRanker() {
-      // TODO: wire up ranker preview API
       this.rankerPreviewLoading = true;
-      this.rankerPreviewLoading = false;
+      this.rankerPreviewError = null;
+      this.rankerPreviewResult = null;
+
+      axios.get('/api/dashboard/latest', {
+        params: {
+          'user-id': this.rankerPreviewUserId,
+        },
+      }).then((response) => {
+        this.rankerPreviewResult = JSON.stringify(response.data, null, 2);
+      }).catch((error) => {
+        if (error.response && error.response.data) {
+          this.rankerPreviewError = error.response.data;
+        } else {
+          this.rankerPreviewError = error.message;
+        }
+      }).finally(() => {
+        this.rankerPreviewLoading = false;
+      });
     },
     syncGraphToConfig() {
       const data = this.lf.getGraphData();
