@@ -2,7 +2,7 @@
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-9 text-center text-sm-left mb-0 d-flex align-items-center">
+      <div class="col-12 col-sm-10 text-center text-sm-left mb-0 d-flex align-items-center">
         <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'latest')">
           <i class="material-icons mr-2 text-primary">new_releases</i>
@@ -33,13 +33,18 @@
           <i class="material-icons mr-2 text-primary">cloud_queue</i>
           <span>External</span>
         </div>
-        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'ranker')">
           <i class="material-icons mr-2 text-primary">sort</i>
           <span>Ranker</span>
         </div>
+        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+          draggable="true" @dragstart="dragStart($event, 'fallback')">
+          <i class="material-icons mr-2 text-primary">history</i>
+          <span>Fallback</span>
+        </div>
       </div>
-      <div class="col-12 col-sm-3 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
+      <div class="col-12 col-sm-2 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
         <d-button theme="white" class="mr-2" @click="exportFlow">Export</d-button>
         <d-button theme="primary" @click="saveFlow">Save</d-button>
       </div>
@@ -89,7 +94,7 @@
           </template>
 
           <!-- Fallback Specific Properties -->
-          <template v-if="nodeForm.type === 'fallback'">
+          <template v-if="nodeForm.type === 'fallback' && nodeForm.properties.recommenders && nodeForm.properties.recommenders.length">
             <div class="form-group">
               <label>Recommenders</label>
               <d-list-group>
@@ -107,10 +112,6 @@
                   </d-input-group-addon>
                 </d-list-group-item>
               </d-list-group>
-              <div v-if="!nodeForm.properties.recommenders || nodeForm.properties.recommenders.length === 0"
-                class="text-muted font-italic">
-                No connected recommenders.
-              </div>
             </div>
           </template>
 
@@ -387,7 +388,7 @@ class IconNodeModel extends HtmlNodeModel {
     this.text.editable = false;
 
     // Prevent deletion of essential nodes
-    if (['data-source', 'recommend', 'fallback'].includes(type)) {
+    if (['data-source', 'recommend'].includes(type)) {
       this.deletable = false;
     }
   }
@@ -691,6 +692,9 @@ export default {
       const nodes = [];
       const edges = [];
       const rankerEnabled = recommend.ranker && recommend.ranker.type !== 'none';
+      const fallbackHasRecommenders = recommend.fallback
+        && Array.isArray(recommend.fallback.recommenders)
+        && recommend.fallback.recommenders.length > 0;
 
       // 1. Fixed Nodes
       nodes.push({
@@ -715,15 +719,17 @@ export default {
         });
       }
 
-      nodes.push({
-        id: 'fallback',
-        type: 'fallback',
-        text: 'Fallback',
-        properties: {
-          fixedName: true,
-          ...recommend.fallback,
-        },
-      });
+      if (fallbackHasRecommenders) {
+        nodes.push({
+          id: 'fallback',
+          type: 'fallback',
+          text: 'Fallback',
+          properties: {
+            fixedName: true,
+            ...recommend.fallback,
+          },
+        });
+      }
 
       nodes.push({
         id: 'recommend',
@@ -744,7 +750,9 @@ export default {
         edges.push({ sourceNodeId: 'ranker', targetNodeId: 'recommend', type: 'bezier' });
       }
       // Fallback -> Recommend
-      edges.push({ sourceNodeId: 'fallback', targetNodeId: 'recommend', type: 'bezier' });
+      if (fallbackHasRecommenders) {
+        edges.push({ sourceNodeId: 'fallback', targetNodeId: 'recommend', type: 'bezier' });
+      }
 
       // 2. Candidate Source Nodes
       const sourceNodeMap = {};
@@ -886,16 +894,18 @@ export default {
       }
 
       // 4. Connect Sources to Fallback
-      const fallbackRecommenders = recommend.fallback.recommenders || [];
-      fallbackRecommenders.forEach((rec) => {
-        const nodeId = sourceNodeMap[rec];
-        if (nodeId) {
-          const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'fallback');
-          if (!exists) {
-            edges.push({ sourceNodeId: nodeId, targetNodeId: 'fallback', type: 'dashed-edge' });
+      if (fallbackHasRecommenders) {
+        const fallbackRecommenders = recommend.fallback.recommenders || [];
+        fallbackRecommenders.forEach((rec) => {
+          const nodeId = sourceNodeMap[rec];
+          if (nodeId) {
+            const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'fallback');
+            if (!exists) {
+              edges.push({ sourceNodeId: nodeId, targetNodeId: 'fallback', type: 'dashed-edge' });
+            }
           }
-        }
-      });
+        });
+      }
 
       return { nodes, edges };
     },
@@ -1467,6 +1477,12 @@ export default {
             this.showDanger('Ranker node already exists');
             return;
           }
+        } else if (type === 'fallback') {
+          const nodes = this.lf.getGraphData().nodes;
+          if (nodes.some(node => node.type === 'fallback')) {
+            this.showDanger('Fallback node already exists');
+            return;
+          }
         }
 
         const { x, y } = this.lf.getPointByClient(e.clientX, e.clientY).canvasOverlayPosition;
@@ -1504,6 +1520,12 @@ export default {
             fit_epoch: 100,
             optimize_period: '360m',
             optimize_trials: 10,
+          };
+        } else if (type === 'fallback') {
+          newNode.text = 'Fallback';
+          newNode.properties = {
+            fixedName: true,
+            recommenders: [],
           };
         } else if (type === 'non-personalized') {
           const name = this.getUniqueName('new_non_personalized', type);
@@ -1570,6 +1592,22 @@ export default {
               });
             }
           });
+        }
+
+        if (type === 'fallback') {
+          const nodes = this.lf.getGraphData().nodes;
+          const recommendNode = nodes.find(node => node.type === 'recommend');
+          if (recommendNode) {
+            const hasEdge = this.lf.getGraphData().edges.some(edge => edge.sourceNodeId === newNode.id
+              && edge.targetNodeId === recommendNode.id);
+            if (!hasEdge) {
+              this.lf.addEdge({
+                sourceNodeId: newNode.id,
+                targetNodeId: recommendNode.id,
+                type: 'bezier',
+              });
+            }
+          }
         }
 
         if (['non-personalized', 'user-to-user', 'item-to-item', 'latest', 'collaborative', 'external'].includes(type)) {
