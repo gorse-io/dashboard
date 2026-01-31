@@ -94,7 +94,8 @@
           </template>
 
           <!-- Fallback Specific Properties -->
-          <template v-if="nodeForm.type === 'fallback' && nodeForm.properties.recommenders && nodeForm.properties.recommenders.length">
+          <template
+            v-if="nodeForm.type === 'fallback' && nodeForm.properties.recommenders && nodeForm.properties.recommenders.length">
             <div class="form-group">
               <label>Recommenders</label>
               <d-list-group>
@@ -692,6 +693,7 @@ export default {
       const nodes = [];
       const edges = [];
       const rankerEnabled = recommend.ranker && recommend.ranker.type !== 'none';
+      const collaborativeEnabled = recommend.collaborative && recommend.collaborative.type !== 'none';
       const fallbackHasRecommenders = recommend.fallback
         && Array.isArray(recommend.fallback.recommenders)
         && recommend.fallback.recommenders.length > 0;
@@ -769,7 +771,7 @@ export default {
       edges.push({ sourceNodeId: 'data-source', targetNodeId: latestNode.id, type: 'bezier' });
 
       // Collaborative
-      if (recommend.collaborative) {
+      if (collaborativeEnabled) {
         const collabNode = {
           id: 'collaborative',
           type: 'collaborative',
@@ -953,7 +955,17 @@ export default {
       }
       this.originalText = text;
 
-      const properties = data.properties || {};
+      const properties = data.properties ? { ...data.properties } : {};
+
+      // Ensure data-source has safe defaults so modal renders
+      if (data.type === 'data-source') {
+        if (!Array.isArray(properties.positive_feedback_types)) {
+          properties.positive_feedback_types = [];
+        }
+        if (!Array.isArray(properties.read_feedback_types)) {
+          properties.read_feedback_types = [];
+        }
+      }
 
       // For fallback nodes, populate recommenders list with order
       if (data.type === 'fallback') {
@@ -1225,14 +1237,21 @@ export default {
       };
 
       // 1. Process Nodes
+      let hasCollaborativeNode = false;
+
       data.nodes.forEach((node) => {
         const props = node.properties;
         if (!props) return;
+
+        // Remove layout-only attributes
+        delete props.width;
+        delete props.height;
 
         if (node.type === 'data-source') {
           newRecommend.data_source = { ...props };
           delete newRecommend.data_source.fixedName;
         } else if (node.type === 'collaborative') {
+          hasCollaborativeNode = true;
           newRecommend.collaborative = { ...props };
           delete newRecommend.collaborative.fixedName;
         } else if (node.type === 'non-personalized') {
@@ -1300,6 +1319,13 @@ export default {
           ...newRecommend.ranker,
           type: 'none',
           recommenders: [],
+        };
+      }
+
+      if (!hasCollaborativeNode) {
+        newRecommend.collaborative = {
+          ...(this.config.recommend.collaborative || {}),
+          type: 'none',
         };
       }
 
@@ -1426,7 +1452,11 @@ export default {
           this.showSuccess('Configuration saved successfully!');
         })
         .catch((error) => {
-          this.showDanger(`Failed to save configuration: ${error.message}`);
+          if (error.response && error.response.data) {
+            this.showDanger(`Failed to save configuration: ${error.response.data}`);
+          } else {
+            this.showDanger(`Failed to save configuration: ${error.message}`);
+          }
         });
     },
     dragStart(e, type) {
@@ -1501,6 +1531,7 @@ export default {
           newNode.text = 'Collaborative';
           newNode.properties = {
             fixedName: true,
+            type: 'mf',
             fit_period: '60m',
             fit_epoch: 10,
             optimize_period: '60m',
