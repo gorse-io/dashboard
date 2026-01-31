@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="col-12 col-sm-2 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
-        <d-button theme="white" class="mr-2" @click="exportFlow">Export</d-button>
+        <d-button theme="white" class="mr-2" @click="clearFlow">Clear</d-button>
         <d-button theme="primary" @click="saveFlow">Save</d-button>
       </div>
     </div>
@@ -1456,6 +1456,22 @@ export default {
             this.showDanger(`Failed to save configuration: ${error.response.data}`);
           } else {
             this.showDanger(`Failed to save configuration: ${error.message}`);
+          }
+        });
+    },
+    clearFlow() {
+      axios.delete('/api/dashboard/config')
+        .then(() => axios.get('/api/dashboard/config'))
+        .then((response) => {
+          this.config = response.data;
+          this.initGraph();
+          this.showSuccess('Configuration cleared successfully!');
+        })
+        .catch((error) => {
+          if (error.response && error.response.data) {
+            this.showDanger(`Failed to clear configuration: ${error.response.data}`);
+          } else {
+            this.showDanger(`Failed to clear configuration: ${error.message}`);
           }
         });
     },
