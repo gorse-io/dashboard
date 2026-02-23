@@ -152,11 +152,11 @@
             <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label>Query Prompt Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                  <label>Query Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
                       target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
                   <textarea class="form-control" rows="8" v-model="nodeForm.properties.query_template"
                     style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
-                  <label class="mt-4">Document Prompt Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                  <label class="mt-4">Document Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
                       target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
                   <textarea class="form-control" rows="7" v-model="nodeForm.properties.document_template"
                     style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
