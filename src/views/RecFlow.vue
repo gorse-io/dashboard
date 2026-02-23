@@ -152,33 +152,31 @@
             <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label>Prompt Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                  <label>Query Prompt Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
                       target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
-                  <textarea class="form-control" rows="8" v-model="nodeForm.properties.prompt"
+                  <textarea class="form-control" rows="8" v-model="nodeForm.properties.query_template"
                     style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
-                  <div class="mt-1">
-                    <d-input-group>
-                      <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
-                      <d-input-group-addon append>
-                        <d-button type="button" theme="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
-                          <i class="material-icons">play_arrow</i>
-                        </d-button>
-                      </d-input-group-addon>
-                    </d-input-group>
-                  </div>
+                  <label class="mt-4">Document Prompt Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                      target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
+                  <textarea class="form-control" rows="7" v-model="nodeForm.properties.document_template"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
                 </div>
                 <div class="form-group col-md-6">
-                  <label>Prompt Preview</label>
-                  <textarea class="form-control" rows="10" readonly
-                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult }}</textarea>
+                  <label>Preview</label>
+                  <d-input-group>
+                    <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
+                    <d-input-group-addon append>
+                      <d-button type="button" theme="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
+                        <i class="material-icons">play_arrow</i>
+                      </d-button>
+                    </d-input-group-addon>
+                  </d-input-group>
+                  <textarea class="form-control mt-2" rows="16" readonly
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult || '' }}</textarea>
                 </div>
               </div>
-              <div class="form-group" v-if="rankerResult || rankerResultError || rankerPreviewError">
-                <label>Result</label>
-                <textarea class="form-control" rows="6" readonly v-if="rankerResult && !rankerResultError"
-                  style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerResult }}</textarea>
-                <d-alert theme="danger" show class="mt-2" v-if="rankerPreviewError">{{ rankerPreviewError }}</d-alert>
-                <d-alert theme="danger" show class="mt-2" v-if="rankerResultError">{{ rankerResultError }}</d-alert>
+              <div class="form-group" v-if="rankerPreviewError">
+                <d-alert theme="danger" show class="mt-2">{{ rankerPreviewError }}</d-alert>
               </div>
             </div>
             <template v-else>
@@ -331,9 +329,11 @@
             </div>
           </template>
 
-          <div class="text-right pt-3">
-            <d-button type="button" theme="secondary" class="mr-2" @click="closeNodeModal">Cancel</d-button>
-            <d-button type="submit" theme="primary">Save</d-button>
+          <div class="d-flex align-items-center justify-content-between pt-3">
+            <div class="text-right ml-auto">
+              <d-button type="button" theme="secondary" class="mr-2" @click="closeNodeModal">Cancel</d-button>
+              <d-button type="submit" theme="primary">Save</d-button>
+            </div>
           </div>
         </d-form>
       </d-modal-body>
@@ -474,10 +474,9 @@ export default {
       previewLoading: false,
       rankerPreviewUserId: '',
       rankerPreviewResult: null,
-      rankerResult: null,
+      rankerDocumentPreviewResult: null,
       rankerPreviewError: null,
       rankerPreviewLoading: false,
-      rankerResultError: null,
     };
   },
   computed: {
@@ -1057,10 +1056,9 @@ export default {
       this.previewLoading = false;
       this.rankerPreviewUserId = '';
       this.rankerPreviewResult = null;
-      this.rankerResult = null;
+      this.rankerDocumentPreviewResult = null;
       this.rankerPreviewError = null;
       this.rankerPreviewLoading = false;
-      this.rankerResultError = null;
       this.disposeMonaco();
     },
     runExternalScript() {
@@ -1150,68 +1148,40 @@ export default {
       this.rankerPreviewLoading = true;
       this.rankerPreviewError = null;
       this.rankerPreviewResult = null;
-      this.rankerResult = null;
-      this.rankerResultError = null;
+      this.rankerDocumentPreviewResult = null;
 
-      const prompt = this.nodeForm.properties.prompt || '';
-      const encodedPrompt = window.btoa(encodeURIComponent(prompt).replace(
+      const queryTemplate = this.nodeForm.properties.query_template || '';
+      const encodedQueryTemplate = window.btoa(encodeURIComponent(queryTemplate).replace(
+        /%([0-9A-F]{2})/g,
+        (match, p1) => String.fromCharCode(`0x${p1}`),
+      ));
+      const documentTemplate = this.nodeForm.properties.document_template || '';
+      const encodedDocumentTemplate = window.btoa(encodeURIComponent(documentTemplate).replace(
         /%([0-9A-F]{2})/g,
         (match, p1) => String.fromCharCode(`0x${p1}`),
       ));
 
       axios.get('/api/dashboard/ranker/prompt', {
         params: {
-          prompt: encodedPrompt,
+          'query-template': encodedQueryTemplate,
+          'document-template': encodedDocumentTemplate,
           'user-id': this.rankerPreviewUserId,
         },
         headers: {
           accept: 'application/json',
         },
       }).then((response) => {
-        const rendered = response.data;
-        const renderedText = typeof rendered === 'string' ? rendered : JSON.stringify(rendered, null, 2);
-        this.rankerPreviewResult = renderedText;
-
-        return axios({
-          method: 'post',
-          url: '/api/chat',
-          data: renderedText,
-          responseType: 'stream',
-          adapter: 'fetch',
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-        });
-      }).then((response) => {
-        if (!response || !response.data) return;
-        const reader = response.data.getReader();
-        const decoder = new TextDecoder();
-        this.rankerResult = '';
-
-        const readChunk = () => reader.read().then(({ done, value }) => {
-          if (done) return;
-          this.rankerResult += decoder.decode(value, { stream: true });
-          return readChunk();
-        });
-
-        return readChunk();
+        this.rankerPreviewResult = JSON.stringify(response.data, null, 2);
+        this.rankerDocumentPreviewResult = null;
       }).catch((error) => {
         if (error.response && error.response.data) {
-          const errorText = typeof error.response.data === 'string'
+          this.rankerPreviewError = typeof error.response.data === 'string'
             ? error.response.data
             : JSON.stringify(error.response.data, null, 2);
-          if (!this.rankerPreviewResult) {
-            this.rankerPreviewError = errorText;
-          } else {
-            this.rankerResultError = errorText;
-          }
         } else {
-          if (!this.rankerPreviewResult) {
-            this.rankerPreviewError = error.message;
-          } else {
-            this.rankerResultError = error.message;
-          }
+          this.rankerPreviewError = error.message;
         }
+        this.rankerDocumentPreviewResult = null;
       }).finally(() => {
         this.rankerPreviewLoading = false;
       });
@@ -1561,6 +1531,8 @@ export default {
           newNode.properties = {
             fixedName: true,
             type: 'fm',
+            query_template: '',
+            document_template: '',
             cache_expire: '120h',
             recommenders: ['latest', 'collaborative', 'non-personalized/most_starred_weekly', 'item-to-item/neighbors', 'user-to-user/neighbors'],
             fit_period: '60m',
