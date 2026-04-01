@@ -1,5 +1,4 @@
-import Vue from 'vue';
-import Router from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 
 import Tasks from './views/Tasks.vue';
 import Overview from './views/Overview.vue';
@@ -18,109 +17,110 @@ import ImportUsers from './views/ImportUsers.vue';
 import ImportFeedback from './views/ImportFeedback.vue';
 import RecFlow from './views/RecFlow.vue';
 
-Vue.use(Router);
+const routes = [
+  {
+    path: '/',
+    redirect: '/overview',
+  },
+  {
+    path: '/overview',
+    name: 'overview',
+    component: Overview,
+  },
+  {
+    path: '/errors',
+    name: 'errors',
+    component: Errors,
+  },
+  {
+    path: '/tasks',
+    name: 'tasks',
+    component: Tasks,
+  },
+  {
+    path: '/users',
+    name: 'users',
+    component: Users,
+  },
+  {
+    path: '/cluster',
+    name: 'cluster',
+    component: Cluster,
+  },
+  {
+    path: '/items',
+    name: 'items',
+    component: Items,
+  },
+  {
+    path: '/config',
+    name: 'config',
+    component: Settings,
+  },
+  {
+    path: '/recommend/:user_id',
+    name: 'recommend',
+    component: Recommend,
+  },
+  {
+    path: '/item/:item_id',
+    name: 'item',
+    component: Item,
+  },
+  {
+    path: '/user/:user_id',
+    name: 'user',
+    component: User,
+  },
+  {
+    path: '/advance',
+    name: 'advance',
+    component: Advance,
+  },
+  {
+    path: '/import/items',
+    name: 'import_items',
+    component: ImportItems,
+  },
+  {
+    path: '/import/users',
+    name: 'import_users',
+    component: ImportUsers,
+  },
+  {
+    path: '/import/feedback',
+    name: 'import_feedback',
+    component: ImportFeedback,
+  },
+  {
+    path: '/login',
+    name: 'login',
+    meta: { layout: 'login' },
+  },
+  {
+    path: '/chat',
+    name: 'chat',
+    component: Chat,
+  },
+  {
+    path: '/recflow',
+    name: 'recflow',
+    component: RecFlow,
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/errors',
+  },
+];
 
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(),
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active',
   scrollBehavior() {
-    return { x: 0, y: 0 };
+    return { top: 0 };
   },
-  routes: [
-    {
-      path: '/',
-      redirect: '/overview',
-    },
-    {
-      path: '/overview',
-      name: 'overview',
-      component: Overview,
-    },
-    {
-      path: '/errors',
-      name: 'errors',
-      component: Errors,
-    },
-    {
-      path: '/tasks',
-      name: 'tasks',
-      component: Tasks,
-    },
-    {
-      path: '/users',
-      name: 'users',
-      component: Users,
-    },
-    {
-      path: '/cluster',
-      name: 'cluster',
-      component: Cluster,
-    },
-    {
-      path: '/items',
-      name: 'items',
-      component: Items,
-    },
-    {
-      path: '/config',
-      name: 'config',
-      component: Settings,
-    },
-    {
-      path: '/recommend/:user_id',
-      name: 'recommend',
-      component: Recommend,
-    },
-    {
-      path: '/item/:item_id',
-      name: 'item',
-      component: Item,
-    },
-    {
-      path: '/user/:user_id',
-      name: 'user',
-      component: User,
-    },
-    {
-      path: '/advance',
-      name: 'advance',
-      component: Advance,
-    },
-    {
-      path: '/import/items',
-      name: 'import_items',
-      component: ImportItems,
-    },
-    {
-      path: '/import/users',
-      name: 'import_users',
-      component: ImportUsers,
-    },
-    {
-      path: '/import/feedback',
-      name: 'import_feedback',
-      component: ImportFeedback,
-    },
-    {
-      path: '/login',
-      name: 'login',
-      meta: { layout: 'login' },
-    },
-    {
-      path: '/chat',
-      name: 'chat',
-      component: Chat,
-    },
-    {
-      path: '/recflow',
-      name: 'recflow',
-      component: RecFlow,
-    },
-    {
-      path: '*',
-      redirect: '/errors',
-    },
-  ],
+  routes,
 });
+
+export default router;

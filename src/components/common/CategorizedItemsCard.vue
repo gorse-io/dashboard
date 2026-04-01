@@ -1,135 +1,180 @@
 <template>
-  <d-card class="card-small">
-    <!-- Card Header -->
-    <d-card-header class="border-bottom">
-      <h6 class="m-0">{{ title }}</h6>
-      <div class="block-handle"></div>
-    </d-card-header>
+  <v-card>
+    <v-card-title class="border-b">
+      <h6 class="text-h6">{{ title }}</h6>
+    </v-card-title>
 
-    <div class="card-body border-bottom">
-      <d-input-group prepend="Categories" class="mb-3">
-        <d-select @change="changeCategory">
-          <option v-for="(category, idx) in categories" :key="idx" :value="category">
-            {{ category }}
-          </option>
-        </d-select>
-      </d-input-group>
-    </div>
+    <v-card-text class="border-b">
+      <v-select
+        v-model="category"
+        :items="categories"
+        label="Categories"
+        density="compact"
+        hide-details
+        @update:model-value="changeCategory"
+      />
+    </v-card-text>
 
-    <d-card-body class="p-0">
-      <!-- Top Referrals List Group -->
-      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
-        <!-- Content -->
-        <div class="blog-comments__content">
-          <!-- Content - Title -->
-          <div class="blog-comments__meta text-muted">
-            {{ item.ItemId }}
-          </div>
-
-          <!-- Content - Body -->
-          <p class="m-0 my-1 mb-2 text-muted text-semibold">
-            {{ item.Comment }}
-          </p>
-
-          <!-- Content - Actions -->
-          <div class="blog-comments__actions">
-            <d-badge outline theme="secondary" v-for="(label, idx) in item.Categories" :key="idx">
-              {{ label }}
-            </d-badge>
-            <d-badge outline theme="primary" v-for="(label, idx) in item.Labels" :key="idx">
-              {{ label }}
-            </d-badge>
-          </div>
-
-          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
-            {{ item.Timestamp }}
-          </p>
+    <v-card-text class="pa-0">
+      <div v-for="(item, idx) in pageItems" :key="idx" class="pa-3 border-b">
+        <div class="text-muted mb-1">
+          {{ item.ItemId }}
         </div>
-      </div>
-    </d-card-body>
 
-    <d-card-footer class="border-top">
-      <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
-            class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
-            class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group>
-    </d-card-footer>
-  </d-card>
+        <p class="mb-1 text-muted">
+          {{ item.Comment }}
+        </p>
+
+        <div class="mb-1">
+          <v-chip
+            v-for="(label, labelIdx) in item.Categories"
+            :key="labelIdx"
+            size="small"
+            variant="outlined"
+            class="mr-1"
+          >
+            {{ label }}
+          </v-chip>
+          <v-chip
+            v-for="(label, labelIdx) in item.Labels"
+            :key="`label-${labelIdx}`"
+            size="small"
+            variant="outlined"
+            color="primary"
+            class="mr-1"
+          >
+            {{ label }}
+          </v-chip>
+        </div>
+
+        <p class="mb-0 text-caption text-muted">
+          {{ item.Timestamp }}
+        </p>
+      </div>
+    </v-card-text>
+
+    <v-card-actions class="border-t">
+      <v-btn
+        variant="text"
+        @click="prevPage"
+        :disabled="pageNumber === 0"
+      >
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-btn
+        variant="text"
+        @click="nextPage"
+        :disabled="pageNumber + 1 >= pageCount"
+      >
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
 export default {
-  name: 'ao-top-referrals',
+  name: 'categorized-items-card',
   props: {
     title: {
       type: String,
       default: '--',
     },
     pageSize: {
+      type: Number,
       default: 10,
     },
     api: {
       type: String,
+      required: true,
     },
   },
-  data() {
-    return {
-      items: [],
-      pageNumber: 0,
-      categories: [''],
-    };
-  },
-  mounted() {
-    axios({
-      method: 'get',
-      url: '/api/dashboard/categories',
-    }).then((response) => {
-      this.categories = [''].concat(response.data);
+  setup(props) {
+    const items = ref([]);
+    const pageNumber = ref(0);
+    const categories = ref(['']);
+    const category = ref('');
+
+    const pageCount = computed(() => {
+      return Math.ceil(items.value.length / props.pageSize);
     });
-    axios({
-      method: 'get',
-      url: this.api,
-      params: {
-        end: this.cacheSize,
-      },
-    })
-      .then((response) => {
-        this.items = response.data;
-      });
-  },
-  computed: {
-    pageCount() {
-      return this.items.length / this.pageSize;
-    },
-    pageItems() {
-      const start = this.pageNumber * this.pageSize;
-      const end = Math.min(start + this.pageSize, this.items.length);
-      return this.items.slice(start, end);
-    },
-  },
-  methods: {
-    prevPage() {
-      this.pageNumber -= 1;
-    },
-    nextPage() {
-      this.pageNumber += 1;
-    },
-    changeCategory(value) {
-      axios({
-        method: 'get',
-        url: this.api + value,
-        params: {
-          end: this.cacheSize,
-        },
-      })
-        .then((response) => {
-          this.items = response.data;
+
+    const pageItems = computed(() => {
+      const start = pageNumber.value * props.pageSize;
+      const end = Math.min(start + props.pageSize, items.value.length);
+      return items.value.slice(start, end);
+    });
+
+    const fetchData = async () => {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: props.api,
+          params: {
+            end: 100,
+          },
         });
-    },
+        items.value = response.data || [];
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    const changeCategory = async (value) => {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: `${props.api}${value}`,
+          params: {
+            end: 100,
+          },
+        });
+        items.value = response.data || [];
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    const prevPage = () => {
+      if (pageNumber.value > 0) {
+        pageNumber.value -= 1;
+      }
+    };
+
+    const nextPage = () => {
+      if (pageNumber.value + 1 < pageCount.value) {
+        pageNumber.value += 1;
+      }
+    };
+
+    onMounted(async () => {
+      await fetchData();
+
+      try {
+        const response = await axios({
+          method: 'get',
+          url: '/api/dashboard/categories',
+        });
+        categories.value = [''].concat(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    });
+
+    return {
+      items,
+      pageNumber,
+      categories,
+      category,
+      pageCount,
+      pageItems,
+      changeCategory,
+      prevPage,
+      nextPage,
+    };
   },
 };
 </script>

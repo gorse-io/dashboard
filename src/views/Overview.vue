@@ -1,34 +1,48 @@
 <template>
-  <d-container fluid class="main-content-container px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <d-row no-gutters class="page-header py-4">
-      <d-col col sm="4" class="text-center text-sm-left mb-4 mb-sm-0">
-        <span class="text-uppercase page-subtitle">Dashboard</span>
-        <h3 class="page-title">Overview</h3>
-      </d-col>
-    </d-row>
+    <v-row class="page-header py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <span class="text-uppercase text-subtitle-2">Dashboard</span>
+        <h3 class="text-h5">Overview</h3>
+      </v-col>
+    </v-row>
 
     <!-- Small Stats Blocks -->
-    <d-row v-if="!timeseriesUpdate">
-      <d-col lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
-        <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label"
-          :value="stats.value" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" />
-      </d-col>
-    </d-row>
+    <v-row v-if="!timeseriesUpdate">
+      <v-col
+        v-for="(stats, idx) in smallStats"
+        :key="idx"
+        cols="12"
+        lg
+        class="mb-4"
+      >
+        <small-stats
+          :id="`small-stats-${idx}`"
+          variation="1"
+          :chart-data="stats.datasets"
+          :label="stats.label"
+          :value="stats.value"
+          :percentage="stats.percentage"
+          :increase="stats.increase"
+          :decrease="stats.decrease"
+        />
+      </v-col>
+    </v-row>
 
-    <d-row>
+    <v-row>
       <!-- Users Overview -->
-      <d-col lg="12" md="12" sm="12" class="mb-4">
+      <v-col lg="12" md="12" sm="12" class="mb-4">
         <bo-users-overview :positiveFeedbackTypes="positiveFeedbackTypes" />
-      </d-col>
-    </d-row>
+      </v-col>
+    </v-row>
 
-    <d-row>
-      <d-col lg="12" md="12" sm="12" class="mb-4">
+    <v-row>
+      <v-col lg="12" md="12" sm="12" class="mb-4">
         <bo-top-items :recommenders="nonPersonalized" />
-      </d-col>
-    </d-row>
-  </d-container>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -36,7 +50,6 @@ import axios from 'axios';
 import SmallStats from '@/components/common/SmallStats.vue';
 import CategorizedItems from '@/components/common/CategorizedItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
-import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
 
 const timeseriesName = ['num_users', 'num_items', 'num_feedback', 'num_pos_feedbacks', 'num_neg_feedbacks'];
 
@@ -44,7 +57,6 @@ export default {
   components: {
     SmallStats,
     boUsersOverview: UsersOverview,
-    boUsersByDevice: UsersByDevice,
     boTopItems: CategorizedItems,
   },
   data() {
@@ -80,8 +92,8 @@ export default {
       method: 'get',
       url: `/api/dashboard/timeseries/${name}`,
     }));
-    axios.all(requests)
-      .then(axios.spread((...responses) => {
+    Promise.all(requests)
+      .then((responses) => {
         this.timeseriesData = responses.map(response => response.data.map(item => item.Value));
         this.timeseriesValues = this.timeseriesData.map((item) => {
           if (item.length === 0) return '0';
@@ -98,7 +110,7 @@ export default {
           return false;
         });
         this.timeseriesUpdate = false;
-      }));
+      });
   },
   computed: {
     smallStats() {
@@ -110,7 +122,7 @@ export default {
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
-          fill: 'start',
+          fill: true,
           borderWidth: 1.5,
           backgroundColor: 'rgba(0, 184, 216, 0.1)',
           borderColor: 'rgb(0, 184, 216)',
@@ -124,7 +136,7 @@ export default {
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
-          fill: 'start',
+          fill: true,
           borderWidth: 1.5,
           backgroundColor: 'rgba(23,198,113,0.1)',
           borderColor: 'rgb(23,198,113)',
@@ -139,7 +151,7 @@ export default {
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
-          fill: 'start',
+          fill: true,
           borderWidth: 1.5,
           backgroundColor: 'rgba(255,180,0,0.1)',
           borderColor: 'rgb(255,180,0)',
@@ -154,7 +166,7 @@ export default {
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
-          fill: 'start',
+          fill: true,
           borderWidth: 1.5,
           backgroundColor: 'rgba(255,65,105,0.1)',
           borderColor: 'rgb(255,65,105)',
@@ -169,7 +181,7 @@ export default {
         labels: ['Label', 'Label', 'Label', 'Label', 'Label', 'Label'],
         datasets: [{
           label: 'Today',
-          fill: 'start',
+          fill: true,
           borderWidth: 1.5,
           backgroundColor: 'rgb(0,123,255,0.1)',
           borderColor: 'rgb(0,123,255)',

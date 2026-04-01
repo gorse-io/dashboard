@@ -1,83 +1,165 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-        <span class="text-uppercase page-subtitle">Overview</span>
-        <h3 class="page-title">Settings</h3>
-      </div>
-    </div>
+    <v-row class="py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <span class="text-uppercase text-subtitle-2">Overview</span>
+        <h3 class="text-h5">Settings</h3>
+      </v-col>
+    </v-row>
 
-    <!-- Default Light Table -->
-    <div class="row" v-for="(settings, section) in config" :key="section">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
-            <h6 class="m-0">{{ section }}</h6>
-          </div>
-          <div class="card-body p-0 pb-3">
-            <d-list-group flush>
-              <d-list-group-item class="p-3" v-for="(value, name) in settings" :key="name">
-                <d-row>
-                  <d-col sm="12" md="2">
-                    <label>{{ name }}</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
-                    <d-input v-if="value == null" type="text"
-                      :placeholder="'missing `' + name + '` in configuration file'" state="invalid" readonly />
-                    <div v-else-if="value.constructor === Array && value.length > 0 && typeof value[0] == 'object'">
-                      <div v-for="(item, i) in value" v-bind:key="item.Name">
-                        <div v-if="i > 0" class="mt-2 mb-2 border-top"></div>
-                        <d-input-group v-for="(fieldValue, fieldName) in item" :key="fieldName" class="mb-2">
-                          <d-input-group-text slot="prepend" style="width: 250px">{{ fieldName }}</d-input-group-text>
-                          <d-input v-if="fieldValue == null" type="text" readonly />
-                          <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
-                            type="text" :value="JSON.stringify(fieldValue)" readonly />
-                          <d-input v-else :value="fieldValue.toString()" type="text" readonly />
-                        </d-input-group>
-                      </div>
+    <!-- Settings Sections -->
+    <v-row v-for="(settings, section) in config" :key="section">
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-b">
+            <h6 class="text-h6">{{ section }}</h6>
+          </v-card-title>
+          <v-list>
+            <v-list-item
+              v-for="(value, name) in settings"
+              :key="name"
+              class="px-4 py-3"
+            >
+              <v-row no-gutters>
+                <v-col cols="12" md="2">
+                  <label class="text-body-2 font-weight-medium">{{ name }}</label>
+                </v-col>
+                <v-col cols="12" md="10">
+                  <v-text-field
+                    v-if="value == null"
+                    :placeholder="`missing ${name} in configuration file`"
+                    readonly
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                    error
+                  />
+                  <div v-else-if="Array.isArray(value) && value.length > 0 && typeof value[0] === 'object'">
+                    <div v-for="(item, i) in value" :key="item.Name || i">
+                      <v-divider v-if="i > 0" class="my-2" />
+                      <v-row
+                        v-for="(fieldValue, fieldName) in item"
+                        :key="fieldName"
+                        class="mb-2"
+                      >
+                        <v-col cols="12" md="3">
+                          <label class="text-body-2">{{ fieldName }}</label>
+                        </v-col>
+                        <v-col cols="12" md="9">
+                          <v-text-field
+                            v-if="fieldValue == null"
+                            readonly
+                            variant="outlined"
+                            density="compact"
+                            hide-details
+                          />
+                          <v-text-field
+                            v-else-if="typeof fieldValue === 'object'"
+                            :model-value="JSON.stringify(fieldValue)"
+                            readonly
+                            variant="outlined"
+                            density="compact"
+                            hide-details
+                          />
+                          <v-text-field
+                            v-else
+                            :model-value="String(fieldValue)"
+                            readonly
+                            variant="outlined"
+                            density="compact"
+                            hide-details
+                          />
+                        </v-col>
+                      </v-row>
                     </div>
-                    <d-input v-else-if="value.constructor === Array" type="text" :value="JSON.stringify(value)"
-                      readonly />
-                    <div v-else-if="typeof value == 'object'">
-                      <d-input-group v-for="(fieldValue, fieldName) in value" :key="fieldName" class="mb-2">
-                        <d-input-group-text slot="prepend" style="width: 250px">{{ fieldName }}</d-input-group-text>
-                        <d-input v-if="fieldValue == null" type="text" readonly />
-                        <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
-                          type="text" :value="JSON.stringify(fieldValue)" readonly />
-                        <d-input v-else :value="fieldValue.toString()" type="text" readonly />
-                      </d-input-group>
-                    </div>
-                    <d-input v-else type="text" :value="value.toString()" readonly />
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+                  </div>
+                  <v-text-field
+                    v-else-if="Array.isArray(value)"
+                    :model-value="JSON.stringify(value)"
+                    readonly
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                  />
+                  <div v-else-if="typeof value === 'object'">
+                    <v-row
+                      v-for="(fieldValue, fieldName) in value"
+                      :key="fieldName"
+                      class="mb-2"
+                    >
+                      <v-col cols="12" md="3">
+                        <label class="text-body-2">{{ fieldName }}</label>
+                      </v-col>
+                      <v-col cols="12" md="9">
+                        <v-text-field
+                          v-if="fieldValue == null"
+                          readonly
+                          variant="outlined"
+                          density="compact"
+                          hide-details
+                        />
+                        <v-text-field
+                          v-else-if="typeof fieldValue === 'object'"
+                          :model-value="JSON.stringify(fieldValue)"
+                          readonly
+                          variant="outlined"
+                          density="compact"
+                          hide-details
+                        />
+                        <v-text-field
+                          v-else
+                          :model-value="String(fieldValue)"
+                          readonly
+                          variant="outlined"
+                          density="compact"
+                          hide-details
+                        />
+                      </v-col>
+                    </v-row>
+                  </div>
+                  <v-text-field
+                    v-else
+                    :model-value="String(value)"
+                    readonly
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                  />
+                </v-col>
+              </v-row>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 export default {
-  data() {
+  name: 'settings-view',
+  setup() {
+    const config = ref(null);
+
+    onMounted(async () => {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: '/api/dashboard/config',
+        });
+        config.value = response.data;
+      } catch (error) {
+        console.error('Error fetching config:', error);
+      }
+    });
+
     return {
-      config: null,
+      config,
     };
-  },
-  mounted() {
-    axios({
-      method: 'get',
-      url: '/api/dashboard/config',
-    })
-      .then((response) => {
-        this.config = response.data;
-      });
   },
 };
 </script>

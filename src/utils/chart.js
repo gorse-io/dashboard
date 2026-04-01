@@ -1,18 +1,16 @@
-import Chart from 'chart.js';
+import { Chart } from 'chart.js';
 
-Chart.defaults.LineWithLine = Chart.defaults.line;
-Chart.controllers.LineWithLine = Chart.controllers.line.extend({
-  draw(ease) {
-    Chart.controllers.line.prototype.draw.call(this, ease);
+// Custom line chart with vertical line on hover
+const verticalLinePlugin = {
+  id: 'verticalLine',
+  afterDraw: (chart) => {
+    if (chart.tooltip.getActiveElements && chart.tooltip.getActiveElements().length) {
+      const activePoint = chart.tooltip.getActiveElements()[0];
+      const ctx = chart.ctx;
+      const x = activePoint.element.x;
+      const topY = chart.scales.y.top;
+      const bottomY = chart.scales.y.bottom;
 
-    if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
-      const activePoint = this.chart.tooltip._active[0];
-      const { ctx } = this.chart;
-      const { x } = activePoint.tooltipPosition();
-      const topY = this.chart.scales['y-axis-0'].top;
-      const bottomY = this.chart.scales['y-axis-0'].bottom;
-
-      // Draw the line
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(x, topY);
@@ -23,6 +21,9 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
       ctx.restore();
     }
   },
-});
+};
+
+// Register the plugin
+Chart.register(verticalLinePlugin);
 
 export default Chart;

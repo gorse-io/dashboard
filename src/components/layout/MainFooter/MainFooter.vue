@@ -1,16 +1,25 @@
 <template>
-  <footer class="main-footer d-flex p-2 px-3 bg-white border-top">
-    <div :class="[contained ? 'container' : 'container-fluid']">
-      <div class="row">
-        <ul class="nav">
-          <li v-for="(item, idx) in menuItems" :key="idx" class="nav-item">
-            <a class="nav-link" target="__blank" :href="item.to">{{ item.title }}</a>
-          </li>
-        </ul>
-        <span class="copyright ml-auto my-auto mr-2">{{ copyright }}</span>
-      </div>
-    </div>
-  </footer>
+  <v-footer class="main-footer d-flex pa-2 px-3 bg-white border-t">
+    <v-container :fluid="!contained" class="pa-0">
+      <v-row no-gutters align="center">
+        <v-col>
+          <v-btn
+            v-for="(item, idx) in menuItems"
+            :key="idx"
+            :href="item.to"
+            target="_blank"
+            variant="text"
+            size="small"
+          >
+            {{ item.title }}
+          </v-btn>
+        </v-col>
+        <v-col cols="auto">
+          <span class="copyright text-body-2">{{ copyright }}</span>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-footer>
 </template>
 
 <script>
@@ -31,25 +40,16 @@ const defaultMenuItems = [{
 export default {
   name: 'main-footer',
   props: {
-    /**
-       * The footer menu items.
-       */
     menuItems: {
       type: Array,
       default() {
         return defaultMenuItems;
       },
     },
-    /**
-       * The copyright information.
-       */
     copyright: {
       type: String,
       default: `Copyright © ${new Date().getFullYear()} zhenghaoz`,
     },
-    /**
-       * Whether the footer should be wrapped in a container, or not.
-       */
     contained: {
       type: Boolean,
       default: false,

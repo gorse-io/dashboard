@@ -1,60 +1,67 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-        <span class="text-uppercase page-subtitle">Overview</span>
-        <h3 class="page-title">Tasks</h3>
-      </div>
-    </div>
+    <v-row class="page-header py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <span class="text-uppercase text-subtitle-2">Overview</span>
+        <h3 class="text-h5">Tasks</h3>
+      </v-col>
+    </v-row>
 
     <!-- Default Light Table -->
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
-            <h6 class="m-0">All Tasks</h6>
-          </div>
-          <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0">Name</th>
-                  <th scope="col" class="border-0">Status</th>
-                  <th scope="col" class="border-0">Start</th>
-                  <th scope="col" class="border-0">Finished</th>
-                  <th scope="col" class="border-0">Progress</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(task, idx) in nodes" :key="idx">
-                  <td>{{ task.Name }}</td>
-                  <td>{{ task.Status }}</td>
-                  <td>
-                    <span v-if="task.Status != 'Pending'">{{ format_date_time(task.StartTime) }}</span>
-                  </td>
-                  <td>
-                    <span v-if="task.Status == 'Complete'">{{ format_date_time(task.FinishTime) }}</span>
-                  </td>
-                  <td>
-                    <d-progress v-if="task.Status == 'Running'" :value="task.Count" :max="task.Total" />
-                    <d-progress v-if="task.Status == 'Suspended'" :value="task.Count" :max="task.Total"
-                      theme="warning" />
-                    <d-progress v-if="task.Status == 'Complete'" :value="task.Total" :max="task.Total"
-                      theme="success" />
-                    <span style="color:red" v-if="task.Status == 'Failed'">{{ task.Error }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-b">All Tasks</v-card-title>
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left">Name</th>
+                <th class="text-left">Status</th>
+                <th class="text-left">Start</th>
+                <th class="text-left">Finished</th>
+                <th class="text-left">Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(task, idx) in nodes" :key="idx">
+                <td>{{ task.Name }}</td>
+                <td>{{ task.Status }}</td>
+                <td>
+                  <span v-if="task.Status != 'Pending'">{{ format_date_time(task.StartTime) }}</span>
+                </td>
+                <td>
+                  <span v-if="task.Status == 'Complete'">{{ format_date_time(task.FinishTime) }}</span>
+                </td>
+                <td>
+                  <v-progress-linear
+                    v-if="task.Status == 'Running'"
+                    :model-value="(task.Count / task.Total) * 100"
+                    color="primary"
+                    height="20"
+                  />
+                  <v-progress-linear
+                    v-if="task.Status == 'Suspended'"
+                    :model-value="(task.Count / task.Total) * 100"
+                    color="warning"
+                    height="20"
+                  />
+                  <v-progress-linear
+                    v-if="task.Status == 'Complete'"
+                    :model-value="100"
+                    color="success"
+                    height="20"
+                  />
+                  <span class="text-error" v-if="task.Status == 'Failed'">{{ task.Error }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -64,6 +71,7 @@ export default {
   data() {
     return {
       nodes: null,
+      timer: null,
     };
   },
   mounted() {

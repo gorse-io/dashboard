@@ -1,83 +1,78 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-        <span class="text-uppercase page-subtitle">Overview</span>
-        <h3 class="page-title">Cluster</h3>
-      </div>
-    </div>
+    <v-row class="py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <span class="text-uppercase text-subtitle-2">Overview</span>
+        <h3 class="text-h5">Cluster</h3>
+      </v-col>
+    </v-row>
 
     <!-- Default Light Table -->
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
-            <h6 class="m-0">Active Nodes</h6>
-          </div>
-          <div class="card-body p-0 pb-3 text-center">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0">Type</th>
-                  <th scope="col" class="border-0">Hostname</th>
-                  <th scope="col" class="border-0">UUID</th>
-                  <th scope="col" class="border-0">Version</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(node, idx) in nodes" :key="idx">
-                  <td>{{ node.Type }}</td>
-                  <td>{{ node.Hostname }}</td>
-                  <td>{{ node.UUID }}</td>
-                  <td>{{ node.Version }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-b">Active Nodes</v-card-title>
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left">Type</th>
+                <th class="text-left">Hostname</th>
+                <th class="text-left">UUID</th>
+                <th class="text-left">Version</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(node, idx) in nodes" :key="idx">
+                <td>{{ node.Type }}</td>
+                <td>{{ node.Hostname }}</td>
+                <td>{{ node.UUID }}</td>
+                <td>{{ node.Version }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-
 <script>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 
 export default {
-  data() {
-    return {
-      nodes: null,
-    };
-  },
-  mounted() {
-    this.fetchNodes();
-    this.timer = setInterval(this.fetchNodes, 1000);
-  },
-  beforeUnmount() {
-    this.cancelAutoUpdate();
-  },
-  methods: {
-    fetchNodes() {
-      axios({
-        method: 'get',
-        url: '/api/dashboard/cluster',
-      })
-        .then((response) => {
-          this.nodes = response.data;
+  name: 'cluster-view',
+  setup() {
+    const nodes = ref(null);
+    let timer = null;
+
+    const fetchNodes = async () => {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: '/api/dashboard/cluster',
         });
-    },
-    cancelAutoUpdate() {
-      clearInterval(this.timer);
-    },
-    openMetrics(host, port) {
-      window.open(`http://${host}:${port}/metrics`, '_blank');
-    },
-    openAPIDocs(host, port) {
-      window.open(`http://${host}:${port}/apidocs`, '_blank');
-    },
+        nodes.value = response.data;
+      } catch (error) {
+        console.error('Error fetching cluster nodes:', error);
+      }
+    };
+
+    onMounted(() => {
+      fetchNodes();
+      timer = setInterval(fetchNodes, 1000);
+    });
+
+    onBeforeUnmount(() => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    });
+
+    return {
+      nodes,
+    };
   },
 };
 </script>

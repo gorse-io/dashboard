@@ -1,133 +1,153 @@
 <template>
-  <d-card class="card-small">
-    <!-- Card Header -->
-    <d-card-header class="border-bottom">
-      <h6 class="m-0">{{ title }}</h6>
-      <div class="block-handle"></div>
-    </d-card-header>
+  <v-card>
+    <v-card-title class="border-b">
+      <h6 class="text-h6">{{ title }}</h6>
+    </v-card-title>
 
-    <d-card-body class="p-0">
-      <div class="card-body border-bottom">
-        <d-select v-model="feedbackType" @change="selectType">
-          <option v-for="feedbackType in types" :key="feedbackType" :value="feedbackType">
-            {{ feedbackType }}
-          </option>
-        </d-select>
+    <v-card-text class="pa-0">
+      <div class="pa-4 border-b">
+        <v-select
+          v-model="feedbackType"
+          :items="types"
+          label="Feedback Type"
+          density="compact"
+          hide-details
+          @update:model-value="selectType"
+        />
       </div>
-    </d-card-body>
+    </v-card-text>
 
-    <d-card-body class="p-0">
-      <!-- Top Referrals List Group -->
-      <div v-for="(item, idx) in items" :key="idx" class="blog-comments__item d-flex p-3">
-        <!-- Content -->
-        <div class="blog-comments__content">
-          <!-- Content - Title -->
-          <div class="blog-comments__meta text-muted">
-            {{ item.Item.ItemId }}
-            <d-badge outline pill theme="secondary" class="float-right">
-              {{ item.FeedbackType + (item.Value > 0 ? ' ' + item.Value : '') }}
-            </d-badge>
-          </div>
-
-          <!-- Content - Body -->
-          <p class="m-0 my-1 mb-2 text-muted text-semibold">
-            {{ item.Item.Comment }}
-          </p>
-
-          <!-- Content - Actions -->
-          <div class="blog-comments__actions">
-            <d-badge outline v-for="(label, idx) in item.Item.Categories" :key="idx">
-              {{ label }}
-            </d-badge>
-            <span
-              style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-              {{ fold(item.Item.Labels) }}
-            </span>
-          </div>
-
-          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
-            {{ item.Timestamp }}
-          </p>
+    <v-card-text class="pa-0">
+      <div v-for="(item, idx) in items" :key="idx" class="pa-3 border-b">
+        <div class="d-flex justify-space-between align-center mb-1">
+          <span class="text-muted">{{ item.Item.ItemId }}</span>
+          <v-chip size="small" variant="outlined">
+            {{ item.FeedbackType + (item.Value > 0 ? ' ' + item.Value : '') }}
+          </v-chip>
         </div>
-      </div>
-    </d-card-body>
 
-    <d-card-footer class="border-top">
-      <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.offset !== 0"><i
-            class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.items.length == this.pageSize"><i
-            class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group>
-    </d-card-footer>
-  </d-card>
+        <p class="mb-1 text-muted">
+          {{ item.Item.Comment }}
+        </p>
+
+        <div class="mb-1">
+          <v-chip
+            v-for="(label, labelIdx) in item.Item.Categories"
+            :key="labelIdx"
+            size="small"
+            variant="outlined"
+            class="mr-1"
+          >
+            {{ label }}
+          </v-chip>
+          <span class="font-monospace">
+            {{ fold(item.Item.Labels) }}
+          </span>
+        </div>
+
+        <p class="mb-0 text-caption text-muted">
+          {{ item.Timestamp }}
+        </p>
+      </div>
+    </v-card-text>
+
+    <v-card-actions class="border-t">
+      <v-btn
+        variant="text"
+        @click="prevPage"
+        :disabled="offset === 0"
+      >
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-btn
+        variant="text"
+        @click="nextPage"
+        :disabled="items.length < pageSize"
+      >
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import utils from '@/utils';
 
 export default {
-  name: 'ao-top-referrals',
+  name: 'user-feedback',
   props: {
     title: {
       type: String,
       default: '--',
     },
     user_id: {
+      type: String,
       default: '',
     },
     pageSize: {
+      type: Number,
       default: 10,
-    },
-    items: {
-      type: Array,
-      default() {
-        return [];
-      },
     },
     types: {
       type: Array,
-      default() {
-        return [];
-      },
+      default: () => [],
     },
   },
-  data() {
-    return {
-      offset: 0,
-      feedbackType: '',
-    };
-  },
-  methods: {
-    prevPage() {
-      this.offset = this.offset - this.pageSize;
-      this.selectType(this.feedbackType);
-    },
-    nextPage() {
-      this.offset += this.pageSize;
-      this.selectType(this.feedbackType);
-    },
-    fold: utils.fold,
-    selectType(value) {
-      if (this.feedbackType !== value) {
-        this.offset = 0;
-        this.feedbackType = value;
+  setup(props) {
+    const items = ref([]);
+    const offset = ref(0);
+    const feedbackType = ref('');
+
+    const fold = utils.fold;
+
+    const selectType = async (value) => {
+      if (feedbackType.value !== value) {
+        offset.value = 0;
+        feedbackType.value = value;
       }
-      axios({
-        method: 'get',
-        url: `/api/dashboard/user/${this.user_id}/feedback/${value}`,
-        params: {
-          offset: this.offset,
-          n: this.pageSize,
-        },
-      }).then((response) => {
-        this.items = response.data;
-      });
-    },
-  },
-  mounted() {
-    this.selectType(this.feedbackType);
+
+      try {
+        const response = await axios({
+          method: 'get',
+          url: `/api/dashboard/user/${props.user_id}/feedback/${value}`,
+          params: {
+            offset: offset.value,
+            n: props.pageSize,
+          },
+        });
+        items.value = response.data;
+      } catch (error) {
+        console.error('Error fetching feedback:', error);
+      }
+    };
+
+    const prevPage = () => {
+      offset.value = Math.max(0, offset.value - props.pageSize);
+      selectType(feedbackType.value);
+    };
+
+    const nextPage = () => {
+      offset.value += props.pageSize;
+      selectType(feedbackType.value);
+    };
+
+    onMounted(() => {
+      if (props.types && props.types.length > 0) {
+        selectType(props.types[0]);
+      }
+    });
+
+    return {
+      items,
+      offset,
+      feedbackType,
+      fold,
+      selectType,
+      prevPage,
+      nextPage,
+    };
   },
 };
 </script>

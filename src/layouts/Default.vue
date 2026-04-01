@@ -1,11 +1,10 @@
 <template>
-  <d-container fluid>
-    <d-row>
+  <v-container fluid class="pa-0">
+    <v-row no-gutters>
       <!-- Main Sidebar -->
       <main-sidebar :items="sidebarItems" />
 
-      <d-col class="main-content offset-lg-2 offset-md-3 p-0" tag="main" lg="10" md="9" sm="12">
-
+      <v-col class="main-content offset-lg-2 offset-md-3 pa-0" cols="12" lg="10" md="9" sm="12">
         <!-- Main Navbar -->
         <main-navbar />
 
@@ -14,10 +13,9 @@
 
         <!-- Main Footer -->
         <main-footer />
-      </d-col>
-
-    </d-row>
-  </d-container>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -29,7 +27,7 @@ import MainSidebar from '@/components/layout/MainSidebar/MainSidebar.vue';
 import MainFooter from '@/components/layout/MainFooter/MainFooter.vue';
 
 export default {
-  name: 'analytics',
+  name: 'default-layout',
   components: {
     MainNavbar,
     MainSidebar,
@@ -43,3 +41,8 @@ export default {
 };
 </script>
 
+<style scoped>
+.main-content {
+  min-height: 100vh;
+}
+</style>

@@ -1,63 +1,72 @@
 <template>
-  <aside :class="['main-sidebar', 'col-12', 'col-md-3', 'col-lg-2', 'px-0', sidebarVisible ? 'open' : '']">
-      <div class="main-navbar">
-        <nav class="navbar align-items-stretch navbar-light bg-white flex-md-nowrap border-bottom p-0">
-          <a class="navbar-brand w-100 mr-0" href="#" style="line-height: 25px;">
-            <div class="d-table m-auto">
-              <img id="main-logo" class="d-inline-block align-top mr-1" style="max-width: 25px;" src="@/assets/images/gorse.png" alt="Shards Dashboard">
-              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">Gorse Dashboard</span>
-            </div>
-          </a>
-          <a class="toggle-sidebar d-sm-inline d-md-none d-lg-none" @click="handleToggleSidebar()">
-            <i class="material-icons">&#xE5C4;</i>
-          </a>
-        </nav>
-      </div>
+  <v-navigation-drawer
+    v-model="sidebarVisible"
+    :rail="false"
+    :permanent="$vuetify.display.mdAndUp"
+    :temporary="!$vuetify.display.mdAndUp"
+    width="250"
+    class="main-sidebar"
+  >
+    <!-- Logo -->
+    <v-list-item class="pa-2 border-b">
+      <router-link to="/" class="text-decoration-none d-flex align-center">
+        <v-img src="@/assets/images/gorse.png" width="25" class="mr-2" />
+        <span v-if="!hideLogoText" class="text-body-1 font-weight-medium">Gorse Dashboard</span>
+      </router-link>
+    </v-list-item>
 
-      <form action="#" class="main-sidebar__search w-100 border-right d-sm-flex d-md-none d-lg-none">
-        <div class="input-group input-group-seamless ml-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <i class="fas fa-search"></i>
-            </div>
-          </div>
-          <input class="navbar-search form-control" type="text" placeholder="Search for something..." aria-label="Search">
-        </div>
-      </form>
+    <!-- Navigation Items -->
+    <v-list density="compact" nav>
+      <template v-for="(item, navItemIdx) in items" :key="navItemIdx">
+        <!-- Item with children -->
+        <v-list-group v-if="item.items && item.items.length" :value="`snc-${navItemIdx}`">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              :prepend-icon="item.htmlBefore ? undefined : undefined"
+              :title="item.title"
+            >
+              <template v-slot:prepend v-if="item.htmlBefore">
+                <div v-html="item.htmlBefore" class="mr-2"></div>
+              </template>
+            </v-list-item>
+          </template>
+          <v-list-item
+            v-for="(subItem, subItemIdx) in item.items"
+            :key="subItemIdx"
+            :to="subItem.to"
+            :href="subItem.href"
+            :title="subItem.title"
+          />
+        </v-list-group>
 
-      <div class="nav-wrapper">
-          <d-nav class="flex-column">
-            <li v-for="(item, navItemIdx) in items" :key="navItemIdx" class="nav-item dropdown">
-              <d-link :class="['nav-link', item.items && item.items.length ? 'dropdown-toggle' : '']" :to="item.to" v-d-toggle="`snc-${navItemIdx}`">
-                <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
-                <span v-if="item.title">{{ item.title }}</span>
-                <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
-              </d-link>
-              <d-collapse v-if="item.items && item.items.length" :id="`snc-${navItemIdx}`" class="dropdown-menu dropdown-menu-small" accordion="sidebar-items-accordion">
-                <d-dropdown-item v-for="(subItem, subItemIdx) in item.items" :key="subItemIdx" :href="subItem.href" :to="subItem.to">
-                  {{ subItem.title }}
-                </d-dropdown-item>
-              </d-collapse>
-            </li>
-          </d-nav>
-      </div>
-  </aside>
+        <!-- Item without children -->
+        <v-list-item
+          v-else
+          :to="item.to"
+          :href="item.href"
+          :title="item.title"
+          :prepend-icon="undefined"
+        >
+          <template v-slot:prepend v-if="item.htmlBefore">
+            <div v-html="item.htmlBefore" class="mr-2"></div>
+          </template>
+        </v-list-item>
+      </template>
+    </v-list>
+  </v-navigation-drawer>
 </template>
 
 <script>
+import { getCurrentInstance } from 'vue';
+
 export default {
   name: 'main-sidebar',
   props: {
-    /**
-      * Whether to hide the logo text, or not.
-      */
     hideLogoText: {
       type: Boolean,
       default: false,
     },
-    /**
-     * The menu items.
-     */
     items: {
       type: Array,
       required: true,
@@ -65,14 +74,18 @@ export default {
   },
   data() {
     return {
-      sidebarVisible: false,
+      sidebarVisible: true,
     };
   },
   created() {
-    this.$eventHub.$on('toggle-sidebar', this.handleToggleSidebar);
+    const instance = getCurrentInstance();
+    const eventHub = instance.appContext.config.globalProperties.$eventHub;
+    eventHub.$on('toggle-sidebar', this.handleToggleSidebar);
   },
-  beforeDestroy() {
-    this.$eventHub.$off('toggle-sidebar');
+  beforeUnmount() {
+    const instance = getCurrentInstance();
+    const eventHub = instance.appContext.config.globalProperties.$eventHub;
+    eventHub.$off('toggle-sidebar', this.handleToggleSidebar);
   },
   methods: {
     handleToggleSidebar() {
@@ -82,13 +95,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
-  .main-sidebar {
-    .item-icon-wrapper {
-      display: inline-block;
-    }
-    .dropdown-menu {
-      display: block;
-    }
-  }
+<style scoped>
+.main-sidebar {
+  height: 100vh !important;
+}
 </style>

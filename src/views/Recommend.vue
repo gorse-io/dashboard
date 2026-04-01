@@ -1,84 +1,94 @@
 <template>
-  <d-container fluid class="main-content-container px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <d-row no-gutters class="page-header py-4">
-      <d-col col sm="4" class="text-center text-sm-left mb-4 mb-sm-0">
-        <span class="text-uppercase page-subtitle">User ID:</span>
-        <h3 class="page-title">{{ user_id }}</h3>
-      </d-col>
-    </d-row>
+    <v-row class="py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <span class="text-uppercase text-subtitle-2">User ID:</span>
+        <h3 class="text-h5">{{ user_id }}</h3>
+      </v-col>
+    </v-row>
 
-    <d-row>
-      <d-col lg="6" md="12" sm="12" class="mb-4">
-        <bo-user-feedback :title="'Feedback'" :user_id="user_id" :types="feedbackTypes" />
-      </d-col>
+    <v-row>
+      <v-col lg="6" md="12" sm="12" class="mb-4">
+        <bo-user-feedback title="Feedback" :user_id="user_id" :types="feedbackTypes" />
+      </v-col>
 
-      <d-col lg="6" md="12" sm="12" class="mb-4">
+      <v-col lg="6" md="12" sm="12" class="mb-4">
         <bo-user-recommend :user_id="user_id" :recommenders="recommenders" />
-      </d-col>
-    </d-row>
-  </d-container>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import axios from 'axios';
 import UserFeedback from '@/components/common/UserFeedback.vue';
 import UserRecommend from '@/components/common/UserRecommend.vue';
 
 export default {
+  name: 'recommend-view',
   components: {
     boUserFeedback: UserFeedback,
     boUserRecommend: UserRecommend,
   },
-  data() {
-    return {
-      cacheSize: 100,
-      user_id: null,
-      feedback: [],
-      recommends: [],
-      feedbackTypes: [],
-      recommenders: [''],
-    };
-  },
-  created() {
-    this.user_id = this.$route.params.user_id;
-  },
-  mounted() {
-    // load config
-    axios({
-      method: 'get',
-      url: '/api/dashboard/config',
-    })
-      .then((response) => {
-        this.cacheSize = response.data.recommend.cache_size;
+  setup() {
+    const route = useRoute();
+    const user_id = ref(route.params.user_id);
+    const feedbackTypes = ref([]);
+    const recommenders = ref(['']);
+
+    onMounted(async () => {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: '/api/dashboard/config',
+        });
 
         // List all feedback types
-        this.feedbackTypes = [''].concat(response.data.recommend.data_source.positive_feedback_types).concat(response.data.recommend.data_source.read_feedback_types);
+        const types = [''];
+        if (response.data.recommend.data_source.positive_feedback_types) {
+          types.push(...response.data.recommend.data_source.positive_feedback_types);
+        }
+        if (response.data.recommend.data_source.read_feedback_types) {
+          types.push(...response.data.recommend.data_source.read_feedback_types);
+        }
+        feedbackTypes.value = types;
 
         // List all recommenders
-        const recommenders = ['', 'latest', 'collaborative'];
+        const recs = ['', 'latest', 'collaborative'];
         if (response.data.recommend['non-personalized']) {
           response.data.recommend['non-personalized'].forEach((r) => {
-            recommenders.push(`non-personalized/${r.name}`);
+            recs.push(`non-personalized/${r.name}`);
           });
         }
         if (response.data.recommend['item-to-item']) {
           response.data.recommend['item-to-item'].forEach((r) => {
-            recommenders.push(`item-to-item/${r.name}`);
+            recs.push(`item-to-item/${r.name}`);
           });
         }
         if (response.data.recommend['user-to-user']) {
           response.data.recommend['user-to-user'].forEach((r) => {
-            recommenders.push(`user-to-user/${r.name}`);
+            recs.push(`user-to-user/${r.name}`);
           });
         }
         if (response.data.recommend.external) {
           response.data.recommend.external.forEach((r) => {
-            recommenders.push(`external/${r.name}`);
+            recs.push(`external/${r.name}`);
           });
         }
-        this.recommenders = recommenders;
-      });
+        recommenders.value = recs;
+      } catch (error) {
+        console.error('Error fetching config:', error);
+      }
+    });
+
+    return {
+      user_id,
+      feedbackTypes,
+      recommenders,
+    };
   },
 };
 </script>

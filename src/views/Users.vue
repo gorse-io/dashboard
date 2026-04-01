@@ -1,94 +1,96 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-        <span class="text-uppercase page-subtitle">Overview</span>
-        <h3 class="page-title">Users</h3>
-      </div>
-    </div>
+    <v-row class="page-header py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <span class="text-uppercase text-subtitle-2">Overview</span>
+        <h3 class="text-h5">Users</h3>
+      </v-col>
+    </v-row>
 
     <!-- Default Light Table -->
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
-            <h6 class="m-0">Users</h6>
-          </div>
-          <div class="card-body border-bottom">
-            <d-input-group>
-              <d-input id="user_id" v-model="user_id" placeholder="User ID" @keyup.enter.native="search_user" />
-              <d-input-group-addon append>
-                <d-button class="btn-white" @click="search_user"><i class="material-icons">search</i></d-button>
-                <d-button class="btn-white" @click="previous_page"><i
-                    class="material-icons">arrow_back_ios</i></d-button>
-                <d-button class="btn-white" @click="next_page"><i
-                    class="material-icons">arrow_forward_ios</i></d-button>
-              </d-input-group-addon>
-            </d-input-group>
-          </div>
-          <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0">ID</th>
-                  <th scope="col" class="border-0">Labels</th>
-                  <th scope="col" class="border-0">Description</th>
-                  <th scope="col" class="border-0">Last Active</th>
-                  <th scope="col" class="border-0">Last Update</th>
-                  <th scope="col" class="border-0"></th>
-                  <th scope="col" class="border-0"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(user, idx) in users" :key="idx">
-                  <td>{{ user.UserId }}</td>
-                  <td>
-                    <span
-                      style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-                      {{ user.Labels }}
-                    </span>
-                  </td>
-                  <td>{{ user.Comment }}</td>
-                  <td>{{ format_date_time(user.LastActiveTime) }}</td>
-                  <td>{{ format_date_time(user.LastUpdateTime) }}</td>
-                  <td>
-                    <d-button-group>
-                      <d-button size="small" outline @click="list_user_neighbors(user.UserId)"><i
-                          class="material-icons">visibility</i></d-button>
-                      <d-button size="small" outline @click="list_user_recommend(user.UserId)"><i
-                          class="material-icons">favorite</i></d-button>
-                      <d-button size="small" theme="danger" outline @click="open_delete_user_dialog(user.UserId)"><i
-                          class="material-icons">delete</i></d-button>
-                    </d-button-group>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-b">Users</v-card-title>
+          <v-card-text class="border-b">
+            <v-text-field
+              v-model="user_id"
+              label="User ID"
+              density="compact"
+              hide-details
+              @keyup.enter="search_user"
+            >
+              <template v-slot:append>
+                <v-btn icon="mdi-magnify" variant="text" @click="search_user" />
+                <v-btn icon="mdi-arrow-left" variant="text" @click="previous_page" />
+                <v-btn icon="mdi-arrow-right" variant="text" @click="next_page" />
+              </template>
+            </v-text-field>
+          </v-card-text>
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left">ID</th>
+                <th class="text-left">Labels</th>
+                <th class="text-left">Description</th>
+                <th class="text-left">Last Active</th>
+                <th class="text-left">Last Update</th>
+                <th class="text-left"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(user, idx) in users" :key="idx">
+                <td>{{ user.UserId }}</td>
+                <td>
+                  <span class="font-monospace">
+                    {{ user.Labels }}
+                  </span>
+                </td>
+                <td>{{ user.Comment }}</td>
+                <td>{{ format_date_time(user.LastActiveTime) }}</td>
+                <td>{{ format_date_time(user.LastUpdateTime) }}</td>
+                <td>
+                  <v-btn-group>
+                    <v-btn size="small" variant="outlined" @click="list_user_neighbors(user.UserId)">
+                      <v-icon>mdi-eye</v-icon>
+                    </v-btn>
+                    <v-btn size="small" variant="outlined" @click="list_user_recommend(user.UserId)">
+                      <v-icon>mdi-heart</v-icon>
+                    </v-btn>
+                    <v-btn size="small" color="error" variant="outlined" @click="open_delete_user_dialog(user.UserId)">
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </v-btn-group>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+      </v-col>
+    </v-row>
 
-    <d-modal v-if="showDialog" @close="showDialog = false" centered>
-      <d-modal-header>
-        <d-modal-title>Delete Item</d-modal-title>
-      </d-modal-header>
-      <d-modal-body>
-        <div class="mb-3">Are you sure to delete user <span style="font-weight: bold">{{ deleteUserId }}</span>? Please
-          type the ID of the deleted user.</div>
-        <d-input-group>
-          <d-input v-model="confirmUserId" />
-          <d-input-group-addon append>
-            <d-button theme="danger" outline @click="delete_user">
-              <i class="material-icons">delete</i>
-            </d-button>
-          </d-input-group-addon>
-        </d-input-group>
-        <span style="color: red">{{ deleteUserError }}</span>
-      </d-modal-body>
-    </d-modal>
-  </div>
+    <!-- Delete Dialog -->
+    <v-dialog v-model="showDialog" max-width="500">
+      <v-card>
+        <v-card-title>Delete User</v-card-title>
+        <v-card-text>
+          <div class="mb-3">
+            Are you sure to delete user <span class="font-weight-bold">{{ deleteUserId }}</span>?
+            Please type the ID of the deleted user.
+          </div>
+          <v-text-field v-model="confirmUserId" density="compact">
+            <template v-slot:append-inner>
+              <v-btn color="error" variant="outlined" @click="delete_user">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+          </v-text-field>
+          <span class="text-error">{{ deleteUserError }}</span>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
 <script>

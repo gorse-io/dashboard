@@ -1,49 +1,35 @@
 <template>
-  <d-card class="card-small h-100">
-    <!-- Card Header -->
-    <d-card-header class="border-bottom">
-      <h6 class="m-0">{{ title }}</h6>
-      <div class="block-handle"></div>
-    </d-card-header>
+  <v-card class="h-100">
+    <v-card-title class="border-b">
+      <h6 class="text-h6">{{ title }}</h6>
+    </v-card-title>
 
-    <d-card-body class="pt-0">
-      <d-row class="border-bottom py-2 bg-light">
+    <v-card-text class="pa-0">
+      <v-row class="border-b py-2 bg-light">
+        <v-col cols="12" sm="6" class="d-flex mb-2 mb-sm-0">
+          <v-select
+            v-model="timeseries"
+            :items="timeseriesOptions"
+            item-title="title"
+            item-value="name"
+            density="compact"
+            hide-details
+            label="Metric"
+            @update:model-value="changeTimeseries"
+          />
+        </v-col>
+      </v-row>
 
-        <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
-          <d-input-group size="sm" class="date-range d-flex justify-content-right">
-            <d-datepicker v-model="dateRange.from"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" placeholder="Start Date" typeable
-              small />
-            <d-datepicker v-model="dateRange.to" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="End Date" typeable small />
-            <d-input-group-text slot="append">
-              <i class="material-icons">&#xE916;</i>
-            </d-input-group-text>
-          </d-input-group>
-        </d-col>
-
-        <d-col col sm="6">
-          <d-input-group size="sm" class="d-flex btn-white ml-auto mr-auto ml-sm-auto mr-sm-0 mt-3 mt-sm-0">
-            <d-select @change="changeTimeseries" :value="timeseries">
-              <option v-for="(timeseriesOption, idx) in timeseriesOptions" :key="idx" :value="timeseriesOption">{{
-                timeseriesOption.title }}</option>
-            </d-select>
-          </d-input-group>
-        </d-col>
-
-      </d-row>
-      <!-- Legend & Chart -->
-      <div ref="legend"></div>
-      <canvas height="80" ref="canvas" style="max-width: 100% !important"></canvas>
-    </d-card-body>
-  </d-card>
+      <canvas height="80" ref="canvasRef" style="max-width: 100% !important"></canvas>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import axios from 'axios';
 import moment from 'moment';
 import Chart from '../../utils/chart';
-
 
 export default {
   name: 'users-overview',
@@ -54,73 +40,38 @@ export default {
     },
     positiveFeedbackTypes: {
       type: Array,
-      default: [],
-    },
-    chartData: {
-      type: Object,
-      default() {
-        return {
-          labels: [],
-          datasets: [{
-            label: 'Current Duration',
-            fill: 'start',
-            data: [],
-            backgroundColor: 'rgba(0,123,255,0.1)',
-            borderColor: 'rgba(0,123,255,1)',
-            pointBackgroundColor: '#ffffff',
-            pointHoverBackgroundColor: 'rgb(0,123,255)',
-            borderWidth: 1.5,
-            pointRadius: 0,
-            pointHoverRadius: 3,
-          }, /* , {
-            label: 'Past Duration',
-            fill: 'start',
-            data: [],
-            backgroundColor: 'rgba(255,65,105,0.1)',
-            borderColor: 'rgba(255,65,105,1)',
-            pointBackgroundColor: '#ffffff',
-            pointHoverBackgroundColor: 'rgba(255,65,105,1)',
-            borderDash: [3, 3],
-            borderWidth: 1,
-            pointRadius: 0,
-            pointHoverRadius: 2,
-            pointBorderColor: 'rgba(255,65,105,1)',
-          } */],
-        };
-      },
+      default: () => [],
     },
   },
-  data() {
-    return {
-      dateRange: {
-        from: null,
-        to: null,
-      },
-      timeseries: {
-        name: 'positive_feedback_ratio',
-        title: 'Positive Feedback Ratio - All',
-        label: 'All',
-      },
-      chartInstance: null,
-      plotRequestId: 0,
-      plotAbortController: null,
-    };
-  },
-  mounted() {
-    this.plot(this.timeseries.name, this.timeseries.label);
-  },
-  beforeDestroy() {
-    if (this.plotAbortController) {
-      this.plotAbortController.abort();
-      this.plotAbortController = null;
-    }
-    if (this.chartInstance) {
-      this.chartInstance.destroy();
-      this.chartInstance = null;
-    }
-  },
-  computed: {
-    timeseriesOptions() {
+  setup(props) {
+    const canvasRef = ref(null);
+    const chartInstance = ref(null);
+    const plotRequestId = ref(0);
+    const plotAbortController = ref(null);
+
+    const timeseries = ref({
+      name: 'positive_feedback_ratio',
+      title: 'Positive Feedback Ratio - All',
+      label: 'All',
+    });
+
+    const chartData = ref({
+      labels: [],
+      datasets: [{
+        label: 'Current Duration',
+        fill: true,
+        data: [],
+        backgroundColor: 'rgba(0,123,255,0.1)',
+        borderColor: 'rgba(0,123,255,1)',
+        pointBackgroundColor: '#ffffff',
+        pointHoverBackgroundColor: 'rgb(0,123,255)',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 3,
+      }],
+    });
+
+    const timeseriesOptions = computed(() => {
       const options = [
         {
           name: 'positive_feedback_ratio',
@@ -128,8 +79,9 @@ export default {
           label: 'All',
         },
       ];
-      if (this.positiveFeedbackTypes.length > 0) {
-        this.positiveFeedbackTypes.forEach((type) => {
+
+      if (props.positiveFeedbackTypes && props.positiveFeedbackTypes.length > 0) {
+        props.positiveFeedbackTypes.forEach((type) => {
           options.push({
             name: `positive_feedback_ratio_${type}`,
             title: `Positive Feedback Ratio - ${type.charAt(0).toUpperCase() + type.slice(1)}`,
@@ -137,6 +89,7 @@ export default {
           });
         });
       }
+
       options.push({
         name: 'cf_ndcg',
         title: 'Collaborative Filtering - NDCG',
@@ -167,122 +120,136 @@ export default {
         title: 'Click-Through Rate - Recall',
         label: 'Recall',
       });
+
       return options;
-    },
-  },
-  methods: {
-    plot(name, label) {
-      this.plotRequestId += 1;
-      const requestId = this.plotRequestId;
+    });
 
-      if (this.plotAbortController) {
-        this.plotAbortController.abort();
+    const plot = async (name, label) => {
+      plotRequestId.value += 1;
+      const requestId = plotRequestId.value;
+
+      if (plotAbortController.value) {
+        plotAbortController.value.abort();
       }
-      this.plotAbortController = new AbortController();
+      plotAbortController.value = new AbortController();
 
-      if (this.chartInstance) {
-        this.chartInstance.destroy();
-        this.chartInstance = null;
+      if (chartInstance.value) {
+        chartInstance.value.destroy();
+        chartInstance.value = null;
       }
 
       const currentEnd = moment();
       const currentBegin = currentEnd.clone().subtract(7, 'days');
-      axios({
-        method: 'get',
-        url: `/api/dashboard/timeseries/${name}?begin=${currentBegin.toISOString()}&end=${currentEnd.toISOString()}`,
-        signal: this.plotAbortController.signal,
-      })
-        .then((response) => {
-          if (requestId !== this.plotRequestId) {
-            return;
-          }
 
-          this.chartData.labels = response.data.map(item => moment(item.Timestamp).format('MMM DD HH:mm'));
-          this.chartData.datasets[0].data = response.data.map(item => Number(item.Value).toFixed(5));
-          this.chartData.datasets[0].label = label;
+      try {
+        const response = await axios({
+          method: 'get',
+          url: `/api/dashboard/timeseries/${name}?begin=${currentBegin.toISOString()}&end=${currentEnd.toISOString()}`,
+          signal: plotAbortController.value.signal,
+        });
 
-          const chartOptions = {
-            ...{
-              responsive: true,
-              legend: {
-                position: 'top',
+        if (requestId !== plotRequestId.value) {
+          return;
+        }
+
+        chartData.value.labels = response.data.map(item => moment(item.Timestamp).format('MMM DD HH:mm'));
+        chartData.value.datasets[0].data = response.data.map(item => Number(item.Value).toFixed(5));
+        chartData.value.datasets[0].label = label;
+
+        const chartOptions = {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            tooltip: {
+              mode: 'nearest',
+              intersect: false,
+            },
+          },
+          elements: {
+            line: {
+              tension: 0.3,
+            },
+            point: {
+              radius: 0,
+            },
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false,
               },
-              elements: {
-                line: {
-                  // A higher value makes the line look skewed at this ratio.
-                  tension: 0.3,
+              ticks: {
+                callback(tick, index) {
+                  return index % 7 !== 0 ? '' : this.getLabelForValue(tick);
                 },
-                point: {
-                  radius: 0,
-                },
-              },
-              scales: {
-                xAxes: [{
-                  gridLines: false,
-                  ticks: {
-                    callback(tick, index) {
-                      // Jump every 7 values on the X axis labels to avoid clutter.
-                      return index % 7 !== 0 ? '' : tick;
-                    },
-                  },
-                }],
-                yAxes: [{
-                  ticks: {
-                    suggestedMax: Math.max(...this.chartData.datasets[0].data),
-                    callback(tick) {
-                      if (tick === 0) {
-                        return tick;
-                      }
-                      // Format the amounts using Ks for thousands.
-                      return tick > 999 ? `${(tick / 1000).toFixed(1)}K` : tick;
-                    },
-                  },
-                }],
-              },
-              hover: {
-                mode: 'nearest',
-                intersect: false,
-              },
-              tooltips: {
-                custom: false,
-                mode: 'nearest',
-                intersect: false,
               },
             },
-            ...this.chartOptions,
-          };
+            y: {
+              ticks: {
+                suggestedMax: Math.max(...chartData.value.datasets[0].data),
+                callback(tick) {
+                  if (tick === 0) {
+                    return tick;
+                  }
+                  return tick > 999 ? `${(tick / 1000).toFixed(1)}K` : tick;
+                },
+              },
+            },
+          },
+          interaction: {
+            mode: 'nearest',
+            intersect: false,
+          },
+        };
 
-          const BlogUsersOverview = new Chart(this.$refs.canvas, {
-            type: 'LineWithLine',
-            data: this.chartData,
+        if (canvasRef.value) {
+          chartInstance.value = new Chart(canvasRef.value, {
+            type: 'line',
+            data: chartData.value,
             options: chartOptions,
           });
+        }
+      } catch (error) {
+        if (error && (error.name === 'CanceledError' || error.name === 'AbortError')) {
+          // Ignore cancellations
+        }
+      }
+    };
 
-          this.chartInstance = BlogUsersOverview;
+    const changeTimeseries = (name) => {
+      const selected = timeseriesOptions.value.find(opt => opt.name === name);
+      if (selected) {
+        timeseries.value = selected;
+        plot(selected.name, selected.label);
+      }
+    };
 
-          // They can still be triggered on hover.
-          const buoMeta = BlogUsersOverview.getDatasetMeta(0);
-          if (buoMeta && buoMeta.data && buoMeta.data.length > 0) {
-            buoMeta.data[0]._model.radius = 0;
-            buoMeta.data[buoMeta.data.length - 1]._model.radius = 0;
-          }
+    onMounted(() => {
+      plot(timeseries.value.name, timeseries.value.label);
+    });
 
-          // Render the chart.
-          BlogUsersOverview.render();
-        })
-        .catch((error) => {
-          // Ignore cancellations (switching timeseries quickly).
-          if (error && (error.name === 'CanceledError' || error.name === 'AbortError')) {
+    onBeforeUnmount(() => {
+      if (plotAbortController.value) {
+        plotAbortController.value.abort();
+      }
+      if (chartInstance.value) {
+        chartInstance.value.destroy();
+      }
+    });
 
-          }
-          // Swallow other errors to avoid breaking the dashboard UI.
-          // (Optional: hook into a toast/notification system if available.)
-        });
-    },
-    changeTimeseries(value) {
-      this.timeseries = value;
-      this.plot(value.name, value.label);
-    },
+    watch(() => props.positiveFeedbackTypes, () => {
+      // Re-plot when positiveFeedbackTypes changes
+      plot(timeseries.value.name, timeseries.value.label);
+    });
+
+    return {
+      canvasRef,
+      timeseries,
+      timeseriesOptions,
+      changeTimeseries,
+    };
   },
 };
 </script>

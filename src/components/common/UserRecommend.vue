@@ -1,82 +1,96 @@
 <template>
-  <d-card class="card-small">
-    <!-- Card Header -->
-    <d-card-header class="border-bottom">
-      <h6 class="m-0">Recommend</h6>
-      <div class="block-handle"></div>
-    </d-card-header>
+  <v-card>
+    <v-card-title class="border-b">
+      <h6 class="text-h6">Recommend</h6>
+    </v-card-title>
 
-    <d-card-body class="p-0">
-      <div class="card-body border-bottom">
-        <d-row>
-          <d-col sm="6"><d-select v-model="recommender" @change="changeRecommend">
-              <option v-for="recommend in recommenders" :key="recommend" :value="recommend">
-                {{ recommend }}
-              </option>
-            </d-select></d-col>
-          <d-col sm="6"><d-input-group prepend="Categories" class="mb-3">
-              <d-select v-model="category" @change="changeCategory">
-                <option v-for="(category, idx) in categories" :key="idx" :value="category">
-                  {{ category }}
-                </option>
-              </d-select>
-            </d-input-group></d-col>
-        </d-row>
+    <v-card-text class="pa-0">
+      <div class="pa-4 border-b">
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-select
+              v-model="recommender"
+              :items="recommenders"
+              label="Recommender"
+              density="compact"
+              hide-details
+              @update:model-value="changeRecommend"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-select
+              v-model="category"
+              :items="categories"
+              label="Categories"
+              density="compact"
+              hide-details
+              @update:model-value="changeCategory"
+            />
+          </v-col>
+        </v-row>
       </div>
-    </d-card-body>
+    </v-card-text>
 
-    <d-card-body class="p-0">
-      <!-- Top Referrals List Group -->
-      <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
-        <!-- Content -->
-        <div class="blog-comments__content">
-          <!-- Content - Title -->
-          <div class="blog-comments__meta text-muted">
-            {{ item.ItemId }}
-          </div>
-
-          <!-- Content - Body -->
-          <p class="m-0 my-1 mb-2 text-muted text-semibold">
-            {{ item.Comment }}
-          </p>
-
-          <!-- Content - Actions -->
-          <div class="blog-comments__actions">
-            <d-badge outline v-for="(label, idx) in item.Categories" :key="idx">
-              {{ label }}
-            </d-badge>
-            <span
-              style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-              {{ fold(item.Labels) }}
-            </span>
-          </div>
-
-          <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">
-            {{ item.Timestamp }}
-          </p>
+    <v-card-text class="pa-0">
+      <div v-for="(item, idx) in pageItems" :key="idx" class="pa-3 border-b">
+        <div class="text-muted mb-1">
+          {{ item.ItemId }}
         </div>
-      </div>
-    </d-card-body>
 
-    <d-card-footer class="border-top">
-      <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
-            class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
-            class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group>
-    </d-card-footer>
-  </d-card>
+        <p class="mb-1 text-muted">
+          {{ item.Comment }}
+        </p>
+
+        <div class="mb-1">
+          <v-chip
+            v-for="(label, labelIdx) in item.Categories"
+            :key="labelIdx"
+            size="small"
+            variant="outlined"
+            class="mr-1"
+          >
+            {{ label }}
+          </v-chip>
+          <span class="font-monospace">
+            {{ fold(item.Labels) }}
+          </span>
+        </div>
+
+        <p class="mb-0 text-caption text-muted">
+          {{ item.Timestamp }}
+        </p>
+      </div>
+    </v-card-text>
+
+    <v-card-actions class="border-t">
+      <v-btn
+        variant="text"
+        @click="prevPage"
+        :disabled="pageNumber === 0"
+      >
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-btn
+        variant="text"
+        @click="nextPage"
+        :disabled="pageNumber + 1 >= pageCount"
+      >
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import utils from '@/utils';
 
 export default {
-  name: 'ao-top-referrals',
+  name: 'user-recommend',
   props: {
     user_id: {
+      type: String,
       default: '',
     },
     recommenders: {
@@ -84,76 +98,92 @@ export default {
       default: () => [''],
     },
   },
-  data() {
-    return {
-      categories: [''],
-      pageSize: 10,
-      items: [],
-      pageNumber: 0,
-      recommender: '',
-      category: '',
+  setup(props) {
+    const categories = ref(['']);
+    const pageSize = 10;
+    const items = ref([]);
+    const pageNumber = ref(0);
+    const recommender = ref('');
+    const category = ref('');
+
+    const fold = utils.fold;
+
+    const pageCount = computed(() => {
+      return Math.ceil(items.value.length / pageSize);
+    });
+
+    const pageItems = computed(() => {
+      const start = pageNumber.value * pageSize;
+      const end = Math.min(start + pageSize, items.value.length);
+      return items.value.slice(start, end);
+    });
+
+    const fetchData = async () => {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: `/api/dashboard/recommend/${props.user_id}/${recommender.value}`,
+          params: {
+            n: 100,
+            category: category.value || undefined,
+          },
+        });
+        items.value = response.data;
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+      }
     };
-  },
-  computed: {
-    pageCount() {
-      return this.items.length / this.pageSize;
-    },
-    pageItems() {
-      const start = this.pageNumber * this.pageSize;
-      const end = Math.min(start + this.pageSize, this.items.length);
-      return this.items.slice(start, end);
-    },
-  },
-  methods: {
-    prevPage() {
-      this.pageNumber -= 1;
-    },
-    nextPage() {
-      this.pageNumber += 1;
-    },
-    changeRecommend(value) {
-      axios({
-        method: 'get',
-        url: `/api/dashboard/recommend/${this.user_id}/${value}`,
-        params: {
-          n: 100,
-          category: this.category,
-        },
-      }).then((response) => {
-        this.items = response.data;
-      });
-    },
-    changeCategory(value) {
-      console.log(this.recommender);
-      axios({
-        method: 'get',
-        url: `/api/dashboard/recommend/${this.user_id}/${this.recommender}`,
-        params: {
-          n: 100,
-          category: value,
-        },
-      }).then((response) => {
-        this.items = response.data;
-      });
-    },
-    fold: utils.fold,
-  },
-  mounted() {
-    axios({
-      method: 'get',
-      url: `/api/dashboard/recommend/${this.user_id}/${this.recommender}/`,
-      params: {
-        n: 100,
-      },
-    }).then((response) => {
-      this.items = response.data;
+
+    const changeRecommend = () => {
+      pageNumber.value = 0;
+      fetchData();
+    };
+
+    const changeCategory = () => {
+      pageNumber.value = 0;
+      fetchData();
+    };
+
+    const prevPage = () => {
+      if (pageNumber.value > 0) {
+        pageNumber.value -= 1;
+      }
+    };
+
+    const nextPage = () => {
+      if (pageNumber.value + 1 < pageCount.value) {
+        pageNumber.value += 1;
+      }
+    };
+
+    onMounted(async () => {
+      await fetchData();
+
+      try {
+        const response = await axios({
+          method: 'get',
+          url: '/api/dashboard/categories',
+        });
+        categories.value = [''].concat(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
     });
-    axios({
-      method: 'get',
-      url: '/api/dashboard/categories',
-    }).then((response) => {
-      this.categories = [''].concat(response.data);
-    });
+
+    return {
+      categories,
+      items,
+      pageNumber,
+      recommender,
+      category,
+      fold,
+      pageCount,
+      pageItems,
+      changeRecommend,
+      changeCategory,
+      prevPage,
+      nextPage,
+    };
   },
 };
 </script>

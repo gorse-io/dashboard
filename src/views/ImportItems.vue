@@ -1,167 +1,186 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-        <span class="text-uppercase page-subtitle">Preview</span>
-        <h3 class="page-title">Import Items</h3>
-      </div>
-    </div>
-    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
-      @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header">
-            <d-form validated @submit.prevent="uploadFile">
-              <d-form-row>
-                <d-col md="10" class="form-group">
-                  <strong class="text-muted d-block mb-2">File</strong>
-                  <div class="custom-file mb-3">
-                    <input type="file" class="custom-file-input" id="csvFile" @change="loadFile" required />
-                    <label class="custom-file-label" for="customFile2">{{
-                      fileName
-                    }}</label>
-                    <d-form-invalid-feedback>Upload local *.jsonl file.</d-form-invalid-feedback>
+    <v-row class="py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <span class="text-uppercase text-subtitle-2">Preview</span>
+        <h3 class="text-h5">Import Items</h3>
+      </v-col>
+    </v-row>
+
+    <v-alert
+      v-if="alertText"
+      :type="alertTheme"
+      closable
+      class="mb-4"
+      @click:close="alertText = null"
+    >
+      {{ alertText }}
+    </v-alert>
+
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-text>
+            <v-form @submit.prevent="uploadFile">
+              <v-row>
+                <v-col cols="12" md="10">
+                  <v-file-input
+                    v-model="selectedFile"
+                    label="Choose file..."
+                    accept=".jsonl"
+                    :hint="'Upload local *.jsonl file.'"
+                    persistent-hint
+                    @update:model-value="loadFile"
+                  />
+                </v-col>
+                <v-col cols="12" md="2" class="d-flex align-center">
+                  <v-btn
+                    color="primary"
+                    variant="outlined"
+                    type="submit"
+                    :loading="progressShow"
+                    :disabled="!selectedFile"
+                  >
+                    Confirm Import
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card-text>
+
+          <v-progress-linear
+            v-if="progressShow"
+            indeterminate
+            color="primary"
+            class="mb-2"
+          />
+
+          <v-table v-if="rows.length > 0">
+            <thead>
+              <tr>
+                <th
+                  v-for="columnName in columnNames"
+                  :key="columnName"
+                  class="text-left"
+                >
+                  {{ columnName }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, rowIdx) in rows" :key="rowIdx">
+                <td v-for="columnName in columnNames" :key="columnName">
+                  <div v-if="columnName === 'Categories'">
+                    <v-chip
+                      v-for="(label, idx) in row[columnName]"
+                      :key="idx"
+                      size="small"
+                      variant="outlined"
+                      color="primary"
+                      class="mr-1"
+                    >
+                      {{ label }}
+                    </v-chip>
                   </div>
-                </d-col>
-                <d-col md="2" class="form-group"><strong class="text-muted d-block mb-2">&nbsp;</strong><d-button
-                    outline>Comfirm
-                    Import</d-button></d-col>
-              </d-form-row>
-            </d-form>
-          </div>
-          <div class="progress" v-if="progressShow">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
-              aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-          </div>
-          <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0" v-for="columnName in columnNames" :key="columnName">
-                    {{ columnName }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, row_idx) in rows" :key="row_idx">
-                  <td v-for="columnName in columnNames" :key="columnName">
-                    <div v-if="columnName === 'Categories'">
-                      <d-badge outline theme="primary" v-for="(label, idx) in row[columnName]" :key="idx">
-                        {{ label }}
-                      </d-badge>
-                    </div>
-                    <div v-else-if="columnName === 'Labels'">
-                      <span
-                        style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-                        {{ row[columnName] }}
-                      </span>
-                    </div>
-                    <div v-else>
-                      {{ row[columnName] }}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+                  <span v-else-if="columnName === 'Labels'" class="font-monospace">
+                    {{ row[columnName] }}
+                  </span>
+                  <span v-else>{{ row[columnName] }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import { ref } from 'vue';
 import axios from 'axios';
-import moment from 'moment';
 
 export default {
-  data() {
-    return {
-      fileName: 'Choose file...',
-      progressShow: false,
-      alertTheme: 'danger',
-      alertText: null,
-      duration: 5,
-      timeUntilDismissed: 0,
-      columnNames: [
-        'ItemId',
-        'IsHidden',
-        'Categories',
-        'Timestamp',
-        'Labels',
-        'Comment',
-      ],
-      rows: [],
-    };
-  },
-  methods: {
-    loadFile(event) {
-      const file = event.target.files[0];
-      // load file name
-      this.fileName = file.name;
-      // load file content
+  name: 'import-items-view',
+  setup() {
+    const selectedFile = ref(null);
+    const fileName = ref('Choose file...');
+    const progressShow = ref(false);
+    const alertTheme = ref('error');
+    const alertText = ref(null);
+    const columnNames = ref([
+      'ItemId',
+      'IsHidden',
+      'Categories',
+      'Timestamp',
+      'Labels',
+      'Comment',
+    ]);
+    const rows = ref([]);
+
+    const loadFile = (file) => {
+      if (!file) return;
+
+      fileName.value = file.name;
       const reader = new FileReader();
       reader.readAsText(file.slice(0, 4096));
       reader.onload = (e) => {
-        this.rows = e.target.result.split('\n').slice(0, -1).map(line => JSON.parse(line));
+        try {
+          rows.value = e.target.result
+            .split('\n')
+            .slice(0, -1)
+            .map((line) => JSON.parse(line));
+        } catch (error) {
+          console.error('Error parsing file:', error);
+        }
       };
-    },
-    format_date_time(timestamp) {
-      if (timestamp === '') {
-        return '';
-      }
-      return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
-    },
-    handleTimeChange(time) {
-      this.timeUntilDismissed = time;
-    },
-    showDanger(message) {
-      this.timeUntilDismissed = this.duration;
-      this.alertTheme = 'danger';
-      this.alertText = message;
-    },
-    showSuccess(message) {
-      this.timeUntilDismissed = this.duration;
-      this.alertTheme = 'success';
-      this.alertText = message;
-    },
-    resetProgressBar() {
-      this.progressTotal = 100;
-      this.progressLoaded = 0;
-    },
-    resetTable() {
-      this.table = [];
-    },
-    uploadFile() {
-      // create form
-      const formData = new FormData();
-      // file must be chosen
-      const csvfile = document.querySelector('#csvFile');
-      if (csvfile.files.length === 0) {
-        this.showDanger('file must be chosen');
+    };
+
+    const showDanger = (message) => {
+      alertTheme.value = 'error';
+      alertText.value = message;
+    };
+
+    const showSuccess = (message) => {
+      alertTheme.value = 'success';
+      alertText.value = message;
+    };
+
+    const uploadFile = async () => {
+      if (!selectedFile.value) {
+        showDanger('File must be chosen');
         return;
       }
-      formData.append('file', csvfile.files[0]);
-      // start upload
-      this.progressShow = true;
-      axios
-        .post('/api/bulk/items', formData)
-        .then((response) => {
-          // import items successfully
-          this.showSuccess(response.data);
-          this.resetProgressBar();
-          this.resetTable();
-          this.progressShow = false;
-        })
-        .catch((error) => {
-          // receive error
-          this.showDanger(error.response.data);
-          this.resetProgressBar();
-          this.progressShow = false;
-        });
-    },
+
+      const formData = new FormData();
+      formData.append('file', selectedFile.value);
+
+      progressShow.value = true;
+
+      try {
+        const response = await axios.post('/api/bulk/items', formData);
+        showSuccess(response.data);
+        rows.value = [];
+        selectedFile.value = null;
+      } catch (error) {
+        showDanger(error.response?.data || error.message);
+      } finally {
+        progressShow.value = false;
+      }
+    };
+
+    return {
+      selectedFile,
+      fileName,
+      progressShow,
+      alertTheme,
+      alertText,
+      columnNames,
+      rows,
+      loadFile,
+      uploadFile,
+    };
   },
 };
 </script>

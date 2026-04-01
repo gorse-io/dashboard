@@ -1,86 +1,98 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
-        <h3 class="page-title">Chat</h3>
-      </div>
-    </div>
+    <v-row class="py-4">
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
+        <h3 class="text-h5">Chat</h3>
+      </v-col>
+    </v-row>
 
-    <d-row>
-      <d-col lg="12" md="12" sm="12" class="mb-4">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
-            <h6 class="m-0">Prompt</h6>
-          </div>
-          <div class="card-body p-0 pb-2">
-            <d-list-group flush>
-              <d-list-group-item class="p-3">
-                <d-row class="mb-3">
-                  <d-col sm="12" md="12">
-                    <d-form-textarea :rows="3" :max-rows="6" v-model="prompt">
-                    </d-form-textarea>
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="12" class="text-right">
-                    <d-button outline @click="send">Send</d-button>
-                  </d-col>
-                </d-row>
-                <d-row v-if="message">
-                  <d-col sm="12" md="12">
-                    <div class="p-3 mt-3 border rounded">
-                      <div v-html="message"></div>
-                    </div>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
-          </div>
-        </div>
-      </d-col>
-    </d-row>
-  </div>
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-b">Prompt</v-card-title>
+          <v-card-text>
+            <v-textarea
+              v-model="prompt"
+              :rows="3"
+              :max-rows="6"
+              variant="outlined"
+              placeholder="Enter your prompt..."
+              class="mb-4"
+            />
+            <v-btn variant="outlined" color="primary" @click="send" :loading="loading">
+              Send
+            </v-btn>
+
+            <v-card v-if="message" variant="outlined" class="mt-4">
+              <v-card-text>
+                <div v-html="message" />
+              </v-card-text>
+            </v-card>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import { ref } from 'vue';
 import axios from 'axios';
 
 export default {
-  data() {
-    return {
-      prompt: '',
-      message: '',
-    };
-  },
-  methods: {
-    async send() {
-      if (!this.prompt) {
-        this.message = 'Please enter a prompt.';
+  name: 'chat-view',
+  setup() {
+    const prompt = ref('');
+    const message = ref('');
+    const loading = ref(false);
+
+    const send = async () => {
+      if (!prompt.value) {
+        message.value = 'Please enter a prompt.';
         return;
       }
-      axios({
-        method: 'post',
-        url: '/api/chat',
-        data: this.prompt,
-        responseType: 'stream',
-        adapter: 'fetch',
-      }).then((response) => {
+
+      loading.value = true;
+      message.value = '';
+
+      try {
+        const response = await axios({
+          method: 'post',
+          url: '/api/chat',
+          data: prompt.value,
+          responseType: 'stream',
+          adapter: 'fetch',
+        });
+
         const reader = response.data.getReader();
         const decoder = new TextDecoder();
-        const that = this;
-        that.message = '';
-        reader.read().then(function processText({ done, value }) {
+
+        const processText = async ({ done, value }) => {
           if (done) {
+            loading.value = false;
             return;
           }
-          that.message += decoder.decode(value, { stream: true }).replace(/\n/g, '<br>');
-          reader.read().then(processText);
-        });
-      }).catch((error) => {
-        this.message = error;
-      });
-    },
+
+          message.value += decoder.decode(value, { stream: true }).replace(/\n/g, '<br>');
+          const result = await reader.read();
+          await processText(result);
+        };
+
+        const result = await reader.read();
+        await processText(result);
+      } catch (error) {
+        message.value = error.message || String(error);
+        loading.value = false;
+      }
+    };
+
+    return {
+      prompt,
+      message,
+      loading,
+      send,
+    };
   },
 };
 </script>
