@@ -1,12 +1,12 @@
 <template>
-  <d-card class="card-small">
+  <v-card class="card-small">
     <!-- Card Header -->
-    <d-card-header class="border-bottom">
+    <v-card-title class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
       <div class="block-handle"></div>
-    </d-card-header>
+    </v-card-title>
 
-    <d-card-body class="p-0">
+    <v-card-text class="pa-0">
       <!-- Top Referrals List Group -->
       <d-list-group flush class="list-group-small">
         <d-list-group-item
@@ -14,15 +14,15 @@
           :key="idx"
           class="d-flex px-3"
         >
-          <span class="text-semibold text-fiord-blue"><i class="material-icons mr-1">{{ item.icon }}</i>{{ item.name }}</span>
-          <span class="ml-auto text-right text-semibold text-reagent-gray"
+          <span class="text-semibold text-fiord-blue"><i class="material-icons me-1">{{ item.icon }}</i>{{ item.name }}</span>
+          <span class="ms-auto text-end text-semibold text-reagent-gray"
             >{{ format(query(item.key)) }}</span
           >
         </d-list-group-item>
       </d-list-group>
-    </d-card-body>
-    <d-card-footer> </d-card-footer>
-  </d-card>
+    </v-card-text>
+    <v-card-actions> </v-card-actions>
+  </v-card>
 </template>
 
 <script>

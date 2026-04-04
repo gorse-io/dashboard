@@ -1,13 +1,13 @@
 <template>
-  <d-card class="card-small">
-    <d-card-header class="border-bottom">
+  <v-card class="card-small">
+    <v-card-title class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
       <div class="block-handle"></div>
-    </d-card-header>
+    </v-card-title>
 
-    <div class="card-body border-bottom">
-      <d-row>
-        <d-col sm="6" md="6">
+    <v-card-text class="border-bottom">
+      <v-row>
+        <v-col cols="12" md="6">
           <d-input-group prepend="Recommender" class="mb-3">
             <d-select @change="changeRecommender" :value="recommender">
               <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
@@ -15,8 +15,8 @@
               </option>
             </d-select>
           </d-input-group>
-        </d-col>
-        <d-col sm="6" md="6">
+        </v-col>
+        <v-col cols="12" md="6">
           <d-input-group prepend="Categories" class="mb-3">
             <d-select @change="changeCategory">
               <option v-for="(category, idx) in categories" :key="idx" :value="category">
@@ -24,20 +24,20 @@
               </option>
             </d-select>
           </d-input-group>
-        </d-col>
-      </d-row>
-    </div>
+        </v-col>
+      </v-row>
+    </v-card-text>
 
-    <d-card-body class="p-0">
-      <table class="table mb-0">
-        <thead class="bg-light">
+    <v-card-text class="pa-0">
+      <v-table>
+        <thead>
           <tr>
-            <th scope="col" class="border-0">ID</th>
-            <th scope="col" class="border-0">Categories</th>
-            <th scope="col" class="border-0">Timestamp</th>
-            <th scope="col" class="border-0">Labels</th>
-            <th scope="col" class="border-0">Description</th>
-            <th scope="col" class="border-0">Score</th>
+            <th>ID</th>
+            <th>Categories</th>
+            <th>Timestamp</th>
+            <th>Labels</th>
+            <th>Description</th>
+            <th>Score</th>
           </tr>
         </thead>
         <tbody>
@@ -61,19 +61,13 @@
             <td>{{ item.Score.toFixed(5) }}</td>
           </tr>
         </tbody>
-      </table>
-    </d-card-body>
+      </v-table>
+    </v-card-text>
 
-    <d-card-footer class="border-top" v-if="last_modified !== undefined">
-      <!-- <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
-            class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
-            class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group> -->
+    <v-card-actions class="border-t" v-if="last_modified !== undefined">
       <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
-    </d-card-footer>
-  </d-card>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>

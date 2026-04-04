@@ -6,6 +6,11 @@ import * as directives from 'vuetify/directives';
 export default createVuetify({
   components,
   directives,
+  defaults: {
+    VBtn: {
+      variant: 'flat',
+    },
+  },
   theme: {
     defaultTheme: 'light',
   },

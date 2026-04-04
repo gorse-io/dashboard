@@ -8,10 +8,29 @@ import {
 import { RouterLink } from 'vue-router';
 import {
   VAlert,
+  VAppBar,
   VBtn,
+  VBtnGroup,
   VCard,
+  VCardActions,
+  VCardText,
+  VCardTitle,
+  VCheckbox,
+  VChip,
+  VCol,
+  VContainer,
   VDialog,
+  VForm,
+  VList,
+  VListItem,
+  VMessages,
   VProgressLinear,
+  VRow,
+  VSelect,
+  VSheet,
+  VTextField,
+  VTextarea,
+  VToolbarItems,
 } from 'vuetify/components';
 
 const normalizeTheme = (theme) => {
@@ -66,6 +85,54 @@ const withDefaultClass = (attrs, className) => ({
   class: [className, attrs.class],
 });
 
+const flattenSlotText = (nodes = []) => nodes
+  .flatMap((node) => {
+    if (node === null || node === undefined || typeof node === 'boolean') {
+      return [];
+    }
+    if (typeof node === 'string' || typeof node === 'number') {
+      return [String(node)];
+    }
+    if (Array.isArray(node.children)) {
+      return flattenSlotText(node.children);
+    }
+    if (typeof node.children === 'string' || typeof node.children === 'number') {
+      return [String(node.children)];
+    }
+    return [];
+  })
+  .join('')
+  .trim();
+
+const extractSelectItems = (nodes = []) => nodes.flatMap((node) => {
+  if (!node || typeof node === 'string' || typeof node === 'number') {
+    return [];
+  }
+
+  if (typeof node.type === 'symbol' && Array.isArray(node.children)) {
+    return extractSelectItems(node.children);
+  }
+
+  if (node.type !== 'option') {
+    if (Array.isArray(node.children)) {
+      return extractSelectItems(node.children);
+    }
+    return [];
+  }
+
+  const title = Array.isArray(node.children)
+    ? flattenSlotText(node.children)
+    : String(node.children ?? '');
+  const value = node.props?.value ?? title;
+  const disabled = node.props?.disabled === true || node.props?.disabled === '';
+
+  return [{
+    title,
+    value,
+    props: { disabled },
+  }];
+});
+
 const DContainer = defineComponent({
   name: 'DContainer',
   props: {
@@ -75,9 +142,10 @@ const DContainer = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VContainer, {
       ...attrs,
-      class: [isTruthy(props.fluid) ? 'container-fluid' : 'container', attrs.class],
+      fluid: isTruthy(props.fluid),
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -91,9 +159,10 @@ const DRow = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VRow, {
       ...attrs,
-      class: ['row', isTruthy(props.noGutters) ? 'no-gutters' : null, attrs.class],
+      noGutters: isTruthy(props.noGutters),
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -131,36 +200,20 @@ const DCol = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    const toBreakpointClass = (bp, value) => {
-      if (value === undefined || value === null || value === false) {
-        return null;
-      }
-      if (value === true || value === '') {
-        return `col-${bp}`;
-      }
-      return `col-${bp}-${value}`;
-    };
-
     return () => {
-      const classes = [];
-      if (isTruthy(props.col)) {
-        classes.push('col');
-      }
-      if (props.cols !== undefined) {
-        classes.push(`col-${props.cols}`);
-      }
-      classes.push(toBreakpointClass('sm', props.sm));
-      classes.push(toBreakpointClass('md', props.md));
-      classes.push(toBreakpointClass('lg', props.lg));
-      classes.push(toBreakpointClass('xl', props.xl));
+      const cols = props.cols !== undefined
+        ? props.cols
+        : (isTruthy(props.col) ? true : undefined);
 
-      if (classes.filter(Boolean).length === 0) {
-        classes.push('col');
-      }
-
-      return h(props.tag, {
+      return h(VCol, {
         ...attrs,
-        class: [...classes, attrs.class],
+        tag: props.tag,
+        cols,
+        sm: props.sm,
+        md: props.md,
+        lg: props.lg,
+        xl: props.xl,
+        class: [attrs.class],
       }, slots.default ? slots.default() : []);
     };
   },
@@ -180,21 +233,30 @@ const DCard = defineComponent({
 const DCardHeader = defineComponent({
   name: 'DCardHeader',
   setup(_, { slots, attrs }) {
-    return () => h('div', withDefaultClass(attrs, 'card-header'), slots.default ? slots.default() : []);
+    return () => h(VCardTitle, {
+      ...attrs,
+      class: [attrs.class],
+    }, slots.default ? slots.default() : []);
   },
 });
 
 const DCardBody = defineComponent({
   name: 'DCardBody',
   setup(_, { slots, attrs }) {
-    return () => h('div', withDefaultClass(attrs, 'card-body'), slots.default ? slots.default() : []);
+    return () => h(VCardText, {
+      ...attrs,
+      class: [attrs.class],
+    }, slots.default ? slots.default() : []);
   },
 });
 
 const DCardFooter = defineComponent({
   name: 'DCardFooter',
   setup(_, { slots, attrs }) {
-    return () => h('div', withDefaultClass(attrs, 'card-footer'), slots.default ? slots.default() : []);
+    return () => h(VCardActions, {
+      ...attrs,
+      class: [attrs.class],
+    }, slots.default ? slots.default() : []);
   },
 });
 
@@ -238,10 +300,9 @@ const DButton = defineComponent({
 const DButtonGroup = defineComponent({
   name: 'DButtonGroup',
   setup(_, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VBtnGroup, {
       ...attrs,
-      class: ['btn-group', attrs.class],
-      role: 'group',
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -263,15 +324,13 @@ const DBadge = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    return () => h('span', {
+    return () => h(VChip, {
       ...attrs,
-      class: [
-        'badge',
-        `badge-${props.theme || 'secondary'}`,
-        isTruthy(props.pill) ? 'badge-pill' : null,
-        isTruthy(props.outline) ? 'border' : null,
-        attrs.class,
-      ],
+      color: normalizeTheme(props.theme),
+      variant: isTruthy(props.outline) ? 'outlined' : 'tonal',
+      rounded: isTruthy(props.pill) ? 'pill' : undefined,
+      size: 'small',
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -293,17 +352,24 @@ const DInputGroup = defineComponent({
       const children = [];
       if (props.prepend !== undefined) {
         children.push(
-          h('div', { class: 'input-group-prepend' }, [
-            h('span', { class: 'input-group-text' }, props.prepend),
-          ]),
+          h(VChip, {
+            size: 'small',
+            variant: 'outlined',
+            class: 'mr-2',
+          }, {
+            default: () => props.prepend,
+          }),
         );
       }
       if (slots.default) {
         children.push(...slots.default());
       }
-      return h('div', {
+      return h(VSheet, {
         ...attrs,
-        class: ['input-group', props.size ? `input-group-${props.size}` : null, attrs.class],
+        color: 'transparent',
+        elevation: 0,
+        rounded: false,
+        class: ['d-flex align-center flex-wrap', attrs.class],
       }, children);
     };
   },
@@ -322,10 +388,14 @@ const DInputGroupAddon = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VSheet, {
       ...attrs,
+      color: 'transparent',
+      elevation: 0,
+      rounded: false,
       class: [
-        isTruthy(props.append) ? 'input-group-append' : 'input-group-prepend',
+        'd-flex align-center',
+        isTruthy(props.append) ? 'ml-2' : 'mr-2',
         attrs.class,
       ],
     }, slots.default ? slots.default() : []);
@@ -341,14 +411,12 @@ const DInputGroupText = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    return () => h('div', {
-      class: [props.placement === 'append' ? 'input-group-append' : 'input-group-prepend'],
-    }, [
-      h('span', {
-        ...attrs,
-        class: ['input-group-text', attrs.class],
-      }, slots.default ? slots.default() : []),
-    ]);
+    return () => h(VChip, {
+      ...attrs,
+      size: 'small',
+      variant: 'outlined',
+      class: [props.placement === 'append' ? 'ml-2' : 'mr-2', attrs.class],
+    }, slots.default ? slots.default() : []);
   },
 });
 
@@ -366,19 +434,28 @@ const DSelect = defineComponent({
   },
   emits: ['update:modelValue', 'input', 'change'],
   setup(props, { slots, attrs, emit }) {
-    const handleChange = (event) => {
-      const nextValue = event.target.value;
+    const handleUpdate = (nextValue) => {
       emit('update:modelValue', nextValue);
       emit('input', nextValue);
       emit('change', nextValue);
     };
 
-    return () => h('select', {
-      ...attrs,
-      class: ['custom-select', attrs.class],
-      value: getInputValue(props),
-      onChange: handleChange,
-    }, slots.default ? slots.default() : []);
+    return () => {
+      const slotNodes = slots.default ? slots.default() : [];
+      const items = extractSelectItems(slotNodes);
+
+      return h(VSelect, {
+        ...attrs,
+        modelValue: getInputValue(props),
+        items,
+        itemTitle: 'title',
+        itemValue: 'value',
+        hideDetails: attrs.hideDetails ?? 'auto',
+        density: attrs.density ?? 'comfortable',
+        class: [attrs.class],
+        'onUpdate:modelValue': handleUpdate,
+      });
+    };
   },
 });
 
@@ -407,15 +484,14 @@ const createTextInputComponent = () => defineComponent({
   },
   emits: ['update:modelValue', 'input', 'change', 'keyup'],
   setup(props, { attrs, emit }) {
-    const handleInput = (event) => {
-      const rawValue = event.target.value;
-      const nextValue = normalizeModelValue(rawValue, props.modelModifiers);
+    const handleUpdate = (nextRawValue) => {
+      const nextValue = normalizeModelValue(nextRawValue, props.modelModifiers);
       emit('update:modelValue', nextValue);
       emit('input', nextValue);
     };
 
     const handleChange = (event) => {
-      const nextValue = normalizeModelValue(event.target.value, props.modelModifiers);
+      const nextValue = normalizeModelValue(event?.target?.value, props.modelModifiers);
       emit('change', nextValue);
     };
 
@@ -423,12 +499,15 @@ const createTextInputComponent = () => defineComponent({
       emit('keyup', event);
     };
 
-    return () => h('input', {
+    return () => h(VTextField, {
       ...attrs,
       type: props.type,
-      class: ['form-control', props.state === 'invalid' ? 'is-invalid' : null, attrs.class],
-      value: getInputValue(props),
-      onInput: handleInput,
+      modelValue: getInputValue(props),
+      error: props.state === 'invalid',
+      hideDetails: attrs.hideDetails ?? 'auto',
+      density: attrs.density ?? 'comfortable',
+      class: [attrs.class],
+      'onUpdate:modelValue': handleUpdate,
       onChange: handleChange,
       onKeyup: handleKeyup,
     });
@@ -460,19 +539,21 @@ const DFormTextarea = defineComponent({
   },
   emits: ['update:modelValue', 'input'],
   setup(props, { attrs, emit }) {
-    const handleInput = (event) => {
-      const nextValue = event.target.value;
+    const handleInput = (nextValue) => {
       emit('update:modelValue', nextValue);
       emit('input', nextValue);
     };
 
-    return () => h('textarea', {
+    return () => h(VTextarea, {
       ...attrs,
-      class: ['form-control', attrs.class],
+      modelValue: getInputValue(props),
       rows: props.rows,
-      style: props.maxRows ? { maxHeight: `${props.maxRows}rem` } : attrs.style,
-      value: getInputValue(props),
-      onInput: handleInput,
+      maxRows: props.maxRows,
+      autoGrow: props.maxRows !== undefined,
+      hideDetails: attrs.hideDetails ?? 'auto',
+      density: attrs.density ?? 'comfortable',
+      class: [attrs.class],
+      'onUpdate:modelValue': handleInput,
     });
   },
 });
@@ -485,7 +566,7 @@ const DForm = defineComponent({
       emit('submit', event);
     };
 
-    return () => h('form', {
+    return () => h(VForm, {
       ...attrs,
       onSubmit: handleSubmit,
     }, slots.default ? slots.default() : []);
@@ -495,9 +576,9 @@ const DForm = defineComponent({
 const DFormRow = defineComponent({
   name: 'DFormRow',
   setup(_, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VRow, {
       ...attrs,
-      class: ['form-row row', attrs.class],
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -505,10 +586,13 @@ const DFormRow = defineComponent({
 const DFormInvalidFeedback = defineComponent({
   name: 'DFormInvalidFeedback',
   setup(_, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VMessages, {
       ...attrs,
-      class: ['invalid-feedback d-block', attrs.class],
-    }, slots.default ? slots.default() : []);
+      active: true,
+      color: 'error',
+      messages: [flattenSlotText(slots.default ? slots.default() : [])],
+      class: [attrs.class],
+    });
   },
 });
 
@@ -633,9 +717,9 @@ const DModal = defineComponent({
 const DModalHeader = defineComponent({
   name: 'DModalHeader',
   setup(_, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VCardTitle, {
       ...attrs,
-      class: ['d-flex align-items-center justify-content-between px-4 pt-4', attrs.class],
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -653,9 +737,9 @@ const DModalTitle = defineComponent({
 const DModalBody = defineComponent({
   name: 'DModalBody',
   setup(_, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VCardText, {
       ...attrs,
-      class: ['px-4 pb-4', attrs.class],
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -695,8 +779,8 @@ const DCheckbox = defineComponent({
       return false;
     };
 
-    const onChange = (event) => {
-      const isChecked = event.target.checked;
+    const onChange = (nextRawValue) => {
+      const isChecked = !!nextRawValue;
       if (Array.isArray(props.modelValue)) {
         const nextValue = [...props.modelValue];
         const currentIndex = nextValue.indexOf(props.value);
@@ -717,27 +801,17 @@ const DCheckbox = defineComponent({
       emit('change', isChecked);
     };
 
-    return () => {
-      const inputNode = h('input', {
-        ...attrs,
-        type: 'checkbox',
-        checked: checked(),
-        disabled: isTruthy(props.disabled),
-        class: ['form-check-input', attrs.class],
-        onChange,
-      });
-
-      if (!slots.default) {
-        return inputNode;
-      }
-
-      return h('label', {
-        class: 'form-check mb-0',
-      }, [
-        inputNode,
-        h('span', { class: 'form-check-label ml-2' }, slots.default()),
-      ]);
-    };
+    return () => h(VCheckbox, {
+      ...attrs,
+      modelValue: props.modelValue !== undefined ? props.modelValue : checked(),
+      value: props.value,
+      disabled: isTruthy(props.disabled),
+      hideDetails: attrs.hideDetails ?? 'auto',
+      density: attrs.density ?? 'comfortable',
+      class: [attrs.class],
+      label: slots.default ? flattenSlotText(slots.default()) : attrs.label,
+      'onUpdate:modelValue': onChange,
+    });
   },
 });
 
@@ -750,9 +824,10 @@ const DListGroup = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VList, {
       ...attrs,
-      class: ['list-group', isTruthy(props.flush) ? 'list-group-flush' : null, attrs.class],
+      density: attrs.density ?? 'comfortable',
+      class: [isTruthy(props.flush) ? 'pa-0' : null, attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -760,9 +835,9 @@ const DListGroup = defineComponent({
 const DListGroupItem = defineComponent({
   name: 'DListGroupItem',
   setup(_, { slots, attrs }) {
-    return () => h('div', {
+    return () => h(VListItem, {
       ...attrs,
-      class: ['list-group-item', attrs.class],
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -770,9 +845,11 @@ const DListGroupItem = defineComponent({
 const DNavbar = defineComponent({
   name: 'DNavbar',
   setup(_, { slots, attrs }) {
-    return () => h('nav', {
+    return () => h(VAppBar, {
       ...attrs,
-      class: ['navbar', attrs.class],
+      flat: true,
+      elevation: 0,
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -780,9 +857,9 @@ const DNavbar = defineComponent({
 const DNavbarNav = defineComponent({
   name: 'DNavbarNav',
   setup(_, { slots, attrs }) {
-    return () => h('ul', {
+    return () => h(VToolbarItems, {
       ...attrs,
-      class: ['navbar-nav', attrs.class],
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -790,9 +867,10 @@ const DNavbarNav = defineComponent({
 const DNav = defineComponent({
   name: 'DNav',
   setup(_, { slots, attrs }) {
-    return () => h('ul', {
+    return () => h(VList, {
       ...attrs,
-      class: ['nav', attrs.class],
+      density: attrs.density ?? 'comfortable',
+      class: [attrs.class],
     }, slots.default ? slots.default() : []);
   },
 });
@@ -866,18 +944,21 @@ const DDropdownItem = defineComponent({
   },
   setup(props, { slots, attrs }) {
     return () => {
+      const common = {
+        ...attrs,
+        class: [attrs.class],
+      };
+
       if (props.to !== undefined) {
-        return h(RouterLink, {
-          ...attrs,
+        return h(VListItem, {
+          ...common,
           to: props.to,
-          class: ['dropdown-item', attrs.class],
         }, slots.default ? slots.default() : []);
       }
 
-      return h('a', {
-        ...attrs,
+      return h(VListItem, {
+        ...common,
         href: props.href || '#',
-        class: ['dropdown-item', attrs.class],
       }, slots.default ? slots.default() : []);
     };
   },
@@ -953,20 +1034,21 @@ const DDatepicker = defineComponent({
       return Number.isNaN(parsed.getTime()) ? null : parsed;
     };
 
-    const handleInput = (event) => {
-      const parsedDate = parseDate(event.target.value);
+    const handleInput = (value) => {
+      const parsedDate = parseDate(value);
       emit('update:modelValue', parsedDate);
       emit('input', parsedDate);
       emit('change', parsedDate);
     };
 
-    return () => h('input', {
+    return () => h(VTextField, {
       ...attrs,
       type: 'date',
-      class: ['form-control', attrs.class],
-      value: toInputDate(getInputValue(props)),
-      onInput: handleInput,
-      onChange: handleInput,
+      modelValue: toInputDate(getInputValue(props)),
+      hideDetails: attrs.hideDetails ?? 'auto',
+      density: attrs.density ?? 'comfortable',
+      class: [attrs.class],
+      'onUpdate:modelValue': handleInput,
     });
   },
 });

@@ -1,52 +1,72 @@
 <template>
-  <aside :class="['main-sidebar', 'col-12', 'col-md-3', 'col-lg-2', 'px-0', sidebarVisible ? 'open' : '']">
-      <div class="main-navbar">
-        <nav class="navbar align-items-stretch navbar-light bg-white flex-md-nowrap border-bottom p-0">
-          <a class="navbar-brand w-100 mr-0" href="#" style="line-height: 25px;">
-            <div class="d-table m-auto">
-              <img id="main-logo" class="d-inline-block align-top mr-1" style="max-width: 25px;" src="@/assets/images/gorse.png" alt="Shards Dashboard">
-              <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">Gorse Dashboard</span>
-            </div>
-          </a>
-          <a class="toggle-sidebar d-sm-inline d-md-none d-lg-none" @click="handleToggleSidebar()">
-            <i class="material-icons">&#xE5C4;</i>
-          </a>
-        </nav>
-      </div>
+  <v-navigation-drawer
+    v-model="drawer"
+    :temporary="isMobile"
+    :permanent="!isMobile"
+    location="left"
+    width="260"
+    color="surface"
+    border
+  >
+    <v-toolbar density="comfortable" color="surface" flat>
+      <v-toolbar-title class="text-subtitle-1 font-weight-medium d-flex align-center">
+        <v-avatar size="24" class="mr-2">
+          <img src="@/assets/images/gorse.png" alt="Gorse Dashboard">
+        </v-avatar>
+        <span v-if="!hideLogoText">Gorse Dashboard</span>
+      </v-toolbar-title>
 
-      <form action="#" class="main-sidebar__search w-100 border-right d-sm-flex d-md-none d-lg-none">
-        <div class="input-group input-group-seamless ml-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">
-              <i class="fas fa-search"></i>
-            </div>
-          </div>
-          <input class="navbar-search form-control" type="text" placeholder="Search for something..." aria-label="Search">
-        </div>
-      </form>
+      <template #append>
+        <v-btn v-if="isMobile" variant="text" icon @click="toggleDrawer">
+          <i class="material-icons">chevron_left</i>
+        </v-btn>
+      </template>
+    </v-toolbar>
 
-      <div class="nav-wrapper">
-          <d-nav class="flex-column">
-            <li v-for="(item, navItemIdx) in items" :key="navItemIdx" class="nav-item dropdown">
-              <router-link v-if="!(item.items && item.items.length)" class="nav-link" :to="item.to">
-                <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
-                <span v-if="item.title">{{ item.title }}</span>
-                <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
-              </router-link>
-              <a v-else href="#" class="nav-link dropdown-toggle" @click.prevent="toggleNavItem(navItemIdx)">
-                <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
-                <span v-if="item.title">{{ item.title }}</span>
-                <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
-              </a>
-              <d-collapse v-if="item.items && item.items.length" :id="`snc-${navItemIdx}`" class="dropdown-menu dropdown-menu-small" :open="isNavOpen(navItemIdx)" accordion="sidebar-items-accordion">
-                <d-dropdown-item v-for="(subItem, subItemIdx) in item.items" :key="subItemIdx" :href="subItem.href" :to="subItem.to">
-                  {{ subItem.title }}
-                </d-dropdown-item>
-              </d-collapse>
-            </li>
-          </d-nav>
-      </div>
-  </aside>
+    <v-divider />
+
+    <v-list nav density="comfortable">
+      <template v-for="(item, navItemIdx) in items" :key="navItemIdx">
+        <v-list-item
+          v-if="!(item.items && item.items.length)"
+          :to="item.to"
+          rounded="lg"
+          color="primary"
+        >
+          <template #prepend>
+            <i v-if="extractIcon(item.htmlBefore)" class="material-icons">{{ extractIcon(item.htmlBefore) }}</i>
+          </template>
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item>
+
+        <v-list-group
+          v-else
+          :model-value="isNavOpen(navItemIdx)"
+          @update:modelValue="setNavOpen(navItemIdx, $event)"
+        >
+          <template #activator="{ props }">
+            <v-list-item v-bind="props" rounded="lg" color="primary">
+              <template #prepend>
+                <i v-if="extractIcon(item.htmlBefore)" class="material-icons">{{ extractIcon(item.htmlBefore) }}</i>
+              </template>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item>
+          </template>
+
+          <v-list-item
+            v-for="(subItem, subItemIdx) in item.items"
+            :key="subItemIdx"
+            :href="subItem.href"
+            :to="subItem.to"
+            rounded="lg"
+            color="primary"
+          >
+            <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list-group>
+      </template>
+    </v-list>
+  </v-navigation-drawer>
 </template>
 
 <script>
@@ -70,40 +90,59 @@ export default {
   },
   data() {
     return {
-      sidebarVisible: false,
+      drawer: true,
+      isMobile: false,
       openNavItems: {},
     };
   },
   created() {
     this.$eventHub.$on('toggle-sidebar', this.handleToggleSidebar);
   },
+  mounted() {
+    this.syncViewport();
+    window.addEventListener('resize', this.syncViewport);
+  },
   beforeUnmount() {
     this.$eventHub.$off('toggle-sidebar', this.handleToggleSidebar);
+    window.removeEventListener('resize', this.syncViewport);
+  },
+  watch: {
+    $route() {
+      if (this.isMobile) {
+        this.drawer = false;
+      }
+    },
   },
   methods: {
+    extractIcon(html) {
+      if (!html) {
+        return '';
+      }
+      const matched = html.match(/<i[^>]*>([^<]+)<\/i>/i);
+      return matched ? matched[1].trim() : '';
+    },
     isNavOpen(index) {
       return !!this.openNavItems[index];
     },
-    toggleNavItem(index) {
+    setNavOpen(index, isOpen) {
       this.openNavItems = {
         ...this.openNavItems,
-        [index]: !this.openNavItems[index],
+        [index]: isOpen,
       };
     },
+    syncViewport() {
+      const mobile = window.innerWidth < 768;
+      if (mobile !== this.isMobile) {
+        this.isMobile = mobile;
+        this.drawer = !mobile;
+      }
+    },
+    toggleDrawer() {
+      this.drawer = !this.drawer;
+    },
     handleToggleSidebar() {
-      this.sidebarVisible = !this.sidebarVisible;
+      this.drawer = !this.drawer;
     },
   },
 };
 </script>
-
-<style lang="scss">
-  .main-sidebar {
-    .item-icon-wrapper {
-      display: inline-block;
-    }
-    .dropdown-menu {
-      display: block;
-    }
-  }
-</style>

@@ -1,19 +1,19 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
         <h3 class="page-title">Chat</h3>
-      </div>
-    </div>
+      </v-col>
+    </v-row>
 
     <d-row>
       <d-col lg="12" md="12" sm="12" class="mb-4">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">Prompt</h6>
-          </div>
-          <div class="card-body p-0 pb-2">
+          </v-card-title>
+          <v-card-text class="pa-0 pb-2">
             <d-list-group flush>
               <d-list-group-item class="p-3">
                 <d-row class="mb-3">
@@ -24,7 +24,7 @@
                 </d-row>
                 <d-row>
                   <d-col sm="12" md="12" class="text-right">
-                    <d-button outline @click="send">Send</d-button>
+                    <v-btn variant="outlined" @click="send">Send</v-btn>
                   </d-col>
                 </d-row>
                 <d-row v-if="message">
@@ -36,11 +36,11 @@
                 </d-row>
               </d-list-group-item>
             </d-list-group>
-          </div>
-        </div>
+          </v-card-text>
+        </v-card>
       </d-col>
     </d-row>
-  </div>
+  </v-container>
 </template>
 
 <script>

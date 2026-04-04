@@ -11,16 +11,14 @@ import 'highlight.js/styles/a11y-dark.css'
 hljs.registerLanguage('json', json)
 
 // Styles
-import 'bootstrap/dist/css/bootstrap.css';
-import '@/scss/shards-dashboards.scss';
-import '@/assets/scss/date-range.scss';
+import '@/assets/scss/bootstrap-compat.scss';
 import 'material-icons/iconfont/material-icons.css';
 
 // Core
 import App from './App.vue';
 import router from './router';
 import vuetify from '@/plugins/vuetify';
-import shardsCompat from '@/plugins/shardsCompat';
+import vuetifyCompat from '@/plugins/vuetifyCompat';
 
 // Layouts
 import Default from '@/layouts/Default.vue';
@@ -32,7 +30,7 @@ const emitter = mitt();
 app.use(router);
 app.use(vuetify);
 app.use(hljsVuePlugin);
-app.use(shardsCompat);
+app.use(vuetifyCompat);
 
 app.component('default-layout', Default);
 app.component('login-layout', Login);

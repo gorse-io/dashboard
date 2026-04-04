@@ -1,28 +1,28 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
         <span class="text-uppercase page-subtitle">Overview</span>
         <h3 class="page-title">Advance</h3>
-      </div>
-    </div>
+      </v-col>
+    </v-row>
 
     <!-- Default Light Table -->
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">Data Export</h6>
-          </div>
-          <div class="card-body p-0 pb-3">
+          </v-card-title>
+          <v-card-text class="pa-0 pb-3">
             <d-list-group flush>
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
                     <a :href="'/api/bulk/users'">
-                      <d-button class="advance_button" outline>&nbsp;&nbsp;&nbsp;Export
-                        Users&nbsp;&nbsp;&nbsp;</d-button>
+                      <v-btn class="advance_button" variant="outlined">&nbsp;&nbsp;&nbsp;Export
+                        Users&nbsp;&nbsp;&nbsp;</v-btn>
                     </a>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -34,8 +34,8 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <a :href="'/api/bulk/items'">
-                      <d-button class="advance_button" outline>&nbsp;&nbsp;&nbsp;Export
-                        Items&nbsp;&nbsp;&nbsp;</d-button>
+                      <v-btn class="advance_button" variant="outlined">&nbsp;&nbsp;&nbsp;Export
+                        Items&nbsp;&nbsp;&nbsp;</v-btn>
                     </a>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -47,7 +47,7 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <a :href="'/api/bulk/feedback'">
-                      <d-button outline>Export Feedback</d-button>
+                      <v-btn variant="outlined">Export Feedback</v-btn>
                     </a>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -56,25 +56,25 @@
                 </d-row>
               </d-list-group-item>
             </d-list-group>
-          </div>
-        </div>
-      </div>
-    </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">Data Import</h6>
-          </div>
-          <div class="card-body p-0 pb-3">
+          </v-card-title>
+          <v-card-text class="pa-0 pb-3">
             <d-list-group flush>
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
                     <router-link :to="{ name: 'import_users' }">
-                      <d-button outline>&nbsp;&nbsp;&nbsp;Import
-                        Users&nbsp;&nbsp;&nbsp;</d-button>
+                      <v-btn variant="outlined">&nbsp;&nbsp;&nbsp;Import
+                        Users&nbsp;&nbsp;&nbsp;</v-btn>
                     </router-link>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -86,8 +86,8 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <router-link :to="{ name: 'import_items' }">
-                      <d-button outline>&nbsp;&nbsp;&nbsp;Import
-                        Items&nbsp;&nbsp;&nbsp;</d-button>
+                      <v-btn variant="outlined">&nbsp;&nbsp;&nbsp;Import
+                        Items&nbsp;&nbsp;&nbsp;</v-btn>
                     </router-link>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -99,7 +99,7 @@
                 <d-row>
                   <d-col sm="12" md="2">
                     <router-link :to="{ name: 'import_feedback' }">
-                      <d-button outline>Import Feedback</d-button>
+                      <v-btn variant="outlined">Import Feedback</v-btn>
                     </router-link>
                   </d-col>
                   <d-col sm="12" md="10">
@@ -108,24 +108,24 @@
                 </d-row>
               </d-list-group-item>
             </d-list-group>
-          </div>
-        </div>
-      </div>
-    </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">Danger Zone</h6>
-          </div>
-          <div class="card-body p-0 pb-3">
+          </v-card-title>
+          <v-card-text class="pa-0 pb-3">
             <d-list-group flush>
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
-                    <d-button outline theme="danger" @click="handleClick">&nbsp;Purge
-                      Database&nbsp;</d-button>
+                    <v-btn variant="outlined" color="error" @click="handleClick">&nbsp;Purge
+                      Database&nbsp;</v-btn>
                     <d-modal v-if="showDialog" @close="handleClose" centered>
                       <d-modal-header>
                         <d-modal-title>Are you absolutely sure?</d-modal-title>
@@ -138,11 +138,11 @@
                         <d-checkbox v-model="checkList" value="delete_feedback">Delete all feedbacks.</d-checkbox>
                         <d-checkbox v-model="checkList" value="delete_cache">Delete all caches.</d-checkbox>
                         <d-alert :theme="alertTheme" :show="showAlert">{{ alertMessage }}</d-alert>
-                        <d-button outline theme="danger" @click="purge" :disabled="disableDialog">
+                        <v-btn variant="outlined" color="error" @click="purge" :disabled="disableDialog">
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                           I understand the consequences, purge all data
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </d-button>
+                        </v-btn>
                       </d-modal-body>
                     </d-modal>
                   </d-col>
@@ -152,11 +152,11 @@
                 </d-row>
               </d-list-group-item>
             </d-list-group>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

@@ -1,20 +1,20 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
         <span class="text-uppercase page-subtitle">User ID:</span>
         <h3 class="page-title">{{ user_id }}</h3>
-      </div>
-    </div>
+      </v-col>
+    </v-row>
 
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">Information</h6>
-          </div>
-          <div class="card-body p-0 pb-3">
+          </v-card-title>
+          <v-card-text class="pa-0 pb-3">
             <d-list-group flush>
               <d-list-group-item class="p-3" v-if="current_user != null">
                 <d-row>
@@ -37,19 +37,19 @@
                 </d-row>
               </d-list-group-item>
             </d-list-group>
-          </div>
-        </div>
-      </div>
-    </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
     <!-- Default Light Table -->
-    <div class="row" v-if="recommenders.length > 0">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+    <v-row v-if="recommenders.length > 0">
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">User to User</h6>
-          </div>
-          <div class="card-body border-bottom">
+          </v-card-title>
+          <v-card-text class="border-bottom">
             <d-row>
               <d-col sm="12" md="12">
                 <d-input-group prepend="Recommender" class="mb-3">
@@ -61,9 +61,9 @@
                 </d-input-group>
               </d-col>
             </d-row>
-          </div>
-          <div class="card-body p-0">
-            <table class="table mb-0">
+          </v-card-text>
+          <v-card-text class="pa-0">
+            <v-table class="mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
@@ -87,20 +87,20 @@
                       name: 'recommend',
                       params: { user_id: user.UserId },
                     }">
-                      <d-button size="small" outline><i class="material-icons">visibility</i></d-button>
+                      <v-btn size="small" variant="outlined"><i class="material-icons">visibility</i></v-btn>
                     </router-link>
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-          <div class="card-footer border-top" v-if="last_modified !== undefined">
+            </v-table>
+          </v-card-text>
+          <v-card-actions class="border-top" v-if="last_modified !== undefined">
             <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

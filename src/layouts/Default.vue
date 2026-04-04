@@ -1,23 +1,12 @@
 <template>
-  <d-container fluid>
-    <d-row>
-      <!-- Main Sidebar -->
-      <main-sidebar :items="sidebarItems" />
+  <main-sidebar :items="sidebarItems" />
+  <main-navbar />
 
-      <d-col class="main-content offset-lg-2 offset-md-3 p-0" tag="main" lg="10" md="9" sm="12">
+  <v-main>
+    <slot />
+  </v-main>
 
-        <!-- Main Navbar -->
-        <main-navbar />
-
-        <!-- Content -->
-        <slot />
-
-        <!-- Main Footer -->
-        <main-footer />
-      </d-col>
-
-    </d-row>
-  </d-container>
+  <main-footer />
 </template>
 
 <script>

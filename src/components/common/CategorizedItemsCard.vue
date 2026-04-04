@@ -1,12 +1,12 @@
 <template>
-  <d-card class="card-small">
+  <v-card class="card-small">
     <!-- Card Header -->
-    <d-card-header class="border-bottom">
+    <v-card-title class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
       <div class="block-handle"></div>
-    </d-card-header>
+    </v-card-title>
 
-    <div class="card-body border-bottom">
+    <v-card-text class="border-bottom">
       <d-input-group prepend="Categories" class="mb-3">
         <d-select @change="changeCategory">
           <option v-for="(category, idx) in categories" :key="idx" :value="category">
@@ -14,9 +14,9 @@
           </option>
         </d-select>
       </d-input-group>
-    </div>
+    </v-card-text>
 
-    <d-card-body class="p-0">
+    <v-card-text class="pa-0">
       <!-- Top Referrals List Group -->
       <div v-for="(item, idx) in pageItems" :key="idx" class="blog-comments__item d-flex p-3">
         <!-- Content -->
@@ -46,17 +46,17 @@
           </p>
         </div>
       </div>
-    </d-card-body>
+    </v-card-text>
 
-    <d-card-footer class="border-top">
-      <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.pageNumber !== 0"><i
-            class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
-            class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group>
-    </d-card-footer>
-  </d-card>
+    <v-card-actions class="border-t">
+      <v-btn-group class="mb-3">
+        <v-btn variant="outlined" size="small" @click="prevPage" v-if="this.pageNumber !== 0"><i
+            class="material-icons">arrow_back_ios</i></v-btn>
+        <v-btn variant="outlined" size="small" @click="nextPage" v-if="this.pageNumber + 1 !== pageCount"><i
+            class="material-icons">arrow_forward_ios</i></v-btn>
+      </v-btn-group>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>

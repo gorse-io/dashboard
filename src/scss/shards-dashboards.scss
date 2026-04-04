@@ -2,7 +2,7 @@
  * Shards Dashboard Lite UI Kit v1.0.0
  * Project URL: https://designrevision.com/downloads/shards-dashboard-lite
  * Based on: Shards UI Kit v2.0.3 (https://designrevision.com/downloads/shards)
- * Based on: Bootstrap v4.1.1 (https://getbootstrap.com)
+ * Legacy dashboard stylesheet
  * Copyright 2017-* DesignRevision (https://designrevision.com)
  * Copyright 2017-* Catalin Vasile (contact@catalin.me)
  * License: MIT
@@ -11,8 +11,7 @@
 // Shards variables overrides.
 @import "overrides";
 
-// Base Shards UI Kit
-@import "../../node_modules/shards-ui/src/scss/shards";
+// Legacy base import removed. Runtime now uses local compatibility styles.
 
 /* Shards Dashboards Lite Styles */
 

@@ -1,6 +1,6 @@
 <template>
-  <d-card :class="['stats-small', computedVariationClass, 'card', 'card-small']">
-    <d-card-body :class="[computedBodyClass]">
+  <v-card :class="['stats-small', computedVariationClass, 'card', 'card-small']">
+    <v-card-text :class="[computedBodyClass]">
       <div :class="['d-flex', computedInnerWrapperClass]">
         <div :class="['stats-small__data', computedDataFieldClass]">
           <span :class="['stats-small__label', 'text-uppercase', computedLabelClass]">{{ label }}</span>
@@ -12,8 +12,8 @@
         </div>
       </div>
       <canvas :height="computedCanvasHeight" ref="canvas" :class="[computedChartId]"></canvas>
-    </d-card-body>
-  </d-card>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>

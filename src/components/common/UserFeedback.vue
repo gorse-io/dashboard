@@ -1,30 +1,28 @@
 <template>
-  <d-card class="card-small">
+  <v-card class="card-small">
     <!-- Card Header -->
-    <d-card-header class="border-bottom">
+    <v-card-title class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
       <div class="block-handle"></div>
-    </d-card-header>
+    </v-card-title>
 
-    <d-card-body class="p-0">
-      <div class="card-body border-bottom">
+    <v-card-text class="border-bottom">
         <d-select v-model="feedbackType" @change="selectType">
           <option v-for="feedbackType in types" :key="feedbackType" :value="feedbackType">
             {{ feedbackType }}
           </option>
         </d-select>
-      </div>
-    </d-card-body>
+    </v-card-text>
 
-    <d-card-body class="p-0">
+    <v-card-text class="pa-0">
       <!-- Top Referrals List Group -->
       <div v-for="(item, idx) in items" :key="idx" class="blog-comments__item d-flex p-3">
         <!-- Content -->
         <div class="blog-comments__content">
           <!-- Content - Title -->
-          <div class="blog-comments__meta text-muted">
+          <div class="blog-comments__meta text-muted d-flex justify-space-between align-center">
             {{ item.Item.ItemId }}
-            <d-badge outline pill theme="secondary" class="float-right">
+            <d-badge outline pill theme="secondary">
               {{ item.FeedbackType + (item.Value > 0 ? ' ' + item.Value : '') }}
             </d-badge>
           </div>
@@ -50,17 +48,17 @@
           </p>
         </div>
       </div>
-    </d-card-body>
+    </v-card-text>
 
-    <d-card-footer class="border-top">
-      <d-button-group class="mb-3">
-        <d-button class="btn-white" @click="prevPage" v-if="this.offset !== 0"><i
-            class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.items.length == this.pageSize"><i
-            class="material-icons">arrow_forward_ios</i></d-button>
-      </d-button-group>
-    </d-card-footer>
-  </d-card>
+    <v-card-actions class="border-t">
+      <v-btn-group class="mb-3">
+        <v-btn variant="outlined" size="small" @click="prevPage" v-if="this.offset !== 0"><i
+            class="material-icons">arrow_back_ios</i></v-btn>
+        <v-btn variant="outlined" size="small" @click="nextPage" v-if="this.items.length == this.pageSize"><i
+            class="material-icons">arrow_forward_ios</i></v-btn>
+      </v-btn-group>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>

@@ -3,8 +3,8 @@
     <div style="text-align: center;" class="align-center">
       <img style="width: 120px; margin-top: 60px; margin-bottom: 20px" src="@/assets/images/gorse.png"/>
       <h5>Welcome to Gorse dashboard</h5>
-      <d-card>
-        <d-card-body>
+      <v-card>
+        <v-card-text>
           <d-form method="post" action="/login">
             <label class="sr-only" for="username">Username</label>
             <d-form-input id="username" name="user_name" class="mb-1" placeholder="Username" />
@@ -14,10 +14,10 @@
                      :show="timeUntilDismissed"
                      @alert-dismissed="timeUntilDismissed = 0"
                      @alert-dismiss-countdown="handleTimeChange">The user name or password is incorrect.</d-alert>
-            <d-button class="mt-2" theme="primary" type="submit">Login</d-button>
+            <v-btn class="mt-2" color="primary" type="submit">Login</v-btn>
           </d-form>
-        </d-card-body>
-      </d-card>
+        </v-card-text>
+      </v-card>
     </div>
   </d-container>
 </template>

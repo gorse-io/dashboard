@@ -1,41 +1,43 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
         <span class="text-uppercase page-subtitle">Preview</span>
         <h3 class="page-title">Import Feedback</h3>
-      </div>
-    </div>
+      </v-col>
+    </v-row>
     <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
       @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header">
-            <d-form validated @submit.prevent="uploadFile">
-              <d-form-row>
-                <d-col md="10" class="form-group">
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title>
+            <v-form @submit.prevent="uploadFile">
+              <v-row>
+                <v-col cols="12" md="10">
                   <strong class="text-muted d-block mb-2">File</strong>
-                  <div class="custom-file mb-3">
-                    <input type="file" class="custom-file-input" id="csvFile" @change="loadFile" required />
-                    <label class="custom-file-label" for="customFile2">{{
-                      fileName
-                    }}</label>
-                    <d-form-invalid-feedback>Upload local csv file.</d-form-invalid-feedback>
-                  </div>
-                </d-col>
-                <d-col md="2" class="form-group"><strong class="text-muted d-block mb-2">&nbsp;</strong><d-button
-                    outline>Comfirm Import</d-button></d-col>
-              </d-form-row>
-            </d-form>
-          </div>
-          <div class="progress" v-if="progressShow">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
-              aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-          </div>
-          <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
+                  <v-file-input
+                    v-model="selectedFile"
+                    accept=".csv,.jsonl,.json"
+                    prepend-icon="mdi-paperclip"
+                    variant="outlined"
+                    density="comfortable"
+                    hide-details="auto"
+                    :label="fileName"
+                    @update:modelValue="loadFile"
+                  />
+                </v-col>
+                <v-col cols="12" md="2">
+                  <strong class="text-muted d-block mb-2">&nbsp;</strong>
+                  <v-btn type="submit" variant="outlined">Confirm Import</v-btn>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card-title>
+          <v-progress-linear v-if="progressShow" indeterminate color="primary" />
+          <v-card-text class="pa-0 pb-3">
+            <v-table class="mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0" v-for="columnName in columnNames" :key="columnName">
@@ -50,12 +52,12 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -66,6 +68,7 @@ export default {
   data() {
     return {
       fileName: 'Choose file...',
+      selectedFile: null,
       progressShow: false,
       alertTheme: 'danger',
       alertText: null,
@@ -82,8 +85,13 @@ export default {
     };
   },
   methods: {
-    loadFile(event) {
-      const file = event.target.files[0];
+    loadFile(fileValue) {
+      const file = Array.isArray(fileValue) ? fileValue[0] : fileValue;
+      if (!file) {
+        this.fileName = 'Choose file...';
+        this.rows = [];
+        return;
+      }
       // load file name
       this.fileName = file.name;
       // load file content
@@ -123,12 +131,11 @@ export default {
     uploadFile() {
       const formData = new FormData();
       // file must be chosen
-      const csvfile = document.querySelector('#csvFile');
-      if (csvfile.files.length === 0) {
+      if (!this.selectedFile) {
         this.showDanger('file must be chosen');
         return;
       }
-      formData.append('file', csvfile.files[0]);
+      formData.append('file', this.selectedFile);
       // start upload
       this.progressShow = true;
       axios

@@ -1,23 +1,23 @@
 <template>
-  <d-container fluid class="main-content-container px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <d-row no-gutters class="page-header py-4">
-      <d-col col sm="4" class="text-center text-sm-left mb-4 mb-sm-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-4 mb-sm-0">
         <span class="text-uppercase page-subtitle">User ID:</span>
         <h3 class="page-title">{{ user_id }}</h3>
-      </d-col>
-    </d-row>
+      </v-col>
+    </v-row>
 
-    <d-row>
-      <d-col lg="6" md="12" sm="12" class="mb-4">
+    <v-row>
+      <v-col cols="12" lg="6" class="mb-4">
         <bo-user-feedback :title="'Feedback'" :user_id="user_id" :types="feedbackTypes" />
-      </d-col>
+      </v-col>
 
-      <d-col lg="6" md="12" sm="12" class="mb-4">
+      <v-col cols="12" lg="6" class="mb-4">
         <bo-user-recommend :user_id="user_id" :recommenders="recommenders" />
-      </d-col>
-    </d-row>
-  </d-container>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

@@ -6,7 +6,7 @@
         <h2>500</h2>
         <h3>Something went wrong!</h3>
         <p>There was a problem on our end. Please try again later.</p>
-        <d-button pill>&larr; Go Back</d-button>
+        <v-btn rounded="pill">&larr; Go Back</v-btn>
       </div>
     </div>
   </d-container>

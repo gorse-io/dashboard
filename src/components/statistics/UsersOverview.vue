@@ -1,16 +1,16 @@
 <template>
-  <d-card class="card-small h-100">
+  <v-card class="card-small h-100">
     <!-- Card Header -->
-    <d-card-header class="border-bottom">
+    <v-card-title class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
       <div class="block-handle"></div>
-    </d-card-header>
+    </v-card-title>
 
-    <d-card-body class="pt-0">
-      <d-row class="border-bottom py-2 bg-light">
+    <v-card-text class="pt-0">
+      <v-row class="border-bottom py-2 bg-grey-lighten-4">
 
-        <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
-          <d-input-group size="sm" class="date-range d-flex justify-content-right">
+        <v-col cols="12" sm="6" class="d-flex mb-2 mb-sm-0">
+          <d-input-group size="sm" class="date-range d-flex justify-end">
             <d-datepicker v-model="dateRange.from"
               :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" placeholder="Start Date" typeable
               small />
@@ -20,23 +20,23 @@
               <i class="material-icons">&#xE916;</i>
             </d-input-group-text>
           </d-input-group>
-        </d-col>
+        </v-col>
 
-        <d-col col sm="6">
-          <d-input-group size="sm" class="d-flex btn-white ml-auto mr-auto ml-sm-auto mr-sm-0 mt-3 mt-sm-0">
+        <v-col cols="12" sm="6">
+          <d-input-group size="sm" class="d-flex ms-sm-auto mt-3 mt-sm-0">
             <d-select @change="changeTimeseries" :value="timeseries">
               <option v-for="(timeseriesOption, idx) in timeseriesOptions" :key="idx" :value="timeseriesOption">{{
                 timeseriesOption.title }}</option>
             </d-select>
           </d-input-group>
-        </d-col>
+        </v-col>
 
-      </d-row>
+      </v-row>
       <!-- Legend & Chart -->
       <div ref="legend"></div>
       <canvas height="80" ref="canvas" style="max-width: 100% !important"></canvas>
-    </d-card-body>
-  </d-card>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>

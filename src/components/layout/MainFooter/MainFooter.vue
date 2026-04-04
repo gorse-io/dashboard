@@ -1,16 +1,29 @@
 <template>
-  <footer class="main-footer d-flex p-2 px-3 bg-white border-top">
-    <div :class="[contained ? 'container' : 'container-fluid']">
-      <div class="row">
-        <ul class="nav">
-          <li v-for="(item, idx) in menuItems" :key="idx" class="nav-item">
-            <a class="nav-link" target="__blank" :href="item.to">{{ item.title }}</a>
-          </li>
-        </ul>
-        <span class="copyright ml-auto my-auto mr-2">{{ copyright }}</span>
-      </div>
-    </div>
-  </footer>
+  <v-footer color="surface" border>
+    <v-container :fluid="!contained">
+      <v-row align="center" no-gutters>
+        <v-col cols="12" md="auto" class="d-flex flex-wrap">
+          <v-btn
+            v-for="(item, idx) in menuItems"
+            :key="idx"
+            variant="text"
+            density="comfortable"
+            class="text-none px-2"
+            target="_blank"
+            :href="item.to"
+          >
+            {{ item.title }}
+          </v-btn>
+        </v-col>
+
+        <v-spacer />
+
+        <v-col cols="12" md="auto" class="text-md-right text-medium-emphasis py-1 py-md-0">
+          {{ copyright }}
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-footer>
 </template>
 
 <script>

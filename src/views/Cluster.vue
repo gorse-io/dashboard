@@ -1,22 +1,22 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
         <span class="text-uppercase page-subtitle">Overview</span>
         <h3 class="page-title">Cluster</h3>
-      </div>
-    </div>
+      </v-col>
+    </v-row>
 
     <!-- Default Light Table -->
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">Active Nodes</h6>
-          </div>
-          <div class="card-body p-0 pb-3 text-center">
-            <table class="table mb-0">
+          </v-card-title>
+          <v-card-text class="pa-0 pb-3 text-center">
+            <v-table class="mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">Type</th>
@@ -33,13 +33,13 @@
                   <td>{{ node.Version }}</td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
-  </div>
+  </v-container>
 </template>
 
 

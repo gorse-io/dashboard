@@ -1,65 +1,65 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-10 text-center text-sm-left mb-0 d-flex align-items-center">
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="10" class="text-center text-sm-left mb-0 d-flex align-center">
+        <div class="d-flex align-center pa-2 me-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'latest')">
-          <i class="material-icons mr-2 text-primary">new_releases</i>
+          <i class="material-icons me-2 text-primary">new_releases</i>
           <span>Latest</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-center pa-2 me-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'collaborative')">
-          <i class="material-icons mr-2 text-primary">group_work</i>
+          <i class="material-icons me-2 text-primary">group_work</i>
           <span>Collaborative</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-center pa-2 me-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'non-personalized')">
-          <i class="material-icons mr-2 text-primary">public</i>
+          <i class="material-icons me-2 text-primary">public</i>
           <span>Non-Personalized</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-center pa-2 me-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'user-to-user')">
-          <i class="material-icons mr-2 text-primary">people</i>
+          <i class="material-icons me-2 text-primary">people</i>
           <span>User to User</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-center pa-2 me-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'item-to-item')">
-          <i class="material-icons mr-2 text-primary">apps</i>
+          <i class="material-icons me-2 text-primary">apps</i>
           <span>Item to Item</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-center pa-2 me-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'external')">
-          <i class="material-icons mr-2 text-primary">cloud_queue</i>
+          <i class="material-icons me-2 text-primary">cloud_queue</i>
           <span>External</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-center pa-2 me-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'ranker')">
-          <i class="material-icons mr-2 text-primary">sort</i>
+          <i class="material-icons me-2 text-primary">sort</i>
           <span>Ranker</span>
         </div>
-        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
+        <div class="d-flex align-center pa-2 border rounded bg-white draggable-node" style="cursor: grab;"
           draggable="true" @dragstart="dragStart($event, 'fallback')">
-          <i class="material-icons mr-2 text-primary">history</i>
+          <i class="material-icons me-2 text-primary">history</i>
           <span>Fallback</span>
         </div>
-      </div>
-      <div class="col-12 col-sm-2 d-flex align-items-center justify-content-sm-end mt-3 mt-sm-0">
-        <d-button theme="white" class="mr-2" @click="clearFlow">Clear</d-button>
-        <d-button theme="primary" @click="saveFlow">Save</d-button>
-      </div>
-    </div>
+      </v-col>
+      <v-col cols="12" sm="2" class="d-flex align-center justify-sm-end mt-3 mt-sm-0">
+        <v-btn color="white" class="me-2" @click="clearFlow">Clear</v-btn>
+        <v-btn color="primary" @click="saveFlow">Save</v-btn>
+      </v-col>
+    </v-row>
 
     <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
       @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
 
     <!-- LogicFlow Container -->
-    <div class="card card-small h-100 position-relative mb-4">
-      <div class="card-body p-0">
+    <v-card class="h-100 position-relative mb-4">
+      <v-card-text class="pa-0">
         <!-- LogicFlow Canvas -->
         <div id="container" class="logic-flow-view" @drop="drop" @dragover.prevent></div>
-      </div>
-    </div>
+      </v-card-text>
+    </v-card>
 
     <!-- Node Property Modal -->
     <d-modal v-if="showNodeModal" @close="closeNodeModal" centered
@@ -71,45 +71,45 @@
         <d-form @submit.prevent="updateNode">
           <!-- Data Source Specific Properties -->
           <template v-if="nodeForm.type === 'data-source'">
-            <div class="form-group">
+            <div class="mb-4">
               <label>Positive Feedback Types (comma separated)</label>
               <d-input :value="nodeForm.properties.positive_feedback_types.join(',')"
                 @input="val => nodeForm.properties.positive_feedback_types = val.split(',').map(s => s.trim())" />
             </div>
-            <div class="form-group">
+            <div class="mb-4">
               <label>Read Feedback Types (comma separated)</label>
               <d-input :value="nodeForm.properties.read_feedback_types.join(',')"
                 @input="val => nodeForm.properties.read_feedback_types = val.split(',').map(s => s.trim())" />
             </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
+            <v-row>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Positive Feedback TTL</label>
                 <d-input type="number" v-model.number="nodeForm.properties.positive_feedback_ttl" />
-              </div>
-              <div class="form-group col-md-6">
+              </v-col>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Item TTL</label>
                 <d-input type="number" v-model.number="nodeForm.properties.item_ttl" />
-              </div>
-            </div>
+              </v-col>
+            </v-row>
           </template>
 
           <!-- Fallback Specific Properties -->
           <template
             v-if="nodeForm.type === 'fallback' && nodeForm.properties.recommenders && nodeForm.properties.recommenders.length">
-            <div class="form-group">
+            <div class="mb-4">
               <label>Recommenders</label>
               <d-list-group>
                 <d-list-group-item v-for="(rec, index) in nodeForm.properties.recommenders" :key="rec"
                   class="d-flex align-items-center border">
-                  <span class="mr-auto">{{ rec }}</span>
+                  <span class="me-auto">{{ rec }}</span>
                   <d-input-group-addon append>
-                    <d-button class="btn-white" @click="moveRecommender(index, -1)" :disabled="index === 0">
+                    <v-btn variant="text" @click="moveRecommender(index, -1)" :disabled="index === 0">
                       <i class="material-icons">arrow_upward</i>
-                    </d-button>
-                    <d-button class="btn-white" @click="moveRecommender(index, 1)"
+                    </v-btn>
+                    <v-btn variant="text" @click="moveRecommender(index, 1)"
                       :disabled="index === nodeForm.properties.recommenders.length - 1">
                       <i class="material-icons">arrow_downward</i>
-                    </d-button>
+                    </v-btn>
                   </d-input-group-addon>
                 </d-list-group-item>
               </d-list-group>
@@ -118,124 +118,143 @@
 
           <!-- Recommend Global Properties -->
           <template v-if="nodeForm.type === 'recommend'">
-            <div class="form-row">
-              <div class="form-group col-md-6">
+            <v-row>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Cache Size</label>
                 <d-input type="number" v-model.number="nodeForm.properties.cache_size" />
-              </div>
-              <div class="form-group col-md-6">
+              </v-col>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Cache Expire</label>
                 <d-input v-model="nodeForm.properties.cache_expire" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Active User TTL</label>
                 <d-input type="number" v-model.number="nodeForm.properties.active_user_ttl" />
-              </div>
-              <div class="form-group col-md-6">
+              </v-col>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Context Size</label>
                 <d-input type="number" v-model.number="nodeForm.properties.context_size" />
-              </div>
-            </div>
+              </v-col>
+            </v-row>
           </template>
 
           <!-- Ranker Specific Properties -->
           <template v-if="nodeForm.type === 'ranker'">
-            <div class="form-group">
+            <div class="mb-4">
               <label>Type</label>
               <d-select v-model="nodeForm.properties.type">
                 <option value="fm">FM</option>
                 <option value="llm">LLM</option>
               </d-select>
             </div>
-            <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
-              <div class="form-row">
-                <div class="form-group col-md-6">
+            <div class="mb-4" v-if="nodeForm.properties.type === 'llm'">
+              <v-row>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Query Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
-                      target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
-                  <textarea class="form-control" rows="8" v-model="nodeForm.properties.query_template"
-                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
+                      target="_blank" class="ms-1"><i class="material-icons">help_outline</i></a></label>
+                  <v-textarea
+                    v-model="nodeForm.properties.query_template"
+                    rows="8"
+                    variant="outlined"
+                    hide-details="auto"
+                    class="mt-2"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"
+                  />
                   <label class="mt-4">Document Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
-                      target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
-                  <textarea class="form-control" rows="7" v-model="nodeForm.properties.document_template"
-                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
-                </div>
-                <div class="form-group col-md-6">
+                      target="_blank" class="ms-1"><i class="material-icons">help_outline</i></a></label>
+                  <v-textarea
+                    v-model="nodeForm.properties.document_template"
+                    rows="7"
+                    variant="outlined"
+                    hide-details="auto"
+                    class="mt-2"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"
+                  />
+                </v-col>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Preview</label>
                   <d-input-group>
                     <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
                     <d-input-group-addon append>
-                      <d-button type="button" theme="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
+                      <v-btn type="button" color="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
                         <i class="material-icons">play_arrow</i>
-                      </d-button>
+                      </v-btn>
                     </d-input-group-addon>
                   </d-input-group>
-                  <textarea class="form-control mt-2" rows="16" readonly
-                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult || '' }}</textarea>
-                </div>
-              </div>
-              <div class="form-group" v-if="rankerPreviewError">
+                  <v-textarea
+                    :model-value="rankerPreviewResult || ''"
+                    rows="16"
+                    readonly
+                    variant="outlined"
+                    hide-details="auto"
+                    class="mt-2"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"
+                  />
+                </v-col>
+              </v-row>
+              <div class="mb-4" v-if="rankerPreviewError">
                 <d-alert theme="danger" show class="mt-2">{{ rankerPreviewError }}</d-alert>
               </div>
             </div>
             <template v-else>
-              <div class="form-row">
-                <div class="form-group col-md-6">
+              <v-row>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Fit Period</label>
                   <d-input v-model="nodeForm.properties.fit_period" />
-                </div>
-                <div class="form-group col-md-6">
+                </v-col>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Fit Epoch</label>
                   <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-6">
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Optimize Period</label>
                   <d-input v-model="nodeForm.properties.optimize_period" />
-                </div>
-                <div class="form-group col-md-6">
+                </v-col>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Optimize Trials</label>
                   <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-6">
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Cache Expire</label>
                   <d-input v-model="nodeForm.properties.cache_expire" />
-                </div>
-                <div class="form-group col-md-6">
+                </v-col>
+                <v-col cols="12" md="6" class="pb-2">
                   <label>Early Stopping Patience</label>
                   <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
-                </div>
-              </div>
+                </v-col>
+              </v-row>
             </template>
           </template>
 
           <!-- Collaborative Specific Properties -->
           <template v-if="nodeForm.type === 'collaborative'">
-            <div class="form-row">
-              <div class="form-group col-md-6">
+            <v-row>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Fit Period</label>
                 <d-input v-model="nodeForm.properties.fit_period" />
-              </div>
-              <div class="form-group col-md-6">
+              </v-col>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Fit Epoch</label>
                 <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Optimize Period</label>
                 <d-input v-model="nodeForm.properties.optimize_period" />
-              </div>
-              <div class="form-group col-md-6">
+              </v-col>
+              <v-col cols="12" md="6" class="pb-2">
                 <label>Optimize Trials</label>
                 <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
-              </div>
-            </div>
-            <div class="form-group">
+              </v-col>
+            </v-row>
+            <div class="mb-4">
               <label>Early Stopping Patience</label>
               <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
             </div>
@@ -243,15 +262,15 @@
 
           <!-- Non-Personalized Specific Properties -->
           <template v-if="nodeForm.type === 'non-personalized'">
-            <div class="form-group">
+            <div class="mb-4">
               <label>Name</label>
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
-            <div class="form-group">
+            <div class="mb-4">
               <label>Score Formula</label>
               <d-input v-model="nodeForm.properties.score" />
             </div>
-            <div class="form-group">
+            <div class="mb-4">
               <label>Filter Expression</label>
               <d-input v-model="nodeForm.properties.filter" />
             </div>
@@ -259,11 +278,11 @@
 
           <!-- User to User Specific Properties -->
           <template v-if="nodeForm.type === 'user-to-user'">
-            <div class="form-group">
+            <div class="mb-4">
               <label>Name</label>
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
-            <div class="form-group">
+            <div class="mb-4">
               <label>Type</label>
               <d-select v-model="nodeForm.properties.type">
                 <option value="embedding">Embedding</option>
@@ -271,7 +290,7 @@
                 <option value="items">Items</option>
               </d-select>
             </div>
-            <div class="form-group"
+            <div class="mb-4"
               v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
               <label>Column</label>
               <d-input v-model="nodeForm.properties.column" />
@@ -280,11 +299,11 @@
 
           <!-- Item to Item Specific Properties -->
           <template v-if="nodeForm.type === 'item-to-item'">
-            <div class="form-group">
+            <div class="mb-4">
               <label>Name</label>
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
-            <div class="form-group">
+            <div class="mb-4">
               <label>Type</label>
               <d-select v-model="nodeForm.properties.type">
                 <option value="embedding">Embedding</option>
@@ -292,7 +311,7 @@
                 <option value="users">Users</option>
               </d-select>
             </div>
-            <div class="form-group"
+            <div class="mb-4"
               v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
               <label>Column</label>
               <d-input v-model="nodeForm.properties.column" />
@@ -301,27 +320,27 @@
 
           <!-- External Recommender Properties -->
           <template v-if="nodeForm.type === 'external'">
-            <div class="form-group">
+            <div class="mb-4">
               <label>Name</label>
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
-            <div class="form-group">
+            <div class="mb-4">
               <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank"
-                  class="ml-1"><i class="material-icons">help_outline</i></a></label>
+                  class="ms-1"><i class="material-icons">help_outline</i></a></label>
               <div ref="monacoEditor" class="monaco-container"></div>
               <small class="text-muted" v-if="monacoError">{{ monacoError }}</small>
             </div>
-            <div class="form-group">
+            <div class="mb-4">
               <d-input-group>
                 <d-input placeholder="User ID" v-model="previewUserId" />
                 <d-input-group-addon append>
-                  <d-button type="button" theme="primary" @click="runExternalScript" :disabled="previewLoading">
+                  <v-btn type="button" color="primary" @click="runExternalScript" :disabled="previewLoading">
                     <i class="material-icons">play_arrow</i>
-                  </d-button>
+                  </v-btn>
                 </d-input-group-addon>
               </d-input-group>
             </div>
-            <div class="form-group" v-if="previewResult || previewError">
+            <div class="mb-4" v-if="previewResult || previewError">
               <label>Result</label>
               <pre class="bg-light p-2 rounded border" v-if="!previewError"
                 style="max-height: 200px; overflow: auto;">{{ previewResult }}</pre>
@@ -329,10 +348,10 @@
             </div>
           </template>
 
-          <div class="d-flex align-items-center justify-content-between pt-3">
-            <div class="text-right ml-auto">
-              <d-button type="button" theme="secondary" class="mr-2" @click="closeNodeModal">Cancel</d-button>
-              <d-button type="submit" theme="primary">Save</d-button>
+          <div class="d-flex align-center justify-end pt-3">
+            <div>
+              <v-btn type="button" color="secondary" class="me-2" @click="closeNodeModal">Cancel</v-btn>
+              <v-btn type="submit" color="primary">Save</v-btn>
             </div>
           </div>
         </d-form>
@@ -345,15 +364,20 @@
         <d-modal-title>Export TOML</d-modal-title>
       </d-modal-header>
       <d-modal-body>
-        <textarea v-model="exportData" rows="15" class="form-control w-100"
-          style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
+        <v-textarea
+          v-model="exportData"
+          rows="15"
+          variant="outlined"
+          hide-details="auto"
+          style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"
+        />
         <div class="mt-3 text-right">
-          <d-button class="mr-2" theme="white" @click="copyExportData">Copy</d-button>
-          <d-button theme="primary" @click="showExportModal = false">Close</d-button>
+          <v-btn class="me-2" color="white" @click="copyExportData">Copy</v-btn>
+          <v-btn color="primary" @click="showExportModal = false">Close</v-btn>
         </div>
       </d-modal-body>
     </d-modal>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -437,9 +461,9 @@ class IconNode extends HtmlNode {
     }
 
     const html = `
-      <div class="card-body d-flex align-items-center p-2 shadow-sm rounded border bg-white" style="height: 50px; width: ${width}px; border-color: #007bff !important;">
-        <i class="material-icons mr-2 text-primary" style="font-size: 20px;">${iconName === 'database' ? 'storage' : iconName}</i>
-        <span class="text-dark font-weight-bold text-truncate" style="font-size: 14px;">${nodeText}</span>
+      <div class="d-flex align-center pa-2 elevation-1 rounded border bg-white" style="height: 50px; width: ${width}px; border-color: #007bff !important;">
+        <i class="material-icons me-2 text-primary" style="font-size: 20px;">${iconName === 'database' ? 'storage' : iconName}</i>
+        <span class="font-weight-bold text-truncate" style="font-size: 14px;">${nodeText}</span>
       </div>
     `;
     el.innerHTML = html;

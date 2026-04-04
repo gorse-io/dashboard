@@ -1,34 +1,34 @@
 <template>
-  <d-container fluid class="main-content-container px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <d-row no-gutters class="page-header py-4">
-      <d-col col sm="4" class="text-center text-sm-left mb-4 mb-sm-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-4 mb-sm-0">
         <span class="text-uppercase page-subtitle">Dashboard</span>
         <h3 class="page-title">Overview</h3>
-      </d-col>
-    </d-row>
+      </v-col>
+    </v-row>
 
     <!-- Small Stats Blocks -->
-    <d-row v-if="!timeseriesUpdate">
-      <d-col lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
+    <v-row v-if="!timeseriesUpdate">
+      <v-col cols="12" lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
         <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label"
           :value="stats.value" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" />
-      </d-col>
-    </d-row>
+      </v-col>
+    </v-row>
 
-    <d-row>
+    <v-row>
       <!-- Users Overview -->
-      <d-col lg="12" md="12" sm="12" class="mb-4">
+      <v-col cols="12" class="mb-4">
         <bo-users-overview :positiveFeedbackTypes="positiveFeedbackTypes" />
-      </d-col>
-    </d-row>
+      </v-col>
+    </v-row>
 
-    <d-row>
-      <d-col lg="12" md="12" sm="12" class="mb-4">
+    <v-row>
+      <v-col cols="12" class="mb-4">
         <bo-top-items :recommenders="nonPersonalized" />
-      </d-col>
-    </d-row>
-  </d-container>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

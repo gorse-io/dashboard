@@ -1,34 +1,50 @@
 <template>
-  <div :class="['main-navbar', 'bg-white', stickyTop ? 'sticky-top' : '']">
-    <d-navbar type="light" class="align-items-stretch flex-md-nowrap p-0">
-      <div class="main-navbar__search w-100 d-none d-md-flex d-lg-flex">
-      </div>
-      <d-navbar-nav class="border-left flex-row align-right">
-        <li v-if="chat" class="nav-item border-right dropdown notifications">
-          <router-link class="nav-link nav-link-icon text-center" :to="{ name: 'chat' }">
-            <div class="nav-link-icon__wrapper">
-              <i class="material-icons">smart_toy</i>
-            </div>
-          </router-link>
-        </li>
-        <li v-if="userInfo != null" class="nav-item dropdown">
-          <a class="nav-link text-nowrap px-3" :class="{ 'dropdown-toggle': userInfo.auth_type.length === 0 }"
-            @click.prevent="toggleUserActions">
-            <img class="user-avatar rounded-circle mr-2"
-              :src="userInfo.picture.length > 0 ? userInfo.picture : getAvatar(userInfo.name)" alt="User Avatar">
-            <span class="d-none d-md-inline-block">{{ userInfo.name }}</span>
-          </a>
-          <d-collapse v-if="userInfo.auth_type.length === 0" id="user-actions"
-            :open="showUserActions" class="dropdown-menu dropdown-menu-small">
-            <d-dropdown-item href="#" class="text-danger">
-              <a style="text-decoration: none; color: inherit;" href="/logout">
-                <i class="material-icons text-danger">&#xE879;</i> Logout</a>
-            </d-dropdown-item>
-          </d-collapse>
-        </li>
-      </d-navbar-nav>
-    </d-navbar>
-  </div>
+  <v-app-bar
+    color="surface"
+    :elevation="stickyTop ? 1 : 0"
+    :flat="!stickyTop"
+    density="comfortable"
+    border
+  >
+    <template #prepend>
+      <v-app-bar-nav-icon class="d-sm-inline d-md-none d-lg-none" @click="toggleSidebar">
+        <i class="material-icons">menu</i>
+      </v-app-bar-nav-icon>
+    </template>
+
+    <v-spacer />
+
+    <v-btn v-if="chat" :to="{ name: 'chat' }" icon variant="text">
+      <i class="material-icons">smart_toy</i>
+    </v-btn>
+
+    <v-menu v-if="userInfo && userInfo.auth_type.length === 0" v-model="showUserActions" location="bottom end">
+      <template #activator="{ props }">
+        <v-btn v-bind="props" variant="text" class="text-none px-3">
+          <v-avatar size="32" class="mr-2">
+            <img :src="userInfo.picture.length > 0 ? userInfo.picture : getAvatar(userInfo.name)" alt="User Avatar">
+          </v-avatar>
+          <span class="d-none d-md-inline-block">{{ userInfo.name }}</span>
+        </v-btn>
+      </template>
+
+      <v-list density="compact">
+        <v-list-item href="/logout">
+          <template #prepend>
+            <i class="material-icons">logout</i>
+          </template>
+          <v-list-item-title>Logout</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
+    <div v-else-if="userInfo" class="d-flex align-center px-3">
+      <v-avatar size="32" class="mr-2">
+        <img :src="userInfo.picture.length > 0 ? userInfo.picture : getAvatar(userInfo.name)" alt="User Avatar">
+      </v-avatar>
+      <span class="d-none d-md-inline-block">{{ userInfo.name }}</span>
+    </div>
+  </v-app-bar>
 </template>
 
 <script>
@@ -69,10 +85,8 @@ export default {
     });
   },
   methods: {
-    toggleUserActions() {
-      if (this.userInfo && this.userInfo.auth_type.length === 0) {
-        this.showUserActions = !this.showUserActions;
-      }
+    toggleSidebar() {
+      this.$eventHub.$emit('toggle-sidebar');
     },
     getAvatar(name) {
       const svgCode = multiavatar(name);
@@ -86,11 +100,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.main-navbar {
-  .dropdown-menu {
-    display: block;
-  }
-}
-</style>

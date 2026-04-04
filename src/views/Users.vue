@@ -1,34 +1,34 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
+  <v-container fluid class="main-content-container px-4">
     <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-4 text-center text-sm-left mb-0">
+    <v-row class="page-header py-4" no-gutters>
+      <v-col cols="12" sm="4" class="text-center text-sm-left mb-0">
         <span class="text-uppercase page-subtitle">Overview</span>
         <h3 class="page-title">Users</h3>
-      </div>
-    </div>
+      </v-col>
+    </v-row>
 
     <!-- Default Light Table -->
-    <div class="row">
-      <div class="col">
-        <div class="card card-small mb-4">
-          <div class="card-header border-bottom">
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mb-4">
+          <v-card-title class="border-bottom">
             <h6 class="m-0">Users</h6>
-          </div>
-          <div class="card-body border-bottom">
+          </v-card-title>
+          <v-card-text class="border-bottom">
             <d-input-group>
               <d-input id="user_id" v-model="user_id" placeholder="User ID" @keyup.enter="search_user" />
               <d-input-group-addon append>
-                <d-button class="btn-white" @click="search_user"><i class="material-icons">search</i></d-button>
-                <d-button class="btn-white" @click="previous_page"><i
-                    class="material-icons">arrow_back_ios</i></d-button>
-                <d-button class="btn-white" @click="next_page"><i
-                    class="material-icons">arrow_forward_ios</i></d-button>
+                <v-btn variant="text" @click="search_user"><i class="material-icons">search</i></v-btn>
+                <v-btn variant="text" @click="previous_page"><i
+                    class="material-icons">arrow_back_ios</i></v-btn>
+                <v-btn variant="text" @click="next_page"><i
+                    class="material-icons">arrow_forward_ios</i></v-btn>
               </d-input-group-addon>
             </d-input-group>
-          </div>
-          <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
+          </v-card-text>
+          <v-card-text class="pa-0 pb-3">
+            <v-table class="mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
@@ -53,22 +53,22 @@
                   <td>{{ format_date_time(user.LastActiveTime) }}</td>
                   <td>{{ format_date_time(user.LastUpdateTime) }}</td>
                   <td>
-                    <d-button-group>
-                      <d-button size="small" outline @click="list_user_neighbors(user.UserId)"><i
-                          class="material-icons">visibility</i></d-button>
-                      <d-button size="small" outline @click="list_user_recommend(user.UserId)"><i
-                          class="material-icons">favorite</i></d-button>
-                      <d-button size="small" theme="danger" outline @click="open_delete_user_dialog(user.UserId)"><i
-                          class="material-icons">delete</i></d-button>
-                    </d-button-group>
+                    <v-btn-group>
+                      <v-btn size="small" variant="outlined" @click="list_user_neighbors(user.UserId)"><i
+                          class="material-icons">visibility</i></v-btn>
+                      <v-btn size="small" variant="outlined" @click="list_user_recommend(user.UserId)"><i
+                          class="material-icons">favorite</i></v-btn>
+                      <v-btn size="small" color="error" variant="outlined" @click="open_delete_user_dialog(user.UserId)"><i
+                          class="material-icons">delete</i></v-btn>
+                    </v-btn-group>
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
     <d-modal v-if="showDialog" @close="showDialog = false" centered>
       <d-modal-header>
@@ -80,15 +80,15 @@
         <d-input-group>
           <d-input v-model="confirmUserId" />
           <d-input-group-addon append>
-            <d-button theme="danger" outline @click="delete_user">
+            <v-btn color="error" variant="outlined" @click="delete_user">
               <i class="material-icons">delete</i>
-            </d-button>
+            </v-btn>
           </d-input-group-addon>
         </d-input-group>
         <span style="color: red">{{ deleteUserError }}</span>
       </d-modal-body>
     </d-modal>
-  </div>
+  </v-container>
 </template>
 
 <script>
