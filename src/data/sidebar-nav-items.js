@@ -4,47 +4,46 @@ export default function () {
     to: {
       name: 'overview',
     },
-    htmlBefore: '<i class="material-icons">show_chart</i>',
-    htmlAfter: '',
+    icon: 'show_chart',
   }, {
     title: 'Tasks',
-    htmlBefore: '<i class="material-icons">task</i>',
+    icon: 'task',
     to: {
       name: 'tasks',
     },
   }, {
     title: 'Cluster',
-    htmlBefore: '<i class="material-icons">dns</i>',
+    icon: 'dns',
     to: {
       name: 'cluster',
     },
   }, {
     title: 'Users',
-    htmlBefore: '<i class="material-icons">person</i>',
+    icon: 'person',
     to: {
       name: 'users',
     },
   }, {
     title: 'Items',
-    htmlBefore: '<i class="material-icons">inventory_2</i>',
+    icon: 'inventory_2',
     to: {
       name: 'items',
     },
   }, {
     title: 'Advance',
-    htmlBefore: '<i class="material-icons">subject</i>',
+    icon: 'subject',
     to: {
       name: 'advance',
     },
   }, {
     title: 'RecFlow',
-    htmlBefore: '<i class="material-icons">build</i>',
+    icon: 'build',
     to: {
       name: 'recflow',
     },
   }, {
     title: 'Settings',
-    htmlBefore: '<i class="material-icons">settings</i>',
+    icon: 'settings',
     to: {
       name: 'config',
     },

@@ -30,12 +30,10 @@
         <v-list-item
           v-if="!(item.items && item.items.length)"
           :to="item.to"
+          :prepend-icon="item.icon || undefined"
           rounded="lg"
           color="primary"
         >
-          <template #prepend>
-            <i v-if="extractIcon(item.htmlBefore)" class="material-icons">{{ extractIcon(item.htmlBefore) }}</i>
-          </template>
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item>
 
@@ -45,10 +43,12 @@
           @update:modelValue="setNavOpen(navItemIdx, $event)"
         >
           <template #activator="{ props }">
-            <v-list-item v-bind="props" rounded="lg" color="primary">
-              <template #prepend>
-                <i v-if="extractIcon(item.htmlBefore)" class="material-icons">{{ extractIcon(item.htmlBefore) }}</i>
-              </template>
+            <v-list-item
+              v-bind="props"
+              :prepend-icon="item.icon || undefined"
+              rounded="lg"
+              color="primary"
+            >
               <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item>
           </template>
@@ -114,13 +114,6 @@ export default {
     },
   },
   methods: {
-    extractIcon(html) {
-      if (!html) {
-        return '';
-      }
-      const matched = html.match(/<i[^>]*>([^<]+)<\/i>/i);
-      return matched ? matched[1].trim() : '';
-    },
     isNavOpen(index) {
       return !!this.openNavItems[index];
     },

@@ -17,8 +17,8 @@ import 'material-icons/iconfont/material-icons.css';
 // Core
 import App from './App.vue';
 import router from './router';
-import vuetify from '@/plugins/vuetify';
-import vuetifyCompat from '@/plugins/vuetifyCompat';
+import vuetify from '@/vuetify';
+import vuetifyCompat from '@/vuetifyCompat';
 
 // Layouts
 import Default from '@/layouts/Default.vue';
