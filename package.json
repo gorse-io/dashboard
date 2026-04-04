@@ -5,8 +5,10 @@
   "license": "MIT",
   "scripts": {
     "lint": "vue-cli-service lint",
-    "serve": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve",
-    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build",
+    "dev": "vite",
+    "serve": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "jest"
   },
   "dependencies": {
@@ -14,20 +16,20 @@
     "@logicflow/core": "^2.1.7",
     "@logicflow/extension": "^2.1.9",
     "@multiavatar/multiavatar": "^1.0.7",
-    "axios": "^1.7.9",
+    "axios": "^1.14.0",
     "bootstrap": "^4.1.3",
     "chart.js": "^2.7.2",
     "core-js": "^3.37.1",
     "dagre": "^0.8.5",
     "jsonpath": "^1.1.1",
     "material-icons": "^1.13.1",
+    "mitt": "^3.0.1",
     "moment": "^2.29.1",
     "monaco-editor": "0.30.1",
     "numeral": "^2.0.6",
     "nunjucks": "^3.2.4",
     "regenerator-runtime": "^0.14.1",
     "shards-ui": "^2.1.0",
-    "mitt": "^3.0.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1",
     "vuetify": "^4.0.0"
@@ -38,13 +40,16 @@
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.5.13",
     "@vue/eslint-config-airbnb": "^8.0.0",
+    "@vitejs/plugin-vue": "^5.2.1",
     "babel-jest": "^26.6.3",
     "cross-env": "7",
     "eslint-plugin-jest": "^24.3.6",
     "jest": "^26.6.3",
     "sass": "^1.97.0",
     "sass-loader": "^13.3.3",
-    "ts-jest": "^26.5.6"
+    "ts-jest": "^26.5.6",
+    "vite": "^5.4.19",
+    "vite-plugin-vuetify": "^2.1.1"
   },
   "pnpm": {
     "overrides": {
