@@ -1,5 +1,4 @@
-import Vue from 'vue';
-import Router from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 
 import Tasks from './views/Tasks.vue';
 import Overview from './views/Overview.vue';
@@ -18,15 +17,18 @@ import ImportUsers from './views/ImportUsers.vue';
 import ImportFeedback from './views/ImportFeedback.vue';
 import RecFlow from './views/RecFlow.vue';
 
-Vue.use(Router);
+const EmptyView = {
+  render() {
+    return null;
+  },
+};
 
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
+export default createRouter({
+  history: createWebHistory(process.env.BASE_URL),
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active',
   scrollBehavior() {
-    return { x: 0, y: 0 };
+    return { left: 0, top: 0 };
   },
   routes: [
     {
@@ -106,6 +108,7 @@ export default new Router({
     {
       path: '/login',
       name: 'login',
+      component: EmptyView,
       meta: { layout: 'login' },
     },
     {
@@ -119,7 +122,7 @@ export default new Router({
       component: RecFlow,
     },
     {
-      path: '*',
+      path: '/:pathMatch(.*)*',
       redirect: '/errors',
     },
   ],

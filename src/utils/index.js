@@ -28,4 +28,6 @@ const utils = {
   },
 };
 
+export const nanoid = (size = 8) => Math.random().toString(36).slice(2, 2 + size);
+
 export default utils;

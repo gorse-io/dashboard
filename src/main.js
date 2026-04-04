@@ -1,6 +1,6 @@
 /* eslint-disable */
-import Vue from 'vue';
-import ShardsVue from 'shards-vue';
+import { createApp } from 'vue';
+import mitt from 'mitt';
 
 // highlight.js
 import hljsVuePlugin from '@highlightjs/vue-plugin'
@@ -9,7 +9,6 @@ import json from 'highlight.js/lib/languages/json'
 import 'highlight.js/styles/a11y-dark.css'
 
 hljs.registerLanguage('json', json)
-Vue.use(hljsVuePlugin);
 
 // Styles
 import 'bootstrap/dist/css/bootstrap.css';
@@ -20,20 +19,28 @@ import 'material-icons/iconfont/material-icons.css';
 // Core
 import App from './App.vue';
 import router from './router';
+import vuetify from '@/plugins/vuetify';
+import shardsCompat from '@/plugins/shardsCompat';
 
 // Layouts
 import Default from '@/layouts/Default.vue';
 import Login from '@/layouts/Login.vue';
 
-ShardsVue.install(Vue);
+const app = createApp(App);
+const emitter = mitt();
 
-Vue.component('default-layout', Default);
-Vue.component('login-layout', Login);
+app.use(router);
+app.use(vuetify);
+app.use(hljsVuePlugin);
+app.use(shardsCompat);
 
-Vue.config.productionTip = false;
-Vue.prototype.$eventHub = new Vue();
+app.component('default-layout', Default);
+app.component('login-layout', Login);
 
-new Vue({
-  router,
-  render: h => h(App),
-}).$mount('#app');
+app.config.globalProperties.$eventHub = {
+  $on: emitter.on,
+  $off: emitter.off,
+  $emit: emitter.emit,
+};
+
+app.mount('#app');

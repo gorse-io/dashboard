@@ -28,12 +28,17 @@
       <div class="nav-wrapper">
           <d-nav class="flex-column">
             <li v-for="(item, navItemIdx) in items" :key="navItemIdx" class="nav-item dropdown">
-              <d-link :class="['nav-link', item.items && item.items.length ? 'dropdown-toggle' : '']" :to="item.to" v-d-toggle="`snc-${navItemIdx}`">
+              <router-link v-if="!(item.items && item.items.length)" class="nav-link" :to="item.to">
                 <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
                 <span v-if="item.title">{{ item.title }}</span>
                 <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
-              </d-link>
-              <d-collapse v-if="item.items && item.items.length" :id="`snc-${navItemIdx}`" class="dropdown-menu dropdown-menu-small" accordion="sidebar-items-accordion">
+              </router-link>
+              <a v-else href="#" class="nav-link dropdown-toggle" @click.prevent="toggleNavItem(navItemIdx)">
+                <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
+                <span v-if="item.title">{{ item.title }}</span>
+                <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
+              </a>
+              <d-collapse v-if="item.items && item.items.length" :id="`snc-${navItemIdx}`" class="dropdown-menu dropdown-menu-small" :open="isNavOpen(navItemIdx)" accordion="sidebar-items-accordion">
                 <d-dropdown-item v-for="(subItem, subItemIdx) in item.items" :key="subItemIdx" :href="subItem.href" :to="subItem.to">
                   {{ subItem.title }}
                 </d-dropdown-item>
@@ -66,15 +71,25 @@ export default {
   data() {
     return {
       sidebarVisible: false,
+      openNavItems: {},
     };
   },
   created() {
     this.$eventHub.$on('toggle-sidebar', this.handleToggleSidebar);
   },
-  beforeDestroy() {
-    this.$eventHub.$off('toggle-sidebar');
+  beforeUnmount() {
+    this.$eventHub.$off('toggle-sidebar', this.handleToggleSidebar);
   },
   methods: {
+    isNavOpen(index) {
+      return !!this.openNavItems[index];
+    },
+    toggleNavItem(index) {
+      this.openNavItems = {
+        ...this.openNavItems,
+        [index]: !this.openNavItems[index],
+      };
+    },
     handleToggleSidebar() {
       this.sidebarVisible = !this.sidebarVisible;
     },

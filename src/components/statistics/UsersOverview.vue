@@ -16,7 +16,7 @@
               small />
             <d-datepicker v-model="dateRange.to" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
               placeholder="End Date" typeable small />
-            <d-input-group-text slot="append">
+            <d-input-group-text placement="append">
               <i class="material-icons">&#xE916;</i>
             </d-input-group-text>
           </d-input-group>
@@ -109,7 +109,7 @@ export default {
   mounted() {
     this.plot(this.timeseries.name, this.timeseries.label);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.plotAbortController) {
       this.plotAbortController.abort();
       this.plotAbortController = null;

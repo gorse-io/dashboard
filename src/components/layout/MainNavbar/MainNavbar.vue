@@ -5,23 +5,21 @@
       </div>
       <d-navbar-nav class="border-left flex-row align-right">
         <li v-if="chat" class="nav-item border-right dropdown notifications">
-          <a class="nav-link nav-link-icon text-center" v-d-toggle.notifications>
+          <router-link class="nav-link nav-link-icon text-center" :to="{ name: 'chat' }">
             <div class="nav-link-icon__wrapper">
-              <router-link :to="{ name: 'chat' }">
-                <i class="material-icons">smart_toy</i>
-              </router-link>
+              <i class="material-icons">smart_toy</i>
             </div>
-          </a>
+          </router-link>
         </li>
         <li v-if="userInfo != null" class="nav-item dropdown">
           <a class="nav-link text-nowrap px-3" :class="{ 'dropdown-toggle': userInfo.auth_type.length === 0 }"
-            v-d-toggle.user-actions>
+            @click.prevent="toggleUserActions">
             <img class="user-avatar rounded-circle mr-2"
               :src="userInfo.picture.length > 0 ? userInfo.picture : getAvatar(userInfo.name)" alt="User Avatar">
             <span class="d-none d-md-inline-block">{{ userInfo.name }}</span>
           </a>
           <d-collapse v-if="userInfo.auth_type.length === 0" id="user-actions"
-            class="dropdown-menu dropdown-menu-small">
+            :open="showUserActions" class="dropdown-menu dropdown-menu-small">
             <d-dropdown-item href="#" class="text-danger">
               <a style="text-decoration: none; color: inherit;" href="/logout">
                 <i class="material-icons text-danger">&#xE879;</i> Logout</a>
@@ -53,6 +51,7 @@ export default {
     return {
       userInfo: null,
       chat: false,
+      showUserActions: false,
     };
   },
   mounted() {
@@ -70,6 +69,11 @@ export default {
     });
   },
   methods: {
+    toggleUserActions() {
+      if (this.userInfo && this.userInfo.auth_type.length === 0) {
+        this.showUserActions = !this.showUserActions;
+      }
+    },
     getAvatar(name) {
       const svgCode = multiavatar(name);
       const parser = new DOMParser();
