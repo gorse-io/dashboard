@@ -7,8 +7,13 @@
         <h3 class="page-title">Import Items</h3>
       </v-col>
     </v-row>
-    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
-      @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
+    <v-alert
+      v-if="timeUntilDismissed > 0"
+      :color="alertColor"
+      variant="tonal"
+      closable
+      @click:close="clearAlertCountdown"
+    >{{ alertText }}</v-alert>
     <v-row>
       <v-col cols="12">
         <v-card class="mb-4">
@@ -49,9 +54,16 @@
                 <tr v-for="(row, row_idx) in rows" :key="row_idx">
                   <td v-for="columnName in columnNames" :key="columnName">
                     <div v-if="columnName === 'Categories'">
-                      <d-badge outline theme="primary" v-for="(label, idx) in row[columnName]" :key="idx">
+                      <v-chip
+                        v-for="(label, idx) in row[columnName]"
+                        :key="idx"
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        class="mr-1 mb-1"
+                      >
                         {{ label }}
-                      </d-badge>
+                      </v-chip>
                     </div>
                     <div v-else-if="columnName === 'Labels'">
                       <span
@@ -87,6 +99,7 @@ export default {
       alertText: null,
       duration: 5,
       timeUntilDismissed: 0,
+      alertTimerId: null,
       columnNames: [
         'ItemId',
         'IsHidden',
@@ -97,6 +110,14 @@ export default {
       ],
       rows: [],
     };
+  },
+  computed: {
+    alertColor() {
+      return this.alertTheme === 'danger' ? 'error' : this.alertTheme;
+    },
+  },
+  beforeUnmount() {
+    this.clearAlertCountdown();
   },
   methods: {
     loadFile(fileValue) {
@@ -121,16 +142,31 @@ export default {
       }
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
-    handleTimeChange(time) {
-      this.timeUntilDismissed = time;
+    startAlertCountdown(seconds) {
+      this.clearAlertCountdown();
+      this.timeUntilDismissed = seconds;
+      this.alertTimerId = setInterval(() => {
+        if (this.timeUntilDismissed <= 1) {
+          this.clearAlertCountdown();
+          return;
+        }
+        this.timeUntilDismissed -= 1;
+      }, 1000);
+    },
+    clearAlertCountdown() {
+      if (this.alertTimerId) {
+        clearInterval(this.alertTimerId);
+        this.alertTimerId = null;
+      }
+      this.timeUntilDismissed = 0;
     },
     showDanger(message) {
-      this.timeUntilDismissed = this.duration;
+      this.startAlertCountdown(this.duration);
       this.alertTheme = 'danger';
       this.alertText = message;
     },
     showSuccess(message) {
-      this.timeUntilDismissed = this.duration;
+      this.startAlertCountdown(this.duration);
       this.alertTheme = 'success';
       this.alertText = message;
     },

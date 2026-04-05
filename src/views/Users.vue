@@ -16,16 +16,24 @@
             <h6 class="m-0">Users</h6>
           </v-card-title>
           <v-card-text class="border-bottom">
-            <d-input-group>
-              <d-input id="user_id" v-model="user_id" placeholder="User ID" @keyup.enter="search_user" />
-              <d-input-group-addon append>
+            <div class="d-flex align-center flex-wrap">
+              <v-text-field
+                id="user_id"
+                v-model="user_id"
+                placeholder="User ID"
+                hide-details="auto"
+                density="comfortable"
+                class="flex-grow-1"
+                @keyup.enter="search_user"
+              />
+              <div class="d-flex align-center ml-2">
                 <v-btn variant="text" @click="search_user"><i class="material-icons">search</i></v-btn>
                 <v-btn variant="text" @click="previous_page"><i
                     class="material-icons">arrow_back_ios</i></v-btn>
                 <v-btn variant="text" @click="next_page"><i
                     class="material-icons">arrow_forward_ios</i></v-btn>
-              </d-input-group-addon>
-            </d-input-group>
+              </div>
+            </div>
           </v-card-text>
           <v-card-text class="pa-0 pb-3">
             <v-table class="mb-0">
@@ -70,24 +78,26 @@
       </v-col>
     </v-row>
 
-    <d-modal v-if="showDialog" @close="showDialog = false" centered>
-      <d-modal-header>
-        <d-modal-title>Delete Item</d-modal-title>
-      </d-modal-header>
-      <d-modal-body>
-        <div class="mb-3">Are you sure to delete user <span style="font-weight: bold">{{ deleteUserId }}</span>? Please
-          type the ID of the deleted user.</div>
-        <d-input-group>
-          <d-input v-model="confirmUserId" />
-          <d-input-group-addon append>
-            <v-btn color="error" variant="outlined" @click="delete_user">
-              <i class="material-icons">delete</i>
-            </v-btn>
-          </d-input-group-addon>
-        </d-input-group>
-        <span style="color: red">{{ deleteUserError }}</span>
-      </d-modal-body>
-    </d-modal>
+    <v-dialog v-model="showDialog" max-width="640">
+      <v-card class="card" variant="flat">
+        <v-card-title>
+          <h5 class="m-0">Delete User</h5>
+        </v-card-title>
+        <v-card-text>
+          <div class="mb-3">Are you sure to delete user <span style="font-weight: bold">{{ deleteUserId }}</span>? Please
+            type the ID of the deleted user.</div>
+          <div class="d-flex align-center flex-wrap">
+            <v-text-field v-model="confirmUserId" hide-details="auto" density="comfortable" class="flex-grow-1" />
+            <div class="d-flex align-center ml-2">
+              <v-btn color="error" variant="outlined" @click="delete_user">
+                <i class="material-icons">delete</i>
+              </v-btn>
+            </div>
+          </div>
+          <span style="color: red">{{ deleteUserError }}</span>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 

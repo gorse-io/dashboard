@@ -7,39 +7,39 @@
       </v-col>
     </v-row>
 
-    <d-row>
-      <d-col lg="12" md="12" sm="12" class="mb-4">
+    <v-row>
+      <v-col lg="12" md="12" sm="12" class="mb-4">
         <v-card class="mb-4">
           <v-card-title class="border-bottom">
             <h6 class="m-0">Prompt</h6>
           </v-card-title>
           <v-card-text class="pa-0 pb-2">
-            <d-list-group flush>
-              <d-list-group-item class="p-3">
-                <d-row class="mb-3">
-                  <d-col sm="12" md="12">
-                    <d-form-textarea :rows="3" :max-rows="6" v-model="prompt">
-                    </d-form-textarea>
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="12" class="text-right">
+            <v-list>
+              <v-list-item class="p-3">
+                <v-row class="mb-3">
+                  <v-col sm="12" md="12">
+                    <v-textarea :rows="3" :max-rows="6" v-model="prompt">
+                    </v-textarea>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col sm="12" md="12" class="text-right">
                     <v-btn variant="outlined" @click="send">Send</v-btn>
-                  </d-col>
-                </d-row>
-                <d-row v-if="message">
-                  <d-col sm="12" md="12">
+                  </v-col>
+                </v-row>
+                <v-row v-if="message">
+                  <v-col sm="12" md="12">
                     <div class="p-3 mt-3 border rounded">
                       <div v-html="message"></div>
                     </div>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
-      </d-col>
-    </d-row>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

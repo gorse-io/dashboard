@@ -7,11 +7,13 @@
     </v-card-title>
 
     <v-card-text class="border-bottom">
-        <d-select v-model="feedbackType" @change="selectType">
-          <option v-for="feedbackType in types" :key="feedbackType" :value="feedbackType">
-            {{ feedbackType }}
-          </option>
-        </d-select>
+      <v-select
+        v-model="feedbackType"
+        :items="types"
+        hide-details="auto"
+        density="comfortable"
+        @update:modelValue="selectType"
+      />
     </v-card-text>
 
     <v-card-text class="pa-0">
@@ -22,9 +24,9 @@
           <!-- Content - Title -->
           <div class="blog-comments__meta text-muted d-flex justify-space-between align-center">
             {{ item.Item.ItemId }}
-            <d-badge outline pill theme="secondary">
+            <v-chip size="small" variant="outlined" rounded="pill" color="secondary">
               {{ item.FeedbackType + (item.Value > 0 ? ' ' + item.Value : '') }}
-            </d-badge>
+            </v-chip>
           </div>
 
           <!-- Content - Body -->
@@ -34,9 +36,16 @@
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
-            <d-badge outline v-for="(label, idx) in item.Item.Categories" :key="idx">
+            <v-chip
+              v-for="(label, idx) in item.Item.Categories"
+              :key="idx"
+              size="small"
+              variant="outlined"
+              color="secondary"
+              class="mr-1 mb-1"
+            >
               {{ label }}
-            </d-badge>
+            </v-chip>
             <span
               style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
               {{ fold(item.Item.Labels) }}

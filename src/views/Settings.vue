@@ -16,43 +16,110 @@
             <h6 class="m-0">{{ section }}</h6>
           </v-card-title>
           <v-card-text class="pa-0 pb-3">
-            <d-list-group flush>
-              <d-list-group-item class="p-3" v-for="(value, name) in settings" :key="name">
-                <d-row>
-                  <d-col sm="12" md="2">
+            <v-list>
+              <v-list-item class="p-3" v-for="(value, name) in settings" :key="name">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <label>{{ name }}</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
-                    <d-input v-if="value == null" type="text"
-                      :placeholder="'missing `' + name + '` in configuration file'" state="invalid" readonly />
+                  </v-col>
+                  <v-col sm="12" md="10">
+                    <v-text-field
+                      v-if="value == null"
+                      type="text"
+                      :placeholder="'missing `' + name + '` in configuration file'"
+                      :model-value="''"
+                      error
+                      readonly
+                      hide-details="auto"
+                      density="comfortable"
+                    />
                     <div v-else-if="value.constructor === Array && value.length > 0 && typeof value[0] == 'object'">
                       <div v-for="(item, i) in value" v-bind:key="item.Name">
                         <div v-if="i > 0" class="mt-2 mb-2 border-top"></div>
-                        <d-input-group v-for="(fieldValue, fieldName) in item" :key="fieldName" class="mb-2">
-                          <d-input-group-text placement="prepend" style="width: 250px">{{ fieldName }}</d-input-group-text>
-                          <d-input v-if="fieldValue == null" type="text" readonly />
-                          <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
-                            type="text" :value="JSON.stringify(fieldValue)" readonly />
-                          <d-input v-else :value="fieldValue.toString()" type="text" readonly />
-                        </d-input-group>
+                        <div v-for="(fieldValue, fieldName) in item" :key="fieldName" class="d-flex align-center flex-wrap mb-2">
+                          <v-chip size="small" variant="outlined" class="mr-2" style="width: 250px">{{ fieldName }}</v-chip>
+                          <v-text-field
+                            v-if="fieldValue == null"
+                            type="text"
+                            :model-value="''"
+                            readonly
+                            hide-details="auto"
+                            density="comfortable"
+                            class="flex-grow-1"
+                          />
+                          <v-text-field
+                            v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
+                            type="text"
+                            :model-value="JSON.stringify(fieldValue)"
+                            readonly
+                            hide-details="auto"
+                            density="comfortable"
+                            class="flex-grow-1"
+                          />
+                          <v-text-field
+                            v-else
+                            type="text"
+                            :model-value="fieldValue.toString()"
+                            readonly
+                            hide-details="auto"
+                            density="comfortable"
+                            class="flex-grow-1"
+                          />
+                        </div>
                       </div>
                     </div>
-                    <d-input v-else-if="value.constructor === Array" type="text" :value="JSON.stringify(value)"
-                      readonly />
+                    <v-text-field
+                      v-else-if="value.constructor === Array"
+                      type="text"
+                      :model-value="JSON.stringify(value)"
+                      readonly
+                      hide-details="auto"
+                      density="comfortable"
+                    />
                     <div v-else-if="typeof value == 'object'">
-                      <d-input-group v-for="(fieldValue, fieldName) in value" :key="fieldName" class="mb-2">
-                        <d-input-group-text placement="prepend" style="width: 250px">{{ fieldName }}</d-input-group-text>
-                        <d-input v-if="fieldValue == null" type="text" readonly />
-                        <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
-                          type="text" :value="JSON.stringify(fieldValue)" readonly />
-                        <d-input v-else :value="fieldValue.toString()" type="text" readonly />
-                      </d-input-group>
+                      <div v-for="(fieldValue, fieldName) in value" :key="fieldName" class="d-flex align-center flex-wrap mb-2">
+                        <v-chip size="small" variant="outlined" class="mr-2" style="width: 250px">{{ fieldName }}</v-chip>
+                        <v-text-field
+                          v-if="fieldValue == null"
+                          type="text"
+                          :model-value="''"
+                          readonly
+                          hide-details="auto"
+                          density="comfortable"
+                          class="flex-grow-1"
+                        />
+                        <v-text-field
+                          v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
+                          type="text"
+                          :model-value="JSON.stringify(fieldValue)"
+                          readonly
+                          hide-details="auto"
+                          density="comfortable"
+                          class="flex-grow-1"
+                        />
+                        <v-text-field
+                          v-else
+                          type="text"
+                          :model-value="fieldValue.toString()"
+                          readonly
+                          hide-details="auto"
+                          density="comfortable"
+                          class="flex-grow-1"
+                        />
+                      </div>
                     </div>
-                    <d-input v-else type="text" :value="value.toString()" readonly />
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
+                    <v-text-field
+                      v-else
+                      type="text"
+                      :model-value="value.toString()"
+                      readonly
+                      hide-details="auto"
+                      density="comfortable"
+                    />
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>

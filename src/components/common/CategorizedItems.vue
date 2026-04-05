@@ -8,22 +8,30 @@
     <v-card-text class="border-bottom">
       <v-row>
         <v-col cols="12" md="6">
-          <d-input-group prepend="Recommender" class="mb-3">
-            <d-select @change="changeRecommender" :value="recommender">
-              <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
-                {{ recommender }}
-              </option>
-            </d-select>
-          </d-input-group>
+          <div class="d-flex align-center flex-wrap mb-3">
+            <v-chip size="small" variant="outlined" class="mr-2">Recommender</v-chip>
+            <v-select
+              :model-value="recommender"
+              :items="recommenders"
+              hide-details="auto"
+              density="comfortable"
+              class="flex-grow-1"
+              @update:modelValue="changeRecommender"
+            />
+          </div>
         </v-col>
         <v-col cols="12" md="6">
-          <d-input-group prepend="Categories" class="mb-3">
-            <d-select @change="changeCategory">
-              <option v-for="(category, idx) in categories" :key="idx" :value="category">
-                {{ category }}
-              </option>
-            </d-select>
-          </d-input-group>
+          <div class="d-flex align-center flex-wrap mb-3">
+            <v-chip size="small" variant="outlined" class="mr-2">Categories</v-chip>
+            <v-select
+              :model-value="category"
+              :items="categories"
+              hide-details="auto"
+              density="comfortable"
+              class="flex-grow-1"
+              @update:modelValue="changeCategory"
+            />
+          </div>
         </v-col>
       </v-row>
     </v-card-text>
@@ -45,9 +53,16 @@
             <td>{{ item.ItemId }}</td>
             <td>
               <div>
-                <d-badge outline theme="secondary" v-for="(category, idx) in item.Categories" :key="idx">
+                <v-chip
+                  v-for="(category, idx) in item.Categories"
+                  :key="idx"
+                  size="small"
+                  variant="outlined"
+                  color="secondary"
+                  class="mr-1 mb-1"
+                >
                   {{ category }}
-                </d-badge>
+                </v-chip>
               </div>
             </td>
             <td>{{ format_date_time(item.Timestamp) }}</td>

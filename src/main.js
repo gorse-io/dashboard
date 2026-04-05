@@ -18,7 +18,6 @@ import 'material-icons/iconfont/material-icons.css';
 import App from './App.vue';
 import router from './router';
 import vuetify from '@/vuetify';
-import vuetifyCompat from '@/vuetifyCompat';
 
 // Layouts
 import Default from '@/layouts/Default.vue';
@@ -30,7 +29,6 @@ const emitter = mitt();
 app.use(router);
 app.use(vuetify);
 app.use(hljsVuePlugin);
-app.use(vuetifyCompat);
 
 app.component('default-layout', Default);
 app.component('login-layout', Login);

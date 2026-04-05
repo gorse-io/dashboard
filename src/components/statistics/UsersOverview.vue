@@ -10,25 +10,42 @@
       <v-row class="border-bottom py-2 bg-grey-lighten-4">
 
         <v-col cols="12" sm="6" class="d-flex mb-2 mb-sm-0">
-          <d-input-group size="sm" class="date-range d-flex justify-end">
-            <d-datepicker v-model="dateRange.from"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" placeholder="Start Date" typeable
-              small />
-            <d-datepicker v-model="dateRange.to" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="End Date" typeable small />
-            <d-input-group-text placement="append">
+          <div class="date-range d-flex justify-end align-center flex-wrap">
+            <v-text-field
+              v-model="dateRange.from"
+              type="date"
+              placeholder="Start Date"
+              density="comfortable"
+              hide-details="auto"
+              class="mr-2"
+            />
+            <v-text-field
+              v-model="dateRange.to"
+              type="date"
+              placeholder="End Date"
+              density="comfortable"
+              hide-details="auto"
+              class="mr-2"
+            />
+            <v-chip size="small" variant="outlined">
               <i class="material-icons">&#xE916;</i>
-            </d-input-group-text>
-          </d-input-group>
+            </v-chip>
+          </div>
         </v-col>
 
         <v-col cols="12" sm="6">
-          <d-input-group size="sm" class="d-flex ms-sm-auto mt-3 mt-sm-0">
-            <d-select @change="changeTimeseries" :value="timeseries">
-              <option v-for="(timeseriesOption, idx) in timeseriesOptions" :key="idx" :value="timeseriesOption">{{
-                timeseriesOption.title }}</option>
-            </d-select>
-          </d-input-group>
+          <div class="d-flex ms-sm-auto mt-3 mt-sm-0">
+            <v-select
+              v-model="timeseries"
+              :items="timeseriesOptions"
+              item-title="title"
+              return-object
+              hide-details="auto"
+              density="comfortable"
+              class="w-100"
+              @update:modelValue="changeTimeseries"
+            />
+          </div>
         </v-col>
 
       </v-row>

@@ -8,18 +8,28 @@
 
     <v-card-text class="border-bottom">
       <v-row>
-        <v-col cols="12" md="6"><d-select v-model="recommender" @change="changeRecommend">
-              <option v-for="recommend in recommenders" :key="recommend" :value="recommend">
-                {{ recommend }}
-              </option>
-            </d-select></v-col>
-          <v-col cols="12" md="6"><d-input-group prepend="Categories" class="mb-3">
-              <d-select v-model="category" @change="changeCategory">
-                <option v-for="(category, idx) in categories" :key="idx" :value="category">
-                  {{ category }}
-                </option>
-              </d-select>
-            </d-input-group></v-col>
+        <v-col cols="12" md="6">
+          <v-select
+            v-model="recommender"
+            :items="recommenders"
+            hide-details="auto"
+            density="comfortable"
+            @update:modelValue="changeRecommend"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <div class="d-flex align-center flex-wrap mb-3">
+            <v-chip size="small" variant="outlined" class="mr-2">Categories</v-chip>
+            <v-select
+              v-model="category"
+              :items="categories"
+              hide-details="auto"
+              density="comfortable"
+              class="flex-grow-1"
+              @update:modelValue="changeCategory"
+            />
+          </div>
+        </v-col>
       </v-row>
     </v-card-text>
 
@@ -40,9 +50,16 @@
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
-            <d-badge outline v-for="(label, idx) in item.Categories" :key="idx">
+            <v-chip
+              v-for="(label, idx) in item.Categories"
+              :key="idx"
+              size="small"
+              variant="outlined"
+              color="secondary"
+              class="mr-1 mb-1"
+            >
               {{ label }}
-            </d-badge>
+            </v-chip>
             <span
               style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
               {{ fold(item.Labels) }}

@@ -15,48 +15,55 @@
             <h6 class="m-0">Information</h6>
           </v-card-title>
           <v-card-text class="pa-0 pb-2">
-            <d-list-group flush>
-              <d-list-group-item class="p-3" v-if="current_item != null">
-                <d-row>
-                  <d-col sm="12" md="2">
+            <v-list>
+              <v-list-item class="p-3" v-if="current_item != null">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <label>Categories</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
-                    <d-badge outline theme="secondary" v-for="(category, idx) in current_item.Categories" :key="idx">
+                  </v-col>
+                  <v-col sm="12" md="10">
+                    <v-chip
+                      v-for="(category, idx) in current_item.Categories"
+                      :key="idx"
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                      class="mr-1 mb-1"
+                    >
                       {{ category }}
-                    </d-badge>
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="2">
+                    </v-chip>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col sm="12" md="2">
                     <label>Timestamp</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label class="text-light">{{
                       format_date_time(current_item.Timestamp)
                     }}</label>
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="2">
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col sm="12" md="2">
                     <label>Labels</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <div>
                       <highlightjs language='json' :code="stringify(current_item.Labels)" />
                     </div>
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="2">
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col sm="12" md="2">
                     <label>Description</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label class="text-light">{{ current_item.Comment }}</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>
@@ -70,26 +77,34 @@
             <h6 class="m-0">Item to Item Recommendations</h6>
           </v-card-title>
           <v-card-text class="border-bottom">
-            <d-row>
-              <d-col sm="6" md="6">
-                <d-input-group prepend="Recommender" class="mb-3">
-                  <d-select @change="changeRecommender" :value="recommender">
-                    <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
-                      {{ recommender }}
-                    </option>
-                  </d-select>
-                </d-input-group>
-              </d-col>
-              <d-col sm="6" md="6">
-                <d-input-group prepend="Categories" class="mb-3">
-                  <d-select @change="changeCategory">
-                    <option v-for="(category, idx) in categories" :key="idx" :value="category">
-                      {{ category }}
-                    </option>
-                  </d-select>
-                </d-input-group>
-              </d-col>
-            </d-row>
+            <v-row>
+              <v-col sm="6" md="6">
+                <div class="d-flex align-center flex-wrap mb-3">
+                  <v-chip size="small" variant="outlined" class="mr-2">Recommender</v-chip>
+                  <v-select
+                    :model-value="recommender"
+                    :items="recommenders"
+                    hide-details="auto"
+                    density="comfortable"
+                    class="flex-grow-1"
+                    @update:modelValue="changeRecommender"
+                  />
+                </div>
+              </v-col>
+              <v-col sm="6" md="6">
+                <div class="d-flex align-center flex-wrap mb-3">
+                  <v-chip size="small" variant="outlined" class="mr-2">Categories</v-chip>
+                  <v-select
+                    :model-value="category"
+                    :items="categories"
+                    hide-details="auto"
+                    density="comfortable"
+                    class="flex-grow-1"
+                    @update:modelValue="changeCategory"
+                  />
+                </div>
+              </v-col>
+            </v-row>
           </v-card-text>
           <v-card-text class="pa-0 pb-3">
             <v-table class="mb-0">
@@ -108,9 +123,16 @@
                   <td>{{ item.ItemId }}</td>
                   <td>
                     <div>
-                      <d-badge outline theme="secondary" v-for="(category, idx) in item.Categories" :key="idx">
+                      <v-chip
+                        v-for="(category, idx) in item.Categories"
+                        :key="idx"
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                        class="mr-1 mb-1"
+                      >
                         {{ category }}
-                      </d-badge>
+                      </v-chip>
                     </div>
                   </td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>

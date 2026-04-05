@@ -15,16 +15,24 @@
             <h6 class="m-0">Items</h6>
           </v-card-title>
           <v-card-text class="border-bottom">
-            <d-input-group>
-              <d-input id="item_id" placeholder="Item ID" v-model="item_id" @keyup.enter="search_item" />
-              <d-input-group-addon append>
+            <div class="d-flex align-center flex-wrap">
+              <v-text-field
+                id="item_id"
+                v-model="item_id"
+                placeholder="Item ID"
+                hide-details="auto"
+                density="comfortable"
+                class="flex-grow-1"
+                @keyup.enter="search_item"
+              />
+              <div class="d-flex align-center ml-2">
                 <v-btn variant="text" @click="search_item"><i class="material-icons">search</i></v-btn>
                 <v-btn variant="text" @click="previous_page"><i
                     class="material-icons">arrow_back_ios</i></v-btn>
                 <v-btn variant="text" @click="next_page"><i
                     class="material-icons">arrow_forward_ios</i></v-btn>
-              </d-input-group-addon>
-            </d-input-group>
+              </div>
+            </div>
           </v-card-text>
           <v-card-text class="pa-0 pb-3">
             <v-table class="mb-0">
@@ -44,13 +52,20 @@
                   <td>{{ item.ItemId }}</td>
                   <td>
                     <div>
-                      <d-badge outline theme="secondary" v-for="(category, idx) in item.Categories" :key="idx">
+                      <v-chip
+                        v-for="(category, idx) in item.Categories"
+                        :key="idx"
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                        class="mr-1 mb-1"
+                      >
                         {{ category }}
-                      </d-badge>
+                      </v-chip>
                     </div>
                   </td>
                   <td>
-                    <d-checkbox :checked="item.IsHidden" disabled="true" />
+                    <v-checkbox :model-value="item.IsHidden" disabled hide-details="auto" density="comfortable" />
                   </td>
                   <td>{{ format_date_time(item.Timestamp) }}</td>
                   <td>
@@ -76,24 +91,26 @@
       </v-col>
     </v-row>
 
-    <d-modal v-if="showDialog" @close="showDialog = false" centered>
-      <d-modal-header>
-        <d-modal-title>Delete Item</d-modal-title>
-      </d-modal-header>
-      <d-modal-body>
-        <div class="mb-3">Are you sure to delete item <span style="font-weight: bold">{{ deleteItemId }}</span>? Please
-          type the ID of the deleted item.</div>
-        <d-input-group>
-          <d-input v-model="confirmItemId" />
-          <d-input-group-addon append>
-            <v-btn color="error" variant="outlined" @click="delete_item">
-              <i class="material-icons">delete</i>
-            </v-btn>
-          </d-input-group-addon>
-        </d-input-group>
-        <span style="color: red">{{ deleteItemError }}</span>
-      </d-modal-body>
-    </d-modal>
+    <v-dialog v-model="showDialog" max-width="640">
+      <v-card class="card" variant="flat">
+        <v-card-title>
+          <h5 class="m-0">Delete Item</h5>
+        </v-card-title>
+        <v-card-text>
+          <div class="mb-3">Are you sure to delete item <span style="font-weight: bold">{{ deleteItemId }}</span>? Please
+            type the ID of the deleted item.</div>
+          <div class="d-flex align-center flex-wrap">
+            <v-text-field v-model="confirmItemId" hide-details="auto" density="comfortable" class="flex-grow-1" />
+            <div class="d-flex align-center ml-2">
+              <v-btn color="error" variant="outlined" @click="delete_item">
+                <i class="material-icons">delete</i>
+              </v-btn>
+            </div>
+          </div>
+          <span style="color: red">{{ deleteItemError }}</span>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 

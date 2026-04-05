@@ -16,46 +16,46 @@
             <h6 class="m-0">Data Export</h6>
           </v-card-title>
           <v-card-text class="pa-0 pb-3">
-            <d-list-group flush>
-              <d-list-group-item class="p-3">
-                <d-row>
-                  <d-col sm="12" md="2">
+            <v-list>
+              <v-list-item class="p-3">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <a :href="'/api/bulk/users'">
                       <v-btn class="advance_button" variant="outlined">&nbsp;&nbsp;&nbsp;Export
                         Users&nbsp;&nbsp;&nbsp;</v-btn>
                     </a>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label>Export users into JSON lines.</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-              <d-list-group-item class="p-3">
-                <d-row>
-                  <d-col sm="12" md="2">
+                  </v-col>
+                </v-row>
+              </v-list-item>
+              <v-list-item class="p-3">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <a :href="'/api/bulk/items'">
                       <v-btn class="advance_button" variant="outlined">&nbsp;&nbsp;&nbsp;Export
                         Items&nbsp;&nbsp;&nbsp;</v-btn>
                     </a>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label>Export items into JSON lines.</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-              <d-list-group-item class="p-3">
-                <d-row>
-                  <d-col sm="12" md="2">
+                  </v-col>
+                </v-row>
+              </v-list-item>
+              <v-list-item class="p-3">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <a :href="'/api/bulk/feedback'">
                       <v-btn variant="outlined">Export Feedback</v-btn>
                     </a>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label>Export feedbacks into JSON lines.</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>
@@ -68,46 +68,46 @@
             <h6 class="m-0">Data Import</h6>
           </v-card-title>
           <v-card-text class="pa-0 pb-3">
-            <d-list-group flush>
-              <d-list-group-item class="p-3">
-                <d-row>
-                  <d-col sm="12" md="2">
+            <v-list>
+              <v-list-item class="p-3">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <router-link :to="{ name: 'import_users' }">
                       <v-btn variant="outlined">&nbsp;&nbsp;&nbsp;Import
                         Users&nbsp;&nbsp;&nbsp;</v-btn>
                     </router-link>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label>Import users into gorse.</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-              <d-list-group-item class="p-3">
-                <d-row>
-                  <d-col sm="12" md="2">
+                  </v-col>
+                </v-row>
+              </v-list-item>
+              <v-list-item class="p-3">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <router-link :to="{ name: 'import_items' }">
                       <v-btn variant="outlined">&nbsp;&nbsp;&nbsp;Import
                         Items&nbsp;&nbsp;&nbsp;</v-btn>
                     </router-link>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label>Import items into gorse.</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-              <d-list-group-item class="p-3">
-                <d-row>
-                  <d-col sm="12" md="2">
+                  </v-col>
+                </v-row>
+              </v-list-item>
+              <v-list-item class="p-3">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <router-link :to="{ name: 'import_feedback' }">
                       <v-btn variant="outlined">Import Feedback</v-btn>
                     </router-link>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label>Import feedbacks into gorse.</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>
@@ -120,38 +120,40 @@
             <h6 class="m-0">Danger Zone</h6>
           </v-card-title>
           <v-card-text class="pa-0 pb-3">
-            <d-list-group flush>
-              <d-list-group-item class="p-3">
-                <d-row>
-                  <d-col sm="12" md="2">
+            <v-list>
+              <v-list-item class="p-3">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <v-btn variant="outlined" color="error" @click="handleClick">&nbsp;Purge
                       Database&nbsp;</v-btn>
-                    <d-modal v-if="showDialog" @close="handleClose" centered>
-                      <d-modal-header>
-                        <d-modal-title>Are you absolutely sure?</d-modal-title>
-                      </d-modal-header>
-                      <d-modal-body>
+                    <v-dialog v-model="showDialog" max-width="640">
+                      <v-card class="card" variant="flat">
+                        <v-card-title>
+                          <h5 class="m-0">Are you absolutely sure?</h5>
+                        </v-card-title>
+                        <v-card-text>
                         <label>This action <span style="color: red; font-weight: bold">cannot</span> be undone. This
                           will permanently:</label>
-                        <d-checkbox v-model="checkList" value="delete_users">Delete all users.</d-checkbox>
-                        <d-checkbox v-model="checkList" value="delete_items">Delete all items.</d-checkbox>
-                        <d-checkbox v-model="checkList" value="delete_feedback">Delete all feedbacks.</d-checkbox>
-                        <d-checkbox v-model="checkList" value="delete_cache">Delete all caches.</d-checkbox>
-                        <d-alert :theme="alertTheme" :show="showAlert">{{ alertMessage }}</d-alert>
+                        <v-checkbox v-model="checkList" value="delete_users" label="Delete all users." hide-details="auto" density="comfortable" />
+                        <v-checkbox v-model="checkList" value="delete_items" label="Delete all items." hide-details="auto" density="comfortable" />
+                        <v-checkbox v-model="checkList" value="delete_feedback" label="Delete all feedbacks." hide-details="auto" density="comfortable" />
+                        <v-checkbox v-model="checkList" value="delete_cache" label="Delete all caches." hide-details="auto" density="comfortable" />
+                        <v-alert v-if="showAlert" :color="alertTheme === 'danger' ? 'error' : alertTheme" variant="tonal" class="mt-2">{{ alertMessage }}</v-alert>
                         <v-btn variant="outlined" color="error" @click="purge" :disabled="disableDialog">
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                           I understand the consequences, purge all data
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         </v-btn>
-                      </d-modal-body>
-                    </d-modal>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                        </v-card-text>
+                      </v-card>
+                    </v-dialog>
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label>Purge all data in data storage and cache storage.</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>
@@ -179,9 +181,6 @@ export default {
       this.showAlert = false;
       this.disableDialog = false;
       this.checkList = [];
-    },
-    handleClose() {
-      this.showDialog = false;
     },
     purge() {
       this.disableDialog = true;

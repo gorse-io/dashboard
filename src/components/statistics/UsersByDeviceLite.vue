@@ -8,8 +8,8 @@
 
     <v-card-text class="pa-0">
       <!-- Top Referrals List Group -->
-      <d-list-group flush class="list-group-small">
-        <d-list-group-item
+      <v-list class="list-group-small">
+        <v-list-item
           v-for="(item, idx) in items"
           :key="idx"
           class="d-flex px-3"
@@ -18,8 +18,8 @@
           <span class="ms-auto text-end text-semibold text-reagent-gray"
             >{{ format(query(item.key)) }}</span
           >
-        </d-list-group-item>
-      </d-list-group>
+        </v-list-item>
+      </v-list>
     </v-card-text>
     <v-card-actions> </v-card-actions>
   </v-card>

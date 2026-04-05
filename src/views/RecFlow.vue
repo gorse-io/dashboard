@@ -50,8 +50,13 @@
       </v-col>
     </v-row>
 
-    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
-      @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
+    <v-alert
+      v-if="timeUntilDismissed > 0"
+      :color="alertTheme === 'danger' ? 'error' : alertTheme"
+      variant="tonal"
+      closable
+      @click:close="clearAlertCountdown"
+    >{{ alertText }}</v-alert>
 
     <!-- LogicFlow Container -->
     <v-card class="h-100 position-relative mb-4">
@@ -62,33 +67,57 @@
     </v-card>
 
     <!-- Node Property Modal -->
-    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered
-      :size="(nodeForm.type === 'external' || nodeForm.type === 'ranker') ? 'lg' : null">
-      <d-modal-header>
-        <d-modal-title>{{ modalTitle }}</d-modal-title>
-      </d-modal-header>
-      <d-modal-body>
-        <d-form @submit.prevent="updateNode">
+    <v-dialog
+      v-model="showNodeModal"
+      :max-width="(nodeForm.type === 'external' || nodeForm.type === 'ranker') ? 1100 : 640"
+      @update:modelValue="(value) => { if (!value) closeNodeModal(); }"
+    >
+      <v-card class="card" variant="flat">
+        <v-card-title>
+          <h5 class="m-0">{{ modalTitle }}</h5>
+        </v-card-title>
+        <v-card-text>
+        <v-form @submit.prevent="updateNode">
           <!-- Data Source Specific Properties -->
           <template v-if="nodeForm.type === 'data-source'">
             <div class="mb-4">
               <label>Positive Feedback Types (comma separated)</label>
-              <d-input :value="nodeForm.properties.positive_feedback_types.join(',')"
-                @input="val => nodeForm.properties.positive_feedback_types = val.split(',').map(s => s.trim())" />
+              <v-text-field
+                :model-value="nodeForm.properties.positive_feedback_types.join(',')"
+                hide-details="auto"
+                density="comfortable"
+                @update:modelValue="val => nodeForm.properties.positive_feedback_types = String(val ?? '').split(',').map(s => s.trim())"
+              />
             </div>
             <div class="mb-4">
               <label>Read Feedback Types (comma separated)</label>
-              <d-input :value="nodeForm.properties.read_feedback_types.join(',')"
-                @input="val => nodeForm.properties.read_feedback_types = val.split(',').map(s => s.trim())" />
+              <v-text-field
+                :model-value="nodeForm.properties.read_feedback_types.join(',')"
+                hide-details="auto"
+                density="comfortable"
+                @update:modelValue="val => nodeForm.properties.read_feedback_types = String(val ?? '').split(',').map(s => s.trim())"
+              />
             </div>
             <v-row>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Positive Feedback TTL</label>
-                <d-input type="number" v-model.number="nodeForm.properties.positive_feedback_ttl" />
+                <v-text-field
+                  type="number"
+                  :model-value="nodeForm.properties.positive_feedback_ttl"
+                  hide-details="auto"
+                  density="comfortable"
+                  @update:modelValue="val => nodeForm.properties.positive_feedback_ttl = normalizeNumber(val)"
+                />
               </v-col>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Item TTL</label>
-                <d-input type="number" v-model.number="nodeForm.properties.item_ttl" />
+                <v-text-field
+                  type="number"
+                  :model-value="nodeForm.properties.item_ttl"
+                  hide-details="auto"
+                  density="comfortable"
+                  @update:modelValue="val => nodeForm.properties.item_ttl = normalizeNumber(val)"
+                />
               </v-col>
             </v-row>
           </template>
@@ -98,11 +127,11 @@
             v-if="nodeForm.type === 'fallback' && nodeForm.properties.recommenders && nodeForm.properties.recommenders.length">
             <div class="mb-4">
               <label>Recommenders</label>
-              <d-list-group>
-                <d-list-group-item v-for="(rec, index) in nodeForm.properties.recommenders" :key="rec"
+              <v-list>
+                <v-list-item v-for="(rec, index) in nodeForm.properties.recommenders" :key="rec"
                   class="d-flex align-items-center border">
                   <span class="me-auto">{{ rec }}</span>
-                  <d-input-group-addon append>
+                  <div class="d-flex align-center ml-2">
                     <v-btn variant="text" @click="moveRecommender(index, -1)" :disabled="index === 0">
                       <i class="material-icons">arrow_upward</i>
                     </v-btn>
@@ -110,9 +139,9 @@
                       :disabled="index === nodeForm.properties.recommenders.length - 1">
                       <i class="material-icons">arrow_downward</i>
                     </v-btn>
-                  </d-input-group-addon>
-                </d-list-group-item>
-              </d-list-group>
+                  </div>
+                </v-list-item>
+              </v-list>
             </div>
           </template>
 
@@ -121,21 +150,39 @@
             <v-row>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Cache Size</label>
-                <d-input type="number" v-model.number="nodeForm.properties.cache_size" />
+                <v-text-field
+                  type="number"
+                  :model-value="nodeForm.properties.cache_size"
+                  hide-details="auto"
+                  density="comfortable"
+                  @update:modelValue="val => nodeForm.properties.cache_size = normalizeNumber(val)"
+                />
               </v-col>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Cache Expire</label>
-                <d-input v-model="nodeForm.properties.cache_expire" />
+                <v-text-field v-model="nodeForm.properties.cache_expire" hide-details="auto" density="comfortable" />
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Active User TTL</label>
-                <d-input type="number" v-model.number="nodeForm.properties.active_user_ttl" />
+                <v-text-field
+                  type="number"
+                  :model-value="nodeForm.properties.active_user_ttl"
+                  hide-details="auto"
+                  density="comfortable"
+                  @update:modelValue="val => nodeForm.properties.active_user_ttl = normalizeNumber(val)"
+                />
               </v-col>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Context Size</label>
-                <d-input type="number" v-model.number="nodeForm.properties.context_size" />
+                <v-text-field
+                  type="number"
+                  :model-value="nodeForm.properties.context_size"
+                  hide-details="auto"
+                  density="comfortable"
+                  @update:modelValue="val => nodeForm.properties.context_size = normalizeNumber(val)"
+                />
               </v-col>
             </v-row>
           </template>
@@ -144,10 +191,7 @@
           <template v-if="nodeForm.type === 'ranker'">
             <div class="mb-4">
               <label>Type</label>
-              <d-select v-model="nodeForm.properties.type">
-                <option value="fm">FM</option>
-                <option value="llm">LLM</option>
-              </d-select>
+              <v-select v-model="nodeForm.properties.type" :items="['fm', 'llm']" hide-details="auto" density="comfortable" />
             </div>
             <div class="mb-4" v-if="nodeForm.properties.type === 'llm'">
               <v-row>
@@ -175,14 +219,20 @@
                 </v-col>
                 <v-col cols="12" md="6" class="pb-2">
                   <label>Preview</label>
-                  <d-input-group>
-                    <d-input placeholder="User ID" v-model="rankerPreviewUserId" />
-                    <d-input-group-addon append>
+                  <div class="d-flex align-center flex-wrap">
+                    <v-text-field
+                      placeholder="User ID"
+                      v-model="rankerPreviewUserId"
+                      hide-details="auto"
+                      density="comfortable"
+                      class="flex-grow-1"
+                    />
+                    <div class="d-flex align-center ml-2">
                       <v-btn type="button" color="primary" @click="previewRanker" :disabled="rankerPreviewLoading">
                         <i class="material-icons">play_arrow</i>
                       </v-btn>
-                    </d-input-group-addon>
-                  </d-input-group>
+                    </div>
+                  </div>
                   <v-textarea
                     :model-value="rankerPreviewResult || ''"
                     rows="16"
@@ -195,38 +245,56 @@
                 </v-col>
               </v-row>
               <div class="mb-4" v-if="rankerPreviewError">
-                <d-alert theme="danger" show class="mt-2">{{ rankerPreviewError }}</d-alert>
+                <v-alert color="error" variant="tonal" class="mt-2">{{ rankerPreviewError }}</v-alert>
               </div>
             </div>
             <template v-else>
               <v-row>
                 <v-col cols="12" md="6" class="pb-2">
                   <label>Fit Period</label>
-                  <d-input v-model="nodeForm.properties.fit_period" />
+                  <v-text-field v-model="nodeForm.properties.fit_period" hide-details="auto" density="comfortable" />
                 </v-col>
                 <v-col cols="12" md="6" class="pb-2">
                   <label>Fit Epoch</label>
-                  <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
+                  <v-text-field
+                    type="number"
+                    :model-value="nodeForm.properties.fit_epoch"
+                    hide-details="auto"
+                    density="comfortable"
+                    @update:modelValue="val => nodeForm.properties.fit_epoch = normalizeNumber(val)"
+                  />
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="12" md="6" class="pb-2">
                   <label>Optimize Period</label>
-                  <d-input v-model="nodeForm.properties.optimize_period" />
+                  <v-text-field v-model="nodeForm.properties.optimize_period" hide-details="auto" density="comfortable" />
                 </v-col>
                 <v-col cols="12" md="6" class="pb-2">
                   <label>Optimize Trials</label>
-                  <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
+                  <v-text-field
+                    type="number"
+                    :model-value="nodeForm.properties.optimize_trials"
+                    hide-details="auto"
+                    density="comfortable"
+                    @update:modelValue="val => nodeForm.properties.optimize_trials = normalizeNumber(val)"
+                  />
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="12" md="6" class="pb-2">
                   <label>Cache Expire</label>
-                  <d-input v-model="nodeForm.properties.cache_expire" />
+                  <v-text-field v-model="nodeForm.properties.cache_expire" hide-details="auto" density="comfortable" />
                 </v-col>
                 <v-col cols="12" md="6" class="pb-2">
                   <label>Early Stopping Patience</label>
-                  <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
+                  <v-text-field
+                    type="number"
+                    :model-value="nodeForm.properties.early_stopping.patience"
+                    hide-details="auto"
+                    density="comfortable"
+                    @update:modelValue="val => nodeForm.properties.early_stopping.patience = normalizeNumber(val)"
+                  />
                 </v-col>
               </v-row>
             </template>
@@ -237,26 +305,44 @@
             <v-row>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Fit Period</label>
-                <d-input v-model="nodeForm.properties.fit_period" />
+                <v-text-field v-model="nodeForm.properties.fit_period" hide-details="auto" density="comfortable" />
               </v-col>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Fit Epoch</label>
-                <d-input type="number" v-model.number="nodeForm.properties.fit_epoch" />
+                <v-text-field
+                  type="number"
+                  :model-value="nodeForm.properties.fit_epoch"
+                  hide-details="auto"
+                  density="comfortable"
+                  @update:modelValue="val => nodeForm.properties.fit_epoch = normalizeNumber(val)"
+                />
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Optimize Period</label>
-                <d-input v-model="nodeForm.properties.optimize_period" />
+                <v-text-field v-model="nodeForm.properties.optimize_period" hide-details="auto" density="comfortable" />
               </v-col>
               <v-col cols="12" md="6" class="pb-2">
                 <label>Optimize Trials</label>
-                <d-input type="number" v-model.number="nodeForm.properties.optimize_trials" />
+                <v-text-field
+                  type="number"
+                  :model-value="nodeForm.properties.optimize_trials"
+                  hide-details="auto"
+                  density="comfortable"
+                  @update:modelValue="val => nodeForm.properties.optimize_trials = normalizeNumber(val)"
+                />
               </v-col>
             </v-row>
             <div class="mb-4">
               <label>Early Stopping Patience</label>
-              <d-input type="number" v-model.number="nodeForm.properties.early_stopping.patience" />
+              <v-text-field
+                type="number"
+                :model-value="nodeForm.properties.early_stopping.patience"
+                hide-details="auto"
+                density="comfortable"
+                @update:modelValue="val => nodeForm.properties.early_stopping.patience = normalizeNumber(val)"
+              />
             </div>
           </template>
 
@@ -264,15 +350,15 @@
           <template v-if="nodeForm.type === 'non-personalized'">
             <div class="mb-4">
               <label>Name</label>
-              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
+              <v-text-field v-model="nodeForm.properties.name" hide-details="auto" density="comfortable" @update:modelValue="syncNodeName" />
             </div>
             <div class="mb-4">
               <label>Score Formula</label>
-              <d-input v-model="nodeForm.properties.score" />
+              <v-text-field v-model="nodeForm.properties.score" hide-details="auto" density="comfortable" />
             </div>
             <div class="mb-4">
               <label>Filter Expression</label>
-              <d-input v-model="nodeForm.properties.filter" />
+              <v-text-field v-model="nodeForm.properties.filter" hide-details="auto" density="comfortable" />
             </div>
           </template>
 
@@ -280,20 +366,16 @@
           <template v-if="nodeForm.type === 'user-to-user'">
             <div class="mb-4">
               <label>Name</label>
-              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
+              <v-text-field v-model="nodeForm.properties.name" hide-details="auto" density="comfortable" @update:modelValue="syncNodeName" />
             </div>
             <div class="mb-4">
               <label>Type</label>
-              <d-select v-model="nodeForm.properties.type">
-                <option value="embedding">Embedding</option>
-                <option value="tags">Tags</option>
-                <option value="items">Items</option>
-              </d-select>
+              <v-select v-model="nodeForm.properties.type" :items="['embedding', 'tags', 'items']" hide-details="auto" density="comfortable" />
             </div>
             <div class="mb-4"
               v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
               <label>Column</label>
-              <d-input v-model="nodeForm.properties.column" />
+              <v-text-field v-model="nodeForm.properties.column" hide-details="auto" density="comfortable" />
             </div>
           </template>
 
@@ -301,20 +383,16 @@
           <template v-if="nodeForm.type === 'item-to-item'">
             <div class="mb-4">
               <label>Name</label>
-              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
+              <v-text-field v-model="nodeForm.properties.name" hide-details="auto" density="comfortable" @update:modelValue="syncNodeName" />
             </div>
             <div class="mb-4">
               <label>Type</label>
-              <d-select v-model="nodeForm.properties.type">
-                <option value="embedding">Embedding</option>
-                <option value="tags">Tags</option>
-                <option value="users">Users</option>
-              </d-select>
+              <v-select v-model="nodeForm.properties.type" :items="['embedding', 'tags', 'users']" hide-details="auto" density="comfortable" />
             </div>
             <div class="mb-4"
               v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
               <label>Column</label>
-              <d-input v-model="nodeForm.properties.column" />
+              <v-text-field v-model="nodeForm.properties.column" hide-details="auto" density="comfortable" />
             </div>
           </template>
 
@@ -322,7 +400,7 @@
           <template v-if="nodeForm.type === 'external'">
             <div class="mb-4">
               <label>Name</label>
-              <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
+              <v-text-field v-model="nodeForm.properties.name" hide-details="auto" density="comfortable" @update:modelValue="syncNodeName" />
             </div>
             <div class="mb-4">
               <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank"
@@ -331,20 +409,20 @@
               <small class="text-muted" v-if="monacoError">{{ monacoError }}</small>
             </div>
             <div class="mb-4">
-              <d-input-group>
-                <d-input placeholder="User ID" v-model="previewUserId" />
-                <d-input-group-addon append>
+              <div class="d-flex align-center flex-wrap">
+                <v-text-field placeholder="User ID" v-model="previewUserId" hide-details="auto" density="comfortable" class="flex-grow-1" />
+                <div class="d-flex align-center ml-2">
                   <v-btn type="button" color="primary" @click="runExternalScript" :disabled="previewLoading">
                     <i class="material-icons">play_arrow</i>
                   </v-btn>
-                </d-input-group-addon>
-              </d-input-group>
+                </div>
+              </div>
             </div>
             <div class="mb-4" v-if="previewResult || previewError">
               <label>Result</label>
               <pre class="bg-light p-2 rounded border" v-if="!previewError"
                 style="max-height: 200px; overflow: auto;">{{ previewResult }}</pre>
-              <d-alert theme="danger" show v-else>{{ previewError }}</d-alert>
+              <v-alert v-else color="error" variant="tonal">{{ previewError }}</v-alert>
             </div>
           </template>
 
@@ -354,16 +432,18 @@
               <v-btn type="submit" color="primary">Save</v-btn>
             </div>
           </div>
-        </d-form>
-      </d-modal-body>
-    </d-modal>
+        </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <!-- Export Modal -->
-    <d-modal v-if="showExportModal" @close="showExportModal = false" centered>
-      <d-modal-header>
-        <d-modal-title>Export TOML</d-modal-title>
-      </d-modal-header>
-      <d-modal-body>
+    <v-dialog v-model="showExportModal" max-width="640">
+      <v-card class="card" variant="flat">
+        <v-card-title>
+          <h5 class="m-0">Export TOML</h5>
+        </v-card-title>
+        <v-card-text>
         <v-textarea
           v-model="exportData"
           rows="15"
@@ -375,8 +455,9 @@
           <v-btn class="me-2" color="white" @click="copyExportData">Copy</v-btn>
           <v-btn color="primary" @click="showExportModal = false">Close</v-btn>
         </div>
-      </d-modal-body>
-    </d-modal>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -482,6 +563,7 @@ export default {
       alertText: null,
       duration: 5,
       timeUntilDismissed: 0,
+      alertTimerId: null,
       nodeForm: {
         id: '',
         type: '',
@@ -687,17 +769,40 @@ export default {
       console.error(error);
     });
   },
+  beforeUnmount() {
+    this.clearAlertCountdown();
+    this.disposeMonaco();
+  },
   methods: {
-    handleTimeChange(time) {
-      this.timeUntilDismissed = time;
+    normalizeNumber(value) {
+      const converted = Number(value);
+      return Number.isNaN(converted) ? value : converted;
+    },
+    startAlertCountdown(seconds) {
+      this.clearAlertCountdown();
+      this.timeUntilDismissed = seconds;
+      this.alertTimerId = setInterval(() => {
+        if (this.timeUntilDismissed <= 1) {
+          this.clearAlertCountdown();
+          return;
+        }
+        this.timeUntilDismissed -= 1;
+      }, 1000);
+    },
+    clearAlertCountdown() {
+      if (this.alertTimerId) {
+        clearInterval(this.alertTimerId);
+        this.alertTimerId = null;
+      }
+      this.timeUntilDismissed = 0;
     },
     showDanger(message) {
-      this.timeUntilDismissed = this.duration;
+      this.startAlertCountdown(this.duration);
       this.alertTheme = 'danger';
       this.alertText = message;
     },
     showSuccess(message) {
-      this.timeUntilDismissed = this.duration;
+      this.startAlertCountdown(this.duration);
       this.alertTheme = 'success';
       this.alertText = message;
     },

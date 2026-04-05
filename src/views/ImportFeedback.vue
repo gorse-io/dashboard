@@ -7,8 +7,13 @@
         <h3 class="page-title">Import Feedback</h3>
       </v-col>
     </v-row>
-    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
-      @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
+    <v-alert
+      v-if="timeUntilDismissed > 0"
+      :color="alertColor"
+      variant="tonal"
+      closable
+      @click:close="clearAlertCountdown"
+    >{{ alertText }}</v-alert>
     <v-row>
       <v-col cols="12">
         <v-card class="mb-4">
@@ -74,6 +79,7 @@ export default {
       alertText: null,
       duration: 5,
       timeUntilDismissed: 0,
+      alertTimerId: null,
       columnNames: [
         'FeedbackType',
         'UserId',
@@ -83,6 +89,14 @@ export default {
       ],
       rows: [],
     };
+  },
+  computed: {
+    alertColor() {
+      return this.alertTheme === 'danger' ? 'error' : this.alertTheme;
+    },
+  },
+  beforeUnmount() {
+    this.clearAlertCountdown();
   },
   methods: {
     loadFile(fileValue) {
@@ -108,16 +122,31 @@ export default {
       }
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
-    handleTimeChange(time) {
-      this.timeUntilDismissed = time;
+    startAlertCountdown(seconds) {
+      this.clearAlertCountdown();
+      this.timeUntilDismissed = seconds;
+      this.alertTimerId = setInterval(() => {
+        if (this.timeUntilDismissed <= 1) {
+          this.clearAlertCountdown();
+          return;
+        }
+        this.timeUntilDismissed -= 1;
+      }, 1000);
+    },
+    clearAlertCountdown() {
+      if (this.alertTimerId) {
+        clearInterval(this.alertTimerId);
+        this.alertTimerId = null;
+      }
+      this.timeUntilDismissed = 0;
     },
     showDanger(mesage) {
-      this.timeUntilDismissed = this.duration;
+      this.startAlertCountdown(this.duration);
       this.alertTheme = 'danger';
       this.alertText = mesage;
     },
     showSuccess(mesage) {
-      this.timeUntilDismissed = this.duration;
+      this.startAlertCountdown(this.duration);
       this.alertTheme = 'success';
       this.alertText = mesage;
     },

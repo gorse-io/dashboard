@@ -1,5 +1,5 @@
 <template>
-  <d-container fluid class="main-content-container px-4 pb-4">
+  <v-container fluid class="main-content-container px-4 pb-4">
     <!-- Error -->
     <div class="error">
       <div class="error__content">
@@ -9,5 +9,5 @@
         <v-btn rounded="pill">&larr; Go Back</v-btn>
       </div>
     </div>
-  </d-container>
+  </v-container>
 </template>

@@ -7,13 +7,16 @@
     </v-card-title>
 
     <v-card-text class="border-bottom">
-      <d-input-group prepend="Categories" class="mb-3">
-        <d-select @change="changeCategory">
-          <option v-for="(category, idx) in categories" :key="idx" :value="category">
-            {{ category }}
-          </option>
-        </d-select>
-      </d-input-group>
+      <div class="d-flex align-center flex-wrap mb-3">
+        <v-chip size="small" variant="outlined" class="mr-2">Categories</v-chip>
+        <v-select
+          :items="categories"
+          hide-details="auto"
+          density="comfortable"
+          class="flex-grow-1"
+          @update:modelValue="changeCategory"
+        />
+      </div>
     </v-card-text>
 
     <v-card-text class="pa-0">
@@ -33,12 +36,26 @@
 
           <!-- Content - Actions -->
           <div class="blog-comments__actions">
-            <d-badge outline theme="secondary" v-for="(label, idx) in item.Categories" :key="idx">
+            <v-chip
+              v-for="(label, idx) in item.Categories"
+              :key="idx"
+              size="small"
+              variant="outlined"
+              color="secondary"
+              class="mr-1 mb-1"
+            >
               {{ label }}
-            </d-badge>
-            <d-badge outline theme="primary" v-for="(label, idx) in item.Labels" :key="idx">
+            </v-chip>
+            <v-chip
+              v-for="(label, idx) in item.Labels"
+              :key="idx"
+              size="small"
+              variant="outlined"
+              color="primary"
+              class="mr-1 mb-1"
+            >
               {{ label }}
-            </d-badge>
+            </v-chip>
           </div>
 
           <p class="m-0 my-0 mb-0 text-muted text-semibold" style="font-size: 80%">

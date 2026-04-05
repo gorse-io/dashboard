@@ -15,28 +15,28 @@
             <h6 class="m-0">Information</h6>
           </v-card-title>
           <v-card-text class="pa-0 pb-3">
-            <d-list-group flush>
-              <d-list-group-item class="p-3" v-if="current_user != null">
-                <d-row>
-                  <d-col sm="12" md="2">
+            <v-list>
+              <v-list-item class="p-3" v-if="current_user != null">
+                <v-row>
+                  <v-col sm="12" md="2">
                     <label>Labels</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <div>
                       <highlightjs language='json' :code="JSON.stringify(current_user.Labels, null, 2)" />
                     </div>
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="2">
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col sm="12" md="2">
                     <label>Description</label>
-                  </d-col>
-                  <d-col sm="12" md="10">
+                  </v-col>
+                  <v-col sm="12" md="10">
                     <label class="text-light">{{ current_user.Comment }}</label>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </v-list>
           </v-card-text>
         </v-card>
       </v-col>
@@ -50,17 +50,21 @@
             <h6 class="m-0">User to User</h6>
           </v-card-title>
           <v-card-text class="border-bottom">
-            <d-row>
-              <d-col sm="12" md="12">
-                <d-input-group prepend="Recommender" class="mb-3">
-                  <d-select @change="changeRecommender" :value="recommender">
-                    <option v-for="(recommender, idx) in recommenders" :key="idx" :value="recommender">
-                      {{ recommender }}
-                    </option>
-                  </d-select>
-                </d-input-group>
-              </d-col>
-            </d-row>
+            <v-row>
+              <v-col sm="12" md="12">
+                <div class="d-flex align-center flex-wrap mb-3">
+                  <v-chip size="small" variant="outlined" class="mr-2">Recommender</v-chip>
+                  <v-select
+                    :model-value="recommender"
+                    :items="recommenders"
+                    hide-details="auto"
+                    density="comfortable"
+                    class="flex-grow-1"
+                    @update:modelValue="changeRecommender"
+                  />
+                </div>
+              </v-col>
+            </v-row>
           </v-card-text>
           <v-card-text class="pa-0">
             <v-table class="mb-0">
