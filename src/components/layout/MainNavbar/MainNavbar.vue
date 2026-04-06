@@ -82,11 +82,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.main-navbar {
-  .dropdown-menu {
-    display: block;
-  }
-}
-</style>
