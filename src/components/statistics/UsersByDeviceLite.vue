@@ -28,8 +28,7 @@
 <script>
 import axios from 'axios';
 import moment from 'moment';
-
-const jsonPath = require('jsonpath');
+import jsonPath from 'jsonpath';
 
 export default {
   name: 'users-by-device',

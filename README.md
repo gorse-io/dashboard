@@ -8,11 +8,12 @@ An admin dashboard for gorse recommender system derived from [shards-dashboard-v
 
 ## Quick Start
 
-1. Install Node 18 and `yarn`.
-2. Install dependencies by running `yarn`.
-3. Run `yarn serve` to start the local development server.
+1. Install Node 18+ and `pnpm`.
+2. Install dependencies by running `pnpm install`.
+3. Run `pnpm dev` to start the local development server.
+4. Run `pnpm build` to create a production bundle.
 
-> - The build might fail if you are using newer versions of Node.
+> - For Node 24+, legacy transitive dependency build scripts are skipped automatically via `pnpm.neverBuiltDependencies`.
 > - [Node Version Manager](http://nvm.sh/) is recommended for managing multiple Node versions on a single machine.
 
 ## Usage
