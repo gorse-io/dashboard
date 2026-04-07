@@ -77,6 +77,11 @@
                 @input="val => nodeForm.properties.positive_feedback_types = val.split(',').map(s => s.trim())" />
             </div>
             <div class="form-group">
+              <label>Negative Feedback Types (comma separated)</label>
+              <d-input :value="nodeForm.properties.negative_feedback_types.join(',')"
+                @input="val => nodeForm.properties.negative_feedback_types = val.split(',').map(s => s.trim())" />
+            </div>
+            <div class="form-group">
               <label>Read Feedback Types (comma separated)</label>
               <d-input :value="nodeForm.properties.read_feedback_types.join(',')"
                 @input="val => nodeForm.properties.read_feedback_types = val.split(',').map(s => s.trim())" />
@@ -960,6 +965,9 @@ export default {
       if (data.type === 'data-source') {
         if (!Array.isArray(properties.positive_feedback_types)) {
           properties.positive_feedback_types = [];
+        }
+        if (!Array.isArray(properties.negative_feedback_types)) {
+          properties.negative_feedback_types = [];
         }
         if (!Array.isArray(properties.read_feedback_types)) {
           properties.read_feedback_types = [];

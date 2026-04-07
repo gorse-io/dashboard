@@ -53,7 +53,7 @@ export default {
         this.cacheSize = response.data.recommend.cache_size;
 
         // List all feedback types
-        this.feedbackTypes = [''].concat(response.data.recommend.data_source.positive_feedback_types).concat(response.data.recommend.data_source.read_feedback_types);
+        this.feedbackTypes = [''].concat(response.data.recommend.data_source.positive_feedback_types).concat(response.data.recommend.data_source.negative_feedback_types || []).concat(response.data.recommend.data_source.read_feedback_types);
 
         // List all recommenders
         const recommenders = ['', 'latest', 'collaborative'];

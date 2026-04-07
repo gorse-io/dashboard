@@ -57,6 +57,7 @@ export default {
       timeseriesPercentages: new Array(timeseriesName.length).fill('0'),
       timeseriesIncrease: new Array(timeseriesName.length).fill(true),
       positiveFeedbackTypes: [],
+      negativeFeedbackTypes: [],
     };
   },
   mounted() {
@@ -67,6 +68,7 @@ export default {
     })
       .then((response) => {
         this.positiveFeedbackTypes = response.data.recommend.data_source.positive_feedback_types;
+        this.negativeFeedbackTypes = response.data.recommend.data_source.negative_feedback_types || [];
         this.cacheSize = response.data.database.cache_size;
         this.nonPersonalized = ['latest'];
         response.data.recommend['non-personalized'].forEach((recommender) => {
