@@ -1,5 +1,7 @@
 <template>
-  <aside :class="['main-sidebar', 'col-12', 'col-md-3', 'col-lg-2', 'px-0', sidebarVisible ? 'open' : '']">
+  <div>
+    <div v-if="sidebarVisible" class="sidebar-backdrop d-md-none" @click="closeSidebar" />
+    <aside :class="['main-sidebar', 'col-12', 'col-md-3', 'col-lg-2', 'px-0', sidebarVisible ? 'open' : '']">
       <div class="main-navbar">
         <nav class="navbar align-items-stretch navbar-light bg-white flex-md-nowrap border-bottom p-0">
           <a class="navbar-brand w-100 mr-0" href="#" style="line-height: 25px;">
@@ -9,7 +11,7 @@
             </div>
           </a>
           <a class="toggle-sidebar d-sm-inline d-md-none d-lg-none" @click="handleToggleSidebar()">
-            <i class="material-icons">&#xE5C4;</i>
+            <i class="material-icons">close</i>
           </a>
         </nav>
       </div>
@@ -26,63 +28,69 @@
       </form>
 
       <div class="nav-wrapper">
-          <d-nav class="flex-column">
-            <li v-for="(item, navItemIdx) in items" :key="navItemIdx" class="nav-item dropdown">
-              <d-link :class="['nav-link', item.items && item.items.length ? 'dropdown-toggle' : '']" :to="item.to" v-d-toggle="`snc-${navItemIdx}`">
-                <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
-                <span v-if="item.title">{{ item.title }}</span>
-                <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
-              </d-link>
-              <d-collapse v-if="item.items && item.items.length" :id="`snc-${navItemIdx}`" class="dropdown-menu dropdown-menu-small" accordion="sidebar-items-accordion">
-                <d-dropdown-item v-for="(subItem, subItemIdx) in item.items" :key="subItemIdx" :href="subItem.href" :to="subItem.to">
-                  {{ subItem.title }}
-                </d-dropdown-item>
-              </d-collapse>
-            </li>
-          </d-nav>
+        <d-nav class="flex-column">
+          <li v-for="(item, navItemIdx) in items" :key="navItemIdx" class="nav-item dropdown">
+            <d-link :class="['nav-link', item.items && item.items.length ? 'dropdown-toggle' : '']" :to="item.to" v-d-toggle="`snc-${navItemIdx}`">
+              <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
+              <span v-if="item.title">{{ item.title }}</span>
+              <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
+            </d-link>
+            <d-collapse v-if="item.items && item.items.length" :id="`snc-${navItemIdx}`" class="dropdown-menu dropdown-menu-small" accordion="sidebar-items-accordion">
+              <d-dropdown-item v-for="(subItem, subItemIdx) in item.items" :key="subItemIdx" :href="subItem.href" :to="subItem.to">
+                {{ subItem.title }}
+              </d-dropdown-item>
+            </d-collapse>
+          </li>
+        </d-nav>
       </div>
-  </aside>
+    </aside>
+  </div>
 </template>
 
 <script>
 export default {
   name: 'main-sidebar',
   props: {
-    /**
-      * Whether to hide the logo text, or not.
-      */
-    hideLogoText: {
-      type: Boolean,
-      default: false,
-    },
-    /**
-     * The menu items.
-     */
-    items: {
-      type: Array,
-      required: true,
-    },
+    hideLogoText: { type: Boolean, default: false },
+    items: { type: Array, required: true },
   },
   data() {
-    return {
-      sidebarVisible: false,
-    };
+    return { sidebarVisible: false };
+  },
+  mounted() {
+    window.addEventListener('toggle-sidebar', this.handleToggleSidebar);
+    window.addEventListener('close-sidebar', this.closeSidebar);
+  },
+  beforeUnmount() {
+    window.removeEventListener('toggle-sidebar', this.handleToggleSidebar);
+    window.removeEventListener('close-sidebar', this.closeSidebar);
+  },
+  watch: {
+    $route() {
+      this.closeSidebar();
+    },
   },
   methods: {
     handleToggleSidebar() {
       this.sidebarVisible = !this.sidebarVisible;
+    },
+    closeSidebar() {
+      this.sidebarVisible = false;
     },
   },
 };
 </script>
 
 <style lang="scss">
-  .main-sidebar {
-    .item-icon-wrapper {
-      display: inline-block;
-    }
-    .dropdown-menu {
-      display: block;
-    }
-  }
+.main-sidebar {
+  .item-icon-wrapper { display: inline-block; }
+  .dropdown-menu { display: block; }
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1060;
+}
 </style>

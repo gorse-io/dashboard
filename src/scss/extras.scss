@@ -439,3 +439,30 @@ $price-color: #37ae2a;
   0%    { transform: rotate(0deg); }
   100%  { transform: rotate(360deg); }
 }
+
+// Mobile overflow optimizations for long lists/tables.
+@include media-breakpoint-down(sm) {
+  .card .table,
+  .table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  .list-group-item,
+  .list-group-item p,
+  .list-group-item span,
+  .list-group-item code {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .list-group-item .badge {
+    display: inline-flex;
+    max-width: 100%;
+    margin-bottom: 0.25rem;
+  }
+}

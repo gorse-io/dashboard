@@ -1,6 +1,11 @@
 <template>
   <div :class="['main-navbar', 'bg-white', stickyTop ? 'sticky-top' : '']">
     <d-navbar type="light" class="align-items-stretch flex-md-nowrap p-0">
+      <div class="d-flex d-md-none align-items-center pl-3">
+        <button class="btn btn-link text-dark p-0" type="button" aria-label="Open menu" @click="toggleSidebar">
+          <i class="material-icons">menu</i>
+        </button>
+      </div>
       <div class="main-navbar__search w-100 d-none d-md-flex d-lg-flex">
       </div>
       <d-navbar-nav class="border-left flex-row align-right">
@@ -70,6 +75,9 @@ export default {
     });
   },
   methods: {
+    toggleSidebar() {
+      window.dispatchEvent(new CustomEvent('toggle-sidebar'));
+    },
     getAvatar(name) {
       const svgCode = multiavatar(name);
       const parser = new DOMParser();
