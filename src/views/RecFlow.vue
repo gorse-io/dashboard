@@ -361,6 +361,7 @@ import LogicFlow, { HtmlNode, HtmlNodeModel, BezierEdge, BezierEdgeModel } from 
 import '@logicflow/core/dist/index.css';
 import dagre from 'dagre';
 import axios from 'axios';
+import { DARK_THEME, getCurrentTheme } from '@/utils/theme';
 
 class DashedEdgeModel extends BezierEdgeModel {
   getEdgeStyle() {
@@ -465,6 +466,7 @@ export default {
         properties: {},
       },
       config: null,
+      theme: getCurrentTheme(),
       monaco: null,
       monacoEditor: null,
       monacoError: '',
@@ -517,6 +519,8 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener('dashboard-theme-change', this.handleThemeChange);
+
     this.lf = new LogicFlow({
       container: document.querySelector('#container'),
       grid: true,
@@ -663,7 +667,21 @@ export default {
       console.error(error);
     });
   },
+  beforeUnmount() {
+    window.removeEventListener('dashboard-theme-change', this.handleThemeChange);
+    this.disposeMonaco();
+  },
   methods: {
+    getEditorTheme() {
+      return this.theme === DARK_THEME ? 'vs-dark' : 'vs';
+    },
+    handleThemeChange(event) {
+      this.theme = event.detail && event.detail.theme ? event.detail.theme : getCurrentTheme();
+
+      if (this.monaco) {
+        this.monaco.editor.setTheme(this.getEditorTheme());
+      }
+    },
     handleTimeChange(time) {
       this.timeUntilDismissed = time;
     },
@@ -1129,7 +1147,7 @@ export default {
           minimap: { enabled: false },
           fontSize: 13,
           lineNumbers: 'on',
-          theme: 'vs',
+          theme: this.getEditorTheme(),
         });
         this.monacoEditor.onDidChangeModelContent(() => {
           this.nodeForm.properties.script = this.monacoEditor.getValue();

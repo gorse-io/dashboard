@@ -19,6 +19,7 @@ import 'material-icons/iconfont/material-icons.css';
 // Core
 import App from './App.vue';
 import router from './router';
+import { applyTheme, getPreferredTheme } from './utils/theme';
 
 // Layouts
 import Default from '@/layouts/Default.vue';
@@ -54,6 +55,8 @@ function createEventHub() {
 }
 
 const app = createApp(App);
+
+applyTheme(getPreferredTheme());
 
 app.use(router);
 app.use(ShardsVue);

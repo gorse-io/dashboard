@@ -190,29 +190,14 @@
       transform: translateY(-50%) rotateZ(180deg);
     }
   }
-
-  &__search {
-    @include media-breakpoint-down(sm) {
-      box-sizing: border-box;
-      border-right: 0 !important;
-      padding: 0.625rem 0;
-      border-bottom: 1px solid $border-color;
-
-      .input-group {
-        margin: 0 !important;
-      }
-    }
-  }
 }
 
 
 //
-// Common styles for both main navbar and
-// main sidebar search elements.
+// Main navbar search elements.
 //
 
-.main-navbar__search,
-.main-sidebar__search {
+.main-navbar__search {
   .input-group-prepend {
     .input-group-text {
       font-size: 0.6875rem;
