@@ -64,8 +64,11 @@
     <!-- Node Property Modal -->
     <d-modal v-if="showNodeModal" @close="closeNodeModal" centered
       :size="(nodeForm.type === 'external' || nodeForm.type === 'ranker') ? 'lg' : null">
-      <d-modal-header>
+      <d-modal-header :close="false">
         <d-modal-title>{{ modalTitle }}</d-modal-title>
+        <button type="button" class="close" aria-label="Close" @click.prevent="closeNodeModal">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </d-modal-header>
       <d-modal-body>
         <d-form @submit.prevent="updateNode">
@@ -341,8 +344,11 @@
 
     <!-- Export Modal -->
     <d-modal v-if="showExportModal" @close="showExportModal = false" centered>
-      <d-modal-header>
+      <d-modal-header :close="false">
         <d-modal-title>Export TOML</d-modal-title>
+        <button type="button" class="close" aria-label="Close" @click.prevent="showExportModal = false">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </d-modal-header>
       <d-modal-body>
         <textarea v-model="exportData" rows="15" class="form-control w-100"
@@ -357,7 +363,13 @@
 </template>
 
 <script>
-import LogicFlow, { HtmlNode, HtmlNodeModel, BezierEdge, BezierEdgeModel } from '@logicflow/core';
+import LogicFlow, {
+  HtmlNode,
+  HtmlNodeModel,
+  BezierEdge,
+  BezierEdgeModel,
+  EventType,
+} from '@logicflow/core';
 import '@logicflow/core/dist/index.css';
 import dagre from 'dagre';
 import axios from 'axios';
@@ -408,6 +420,22 @@ class IconNode extends HtmlNode {
     const { text, properties, type } = this.props.model;
     const el = document.createElement('div');
     el.className = 'card';
+    el.addEventListener('dblclick', (event) => {
+      const { model, graphModel } = this.props;
+      const position = graphModel.getPointByClient({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      graphModel.selectNodeById(model.id);
+      graphModel.eventCenter.emit(EventType.NODE_DBCLICK, {
+        data: model.getData(),
+        e: event,
+        position,
+        isSelected: true,
+        isMultiple: false,
+      });
+    });
 
     // Determine icon based on type
     let iconName = 'settings'; // Default icon
@@ -963,6 +991,12 @@ export default {
       return { nodes: layoutedNodes, edges };
     },
     handleNodeDbClick({ data }) {
+      this.openNodeModal(data);
+    },
+    openNodeModal(data) {
+      if (!data) {
+        return;
+      }
       if (data.properties && data.properties.readOnly) {
         return;
       }
@@ -981,6 +1015,28 @@ export default {
         }
         if (!Array.isArray(properties.read_feedback_types)) {
           properties.read_feedback_types = [];
+        }
+      }
+
+      if (data.type === 'ranker') {
+        properties.type = properties.type || 'fm';
+        properties.query_template = properties.query_template || '';
+        properties.document_template = properties.document_template || '';
+        properties.cache_expire = properties.cache_expire || '120h';
+        if (!properties.early_stopping) {
+          properties.early_stopping = {};
+        }
+        if (properties.early_stopping.patience === undefined) {
+          properties.early_stopping.patience = 10;
+        }
+      }
+
+      if (data.type === 'collaborative') {
+        if (!properties.early_stopping) {
+          properties.early_stopping = {};
+        }
+        if (properties.early_stopping.patience === undefined) {
+          properties.early_stopping.patience = 10;
         }
       }
 
