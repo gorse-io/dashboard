@@ -91,6 +91,27 @@
                 <d-input type="number" v-model.number="nodeForm.properties.item_ttl" />
               </div>
             </div>
+            <div class="form-group">
+              <label>Feedback Weight</label>
+              <div v-for="(value, key, index) in nodeForm.properties.feedback_weight" :key="key" class="form-row mb-2">
+                <div class="col-md-5">
+                  <d-input :value="key" @input="updateFeedbackWeightKey(key, $event)"
+                    placeholder="Feedback type" />
+                </div>
+                <div class="col-md-5">
+                  <d-input :value="value" @input="updateFeedbackWeightValue(key, $event)"
+                    placeholder="Weight expression" />
+                </div>
+                <div class="col-md-2">
+                  <d-button theme="danger" @click="removeFeedbackWeight(key)">
+                    <i class="material-icons">delete</i>
+                  </d-button>
+                </div>
+              </div>
+              <d-button theme="secondary" size="sm" @click="addFeedbackWeight">
+                <i class="material-icons">add</i> Add Weight
+              </d-button>
+            </div>
           </template>
 
           <!-- Fallback Specific Properties -->
@@ -964,6 +985,9 @@ export default {
         if (!Array.isArray(properties.read_feedback_types)) {
           properties.read_feedback_types = [];
         }
+        if (!properties.feedback_weight || typeof properties.feedback_weight !== 'object') {
+          properties.feedback_weight = {};
+        }
       }
 
       // For fallback nodes, populate recommenders list with order
@@ -1037,6 +1061,36 @@ export default {
         const item = list.splice(index, 1)[0];
         list.splice(newIndex, 0, item);
       }
+    },
+    addFeedbackWeight() {
+      if (!this.nodeForm.properties.feedback_weight) {
+        this.nodeForm.properties.feedback_weight = {};
+      }
+      // Use a temporary key that user can edit
+      const newKey = `new_${Object.keys(this.nodeForm.properties.feedback_weight).length}`;
+      this.nodeForm.properties.feedback_weight = {
+        ...this.nodeForm.properties.feedback_weight,
+        [newKey]: '',
+      };
+    },
+    removeFeedbackWeight(key) {
+      const newWeight = { ...this.nodeForm.properties.feedback_weight };
+      delete newWeight[key];
+      this.nodeForm.properties.feedback_weight = newWeight;
+    },
+    updateFeedbackWeightKey(oldKey, newKey) {
+      if (newKey === oldKey) return;
+      const value = this.nodeForm.properties.feedback_weight[oldKey];
+      const newWeight = { ...this.nodeForm.properties.feedback_weight };
+      delete newWeight[oldKey];
+      newWeight[newKey] = value;
+      this.nodeForm.properties.feedback_weight = newWeight;
+    },
+    updateFeedbackWeightValue(key, newValue) {
+      this.nodeForm.properties.feedback_weight = {
+        ...this.nodeForm.properties.feedback_weight,
+        [key]: newValue,
+      };
     },
     syncNodeName(name) {
       this.nodeForm.text = name;

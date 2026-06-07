@@ -124,7 +124,7 @@
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
-                    <d-button outline theme="danger" @click.native="handleClick">&nbsp;Purge
+                    <d-button outline theme="danger" @click="handleClick">&nbsp;Purge
                       Database&nbsp;</d-button>
                     <d-modal v-if="showDialog" @close="handleClose" centered>
                       <d-modal-header>
