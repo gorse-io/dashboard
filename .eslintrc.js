@@ -1,12 +1,11 @@
 module.exports = {
   root: true,
-  plugins: ["jest"],
   env: {
     node: true,
-    "jest/globals": true,
+    jest: true,
   },
   extends: [
-    'plugin:vue/essential',
+    'plugin:vue/vue3-essential',
     '@vue/airbnb',
   ],
   rules: {
@@ -15,8 +14,11 @@ module.exports = {
     'global-require': 'off',
     'no-new': 0, // Intrusive when using Chart.js instances.
     'no-underscore-dangle': 0, // Chart.js uses underscore dangles (_) internally.
+    'import/extensions': 'off',
     'import/no-unresolved': 0, // False positives regarding imports that use aliases.
-    "linebreak-style": 0,
+    'linebreak-style': 0,
+    'vue/max-len': 'off',
+    'vue/multi-word-component-names': 'off',
   },
   overrides: [
     {
@@ -27,6 +29,7 @@ module.exports = {
     },
   ],
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: '@babel/eslint-parser',
+    requireConfigFile: false,
   },
 };

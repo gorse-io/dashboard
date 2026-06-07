@@ -17,7 +17,7 @@
           </div>
           <div class="card-body border-bottom">
             <d-input-group>
-              <d-input id="user_id" v-model="user_id" placeholder="User ID" @keyup.enter.native="search_user" />
+              <d-input id="user_id" v-model="user_id" placeholder="User ID" @keyup.enter="search_user" />
               <d-input-group-addon append>
                 <d-button class="btn-white" @click="search_user"><i class="material-icons">search</i></d-button>
                 <d-button class="btn-white" @click="previous_page"><i

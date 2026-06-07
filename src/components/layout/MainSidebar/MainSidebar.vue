@@ -8,7 +8,7 @@
               <span v-if="!hideLogoText" class="d-none d-md-inline ml-1">Gorse Dashboard</span>
             </div>
           </a>
-          <a class="toggle-sidebar d-sm-inline d-md-none d-lg-none" @click="handleToggleSidebar()">
+          <a href="#" class="toggle-sidebar d-sm-inline d-md-none d-lg-none" @click.prevent="handleToggleSidebar()">
             <i class="material-icons">&#xE5C4;</i>
           </a>
         </nav>
@@ -71,8 +71,8 @@ export default {
   created() {
     this.$eventHub.$on('toggle-sidebar', this.handleToggleSidebar);
   },
-  beforeDestroy() {
-    this.$eventHub.$off('toggle-sidebar');
+  beforeUnmount() {
+    this.$eventHub.$off('toggle-sidebar', this.handleToggleSidebar);
   },
   methods: {
     handleToggleSidebar() {
