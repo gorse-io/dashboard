@@ -29,6 +29,7 @@
           </d-collapse>
         </li>
       </d-navbar-nav>
+      <navbar-toggle />
     </d-navbar>
   </div>
 </template>
@@ -36,9 +37,11 @@
 <script>
 import axios from 'axios';
 import multiavatar from '@multiavatar/multiavatar';
+import NavbarToggle from './NavbarToggle.vue';
 
 export default {
   components: {
+    NavbarToggle,
   },
   props: {
     /**
