@@ -35,22 +35,24 @@
               aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
           </div>
           <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0" v-for="columnName in columnNames" :key="columnName">
-                    {{ columnName }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, row_idx) in rows" :key="row_idx">
-                  <td v-for="columnName in columnNames" :key="columnName">
-                    {{ row[columnName] }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th scope="col" class="border-0" v-for="columnName in columnNames" :key="columnName">
+                      {{ columnName }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, row_idx) in rows" :key="row_idx">
+                    <td v-for="columnName in columnNames" :key="columnName">
+                      {{ row[columnName] }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

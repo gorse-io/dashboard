@@ -16,37 +16,39 @@
             <h6 class="m-0">All Tasks</h6>
           </div>
           <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0">Name</th>
-                  <th scope="col" class="border-0">Status</th>
-                  <th scope="col" class="border-0">Start</th>
-                  <th scope="col" class="border-0">Finished</th>
-                  <th scope="col" class="border-0">Progress</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(task, idx) in nodes" :key="idx">
-                  <td>{{ task.Name }}</td>
-                  <td>{{ task.Status }}</td>
-                  <td>
-                    <span v-if="task.Status != 'Pending'">{{ format_date_time(task.StartTime) }}</span>
-                  </td>
-                  <td>
-                    <span v-if="task.Status == 'Complete'">{{ format_date_time(task.FinishTime) }}</span>
-                  </td>
-                  <td>
-                    <d-progress v-if="task.Status == 'Running'" :value="task.Count" :max="task.Total" />
-                    <d-progress v-if="task.Status == 'Suspended'" :value="task.Count" :max="task.Total"
-                      theme="warning" />
-                    <d-progress v-if="task.Status == 'Complete'" :value="task.Total" :max="task.Total"
-                      theme="success" />
-                    <span style="color:red" v-if="task.Status == 'Failed'">{{ task.Error }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th scope="col" class="border-0">Name</th>
+                    <th scope="col" class="border-0">Status</th>
+                    <th scope="col" class="border-0">Start</th>
+                    <th scope="col" class="border-0">Finished</th>
+                    <th scope="col" class="border-0">Progress</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(task, idx) in nodes" :key="idx">
+                    <td>{{ task.Name }}</td>
+                    <td>{{ task.Status }}</td>
+                    <td>
+                      <span v-if="task.Status != 'Pending'">{{ format_date_time(task.StartTime) }}</span>
+                    </td>
+                    <td>
+                      <span v-if="task.Status == 'Complete'">{{ format_date_time(task.FinishTime) }}</span>
+                    </td>
+                    <td>
+                      <d-progress v-if="task.Status == 'Running'" :value="task.Count" :max="task.Total" />
+                      <d-progress v-if="task.Status == 'Suspended'" :value="task.Count" :max="task.Total"
+                        theme="warning" />
+                      <d-progress v-if="task.Status == 'Complete'" :value="task.Total" :max="task.Total"
+                        theme="success" />
+                      <span style="color:red" v-if="task.Status == 'Failed'">{{ task.Error }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

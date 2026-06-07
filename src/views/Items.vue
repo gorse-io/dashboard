@@ -27,50 +27,52 @@
             </d-input-group>
           </div>
           <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0">ID</th>
-                  <th scope="col" class="border-0">Categories</th>
-                  <th scope="col" class="border-0">Hidden</th>
-                  <th scope="col" class="border-0">Timestamp</th>
-                  <th scope="col" class="border-0">Labels</th>
-                  <th scope="col" class="border-0">Description</th>
-                  <th scope="col" class="border-0"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(item, idx) in items" :key="idx">
-                  <td>{{ item.ItemId }}</td>
-                  <td>
-                    <div>
-                      <d-badge outline theme="secondary" v-for="(category, idx) in item.Categories" :key="idx">
-                        {{ category }}
-                      </d-badge>
-                    </div>
-                  </td>
-                  <td>
-                    <d-checkbox :checked="item.IsHidden" disabled="true" />
-                  </td>
-                  <td>{{ format_date_time(item.Timestamp) }}</td>
-                  <td>
-                    <span
-                      style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-                      {{ fold(item.Labels) }}
-                    </span>
-                  </td>
-                  <td>{{ item.Comment }}</td>
-                  <td>
-                    <d-button-group>
-                      <d-button size="small" outline @click="view_item(item.ItemId)"><i
-                          class="material-icons">visibility</i></d-button>
-                      <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)"><i
-                          class="material-icons">delete</i></d-button>
-                    </d-button-group>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th scope="col" class="border-0">ID</th>
+                    <th scope="col" class="border-0">Categories</th>
+                    <th scope="col" class="border-0">Hidden</th>
+                    <th scope="col" class="border-0">Timestamp</th>
+                    <th scope="col" class="border-0">Labels</th>
+                    <th scope="col" class="border-0">Description</th>
+                    <th scope="col" class="border-0"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, idx) in items" :key="idx">
+                    <td>{{ item.ItemId }}</td>
+                    <td>
+                      <div>
+                        <d-badge outline theme="secondary" v-for="(category, idx) in item.Categories" :key="idx">
+                          {{ category }}
+                        </d-badge>
+                      </div>
+                    </td>
+                    <td>
+                      <d-checkbox :checked="item.IsHidden" disabled="true" />
+                    </td>
+                    <td>{{ format_date_time(item.Timestamp) }}</td>
+                    <td>
+                      <span
+                        style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                        {{ fold(item.Labels) }}
+                      </span>
+                    </td>
+                    <td>{{ item.Comment }}</td>
+                    <td>
+                      <d-button-group>
+                        <d-button size="small" outline @click="view_item(item.ItemId)"><i
+                            class="material-icons">visibility</i></d-button>
+                        <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)"><i
+                            class="material-icons">delete</i></d-button>
+                      </d-button-group>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

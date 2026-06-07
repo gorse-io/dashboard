@@ -36,35 +36,37 @@
               aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
           </div>
           <div class="card-body p-0 pb-3">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0" v-for="columnName in columnNames" :key="columnName">
-                    {{ columnName }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, row_idx) in rows" :key="row_idx">
-                  <td v-for="columnName in columnNames" :key="columnName">
-                    <div v-if="columnName === 'Categories'">
-                      <d-badge outline theme="primary" v-for="(label, idx) in row[columnName]" :key="idx">
-                        {{ label }}
-                      </d-badge>
-                    </div>
-                    <div v-else-if="columnName === 'Labels'">
-                      <span
-                        style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th scope="col" class="border-0" v-for="columnName in columnNames" :key="columnName">
+                      {{ columnName }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, row_idx) in rows" :key="row_idx">
+                    <td v-for="columnName in columnNames" :key="columnName">
+                      <div v-if="columnName === 'Categories'">
+                        <d-badge outline theme="primary" v-for="(label, idx) in row[columnName]" :key="idx">
+                          {{ label }}
+                        </d-badge>
+                      </div>
+                      <div v-else-if="columnName === 'Labels'">
+                        <span
+                          style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                          {{ row[columnName] }}
+                        </span>
+                      </div>
+                      <div v-else>
                         {{ row[columnName] }}
-                      </span>
-                    </div>
-                    <div v-else>
-                      {{ row[columnName] }}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

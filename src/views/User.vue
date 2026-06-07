@@ -63,36 +63,38 @@
             </d-row>
           </div>
           <div class="card-body p-0">
-            <table class="table mb-0">
-              <thead class="bg-light">
-                <tr>
-                  <th scope="col" class="border-0">ID</th>
-                  <th scope="col" class="border-0">Labels</th>
-                  <th scope="col" class="border-0">Score</th>
-                  <th scope="col" class="border-0"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(user, idx) in users" :key="idx">
-                  <td>{{ user.UserId }}</td>
-                  <td>
-                    <span
-                      style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
-                      {{ user.Labels }}
-                    </span>
-                  </td>
-                  <td>{{ user.Score.toFixed(5) }}</td>
-                  <td>
-                    <router-link :to="{
-                      name: 'recommend',
-                      params: { user_id: user.UserId },
-                    }">
-                      <d-button size="small" outline><i class="material-icons">visibility</i></d-button>
-                    </router-link>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th scope="col" class="border-0">ID</th>
+                    <th scope="col" class="border-0">Labels</th>
+                    <th scope="col" class="border-0">Score</th>
+                    <th scope="col" class="border-0"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(user, idx) in users" :key="idx">
+                    <td>{{ user.UserId }}</td>
+                    <td>
+                      <span
+                        style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
+                        {{ user.Labels }}
+                      </span>
+                    </td>
+                    <td>{{ user.Score.toFixed(5) }}</td>
+                    <td>
+                      <router-link :to="{
+                        name: 'recommend',
+                        params: { user_id: user.UserId },
+                      }">
+                        <d-button size="small" outline><i class="material-icons">visibility</i></d-button>
+                      </router-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="card-footer border-top" v-if="last_modified !== undefined">
             <span class="text-muted">Last Update: {{ format_date_time(last_modified) }}</span>
