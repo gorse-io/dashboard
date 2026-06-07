@@ -29,7 +29,9 @@
                       <div v-for="(item, i) in value" v-bind:key="item.Name">
                         <div v-if="i > 0" class="mt-2 mb-2 border-top"></div>
                         <d-input-group v-for="(fieldValue, fieldName) in item" :key="fieldName" class="mb-2">
-                          <d-input-group-text slot="prepend" style="width: 250px">{{ fieldName }}</d-input-group-text>
+                          <template #prepend>
+                            <d-input-group-text style="width: 250px">{{ fieldName }}</d-input-group-text>
+                          </template>
                           <d-input v-if="fieldValue == null" type="text" readonly />
                           <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
                             type="text" :value="JSON.stringify(fieldValue)" readonly />
@@ -41,7 +43,9 @@
                       readonly />
                     <div v-else-if="typeof value == 'object'">
                       <d-input-group v-for="(fieldValue, fieldName) in value" :key="fieldName" class="mb-2">
-                        <d-input-group-text slot="prepend" style="width: 250px">{{ fieldName }}</d-input-group-text>
+                        <template #prepend>
+                          <d-input-group-text style="width: 250px">{{ fieldName }}</d-input-group-text>
+                        </template>
                         <d-input v-if="fieldValue == null" type="text" readonly />
                         <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
                           type="text" :value="JSON.stringify(fieldValue)" readonly />

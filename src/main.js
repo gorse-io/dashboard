@@ -1,6 +1,7 @@
 /* eslint-disable */
-import Vue from 'vue';
-import ShardsVue from 'shards-vue';
+import { createApp } from 'vue';
+import PrimeVue from 'primevue/config';
+import ShardsCompat from '@/plugins/shards-compat';
 
 // highlight.js
 import hljsVuePlugin from '@highlightjs/vue-plugin'
@@ -9,7 +10,6 @@ import json from 'highlight.js/lib/languages/json'
 import 'highlight.js/styles/a11y-dark.css'
 
 hljs.registerLanguage('json', json)
-Vue.use(hljsVuePlugin);
 
 // Styles
 import 'bootstrap/dist/css/bootstrap.css';
@@ -25,15 +25,16 @@ import router from './router';
 import Default from '@/layouts/Default.vue';
 import Login from '@/layouts/Login.vue';
 
-ShardsVue.install(Vue);
+const app = createApp(App);
 
-Vue.component('default-layout', Default);
-Vue.component('login-layout', Login);
+app.use(PrimeVue, {
+  unstyled: true,
+});
+app.use(ShardsCompat);
+app.use(hljsVuePlugin);
+app.use(router);
 
-Vue.config.productionTip = false;
-Vue.prototype.$eventHub = new Vue();
+app.component('default-layout', Default);
+app.component('login-layout', Login);
 
-new Vue({
-  router,
-  render: h => h(App),
-}).$mount('#app');
+app.mount('#app');
