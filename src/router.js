@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { createRouter, createWebHistory } from 'vue-router';
 
 import Tasks from './views/Tasks.vue';
@@ -16,8 +17,9 @@ import ImportItems from './views/ImportItems.vue';
 import ImportUsers from './views/ImportUsers.vue';
 import ImportFeedback from './views/ImportFeedback.vue';
 import RecFlow from './views/RecFlow.vue';
+import { getLoginStatus, setLoginStatus } from './utils/auth';
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active',
@@ -120,3 +122,42 @@ export default createRouter({
     },
   ],
 });
+
+router.beforeEach(async (to, from, next) => {
+  if (to.name === 'login') {
+    if (getLoginStatus() === true) {
+      next(to.query.redirect || '/overview');
+    } else {
+      next();
+    }
+    return;
+  }
+
+  const loginStatus = getLoginStatus();
+  if (loginStatus === true) {
+    next();
+    return;
+  }
+
+  if (loginStatus === false) {
+    next({ name: 'login', query: { redirect: to.fullPath } });
+    return;
+  }
+
+  try {
+    await axios.get('/api/dashboard/userinfo', {
+      skipAuthRedirect: true,
+    });
+    setLoginStatus(true);
+    next();
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      setLoginStatus(false);
+      next({ name: 'login', query: { redirect: to.fullPath } });
+      return;
+    }
+    next();
+  }
+});
+
+export default router;
