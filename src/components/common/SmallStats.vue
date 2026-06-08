@@ -11,7 +11,7 @@
             percentage }}</span>
         </div>
       </div>
-      <canvas :height="computedCanvasHeight" ref="canvas" :class="[computedChartId]"></canvas>
+      <canvas :height="computedCanvasHeight" ref="canvas" :class="[computedChartId]" />
     </d-card-body>
   </d-card>
 </template>
@@ -89,6 +89,9 @@ export default {
      */
     chartConfig: {
       type: Object,
+      default() {
+        return {};
+      },
     },
     /**
      * The variation.

@@ -3,7 +3,7 @@
     <!-- Card Header -->
     <d-card-header class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
-      <div class="block-handle"></div>
+      <div class="block-handle" />
     </d-card-header>
 
     <d-card-body class="p-0">
@@ -18,14 +18,14 @@
 
     <d-card-body class="p-0">
       <!-- Top Referrals List Group -->
-      <div v-for="(item, idx) in items" :key="idx" class="blog-comments__item d-flex p-3">
+      <div v-for="(item, idx) in localItems" :key="idx" class="blog-comments__item d-flex p-3">
         <!-- Content -->
         <div class="blog-comments__content">
           <!-- Content - Title -->
           <div class="blog-comments__meta text-muted">
             {{ item.Item.ItemId }}
             <d-badge outline pill theme="secondary" class="float-right">
-              {{ item.FeedbackType + (item.Value > 0 ? ' ' + item.Value : '') }}
+              {{ item.FeedbackType + (item.Value > 0 ? ` ${item.Value}` : '') }}
             </d-badge>
           </div>
 
@@ -55,9 +55,9 @@
     <d-card-footer class="border-top">
       <d-button-group class="mb-3">
         <d-button class="btn-white" @click="prevPage" v-if="this.offset !== 0"><i
-            class="material-icons">arrow_back_ios</i></d-button>
-        <d-button class="btn-white" @click="nextPage" v-if="this.items.length == this.pageSize"><i
-            class="material-icons">arrow_forward_ios</i></d-button>
+          class="material-icons">arrow_back_ios</i></d-button>
+        <d-button class="btn-white" @click="nextPage" v-if="this.localItems.length === this.pageSize"><i
+          class="material-icons">arrow_forward_ios</i></d-button>
       </d-button-group>
     </d-card-footer>
   </d-card>
@@ -97,11 +97,17 @@ export default {
     return {
       offset: 0,
       feedbackType: '',
+      localItems: this.items,
     };
+  },
+  watch: {
+    items(value) {
+      this.localItems = value;
+    },
   },
   methods: {
     prevPage() {
-      this.offset = this.offset - this.pageSize;
+      this.offset -= this.pageSize;
       this.selectType(this.feedbackType);
     },
     nextPage() {
@@ -122,7 +128,7 @@ export default {
           n: this.pageSize,
         },
       }).then((response) => {
-        this.items = response.data;
+        this.localItems = response.data;
       });
     },
   },
