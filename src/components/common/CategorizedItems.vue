@@ -2,7 +2,7 @@
   <d-card class="card-small">
     <d-card-header class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
-      <div class="block-handle"></div>
+      <div class="block-handle" />
     </d-card-header>
 
     <div class="card-body border-bottom">
@@ -95,6 +95,9 @@ export default {
     },
     recommenders: {
       type: Array,
+      default() {
+        return [];
+      },
     },
   },
   data() {
@@ -103,7 +106,7 @@ export default {
       last_modified: undefined,
       pageNumber: 0,
       categories: [''],
-      recommender: this.recommenders[0],
+      recommender: this.recommenders[0] || '',
       category: '',
     };
   },

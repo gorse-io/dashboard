@@ -32,18 +32,24 @@
                     <td>{{ task.Name }}</td>
                     <td>{{ task.Status }}</td>
                     <td>
-                      <span v-if="task.Status != 'Pending'">{{ format_date_time(task.StartTime) }}</span>
+                      <span v-if="task.Status !== 'Pending'">{{ format_date_time(task.StartTime) }}</span>
                     </td>
                     <td>
-                      <span v-if="task.Status == 'Complete'">{{ format_date_time(task.FinishTime) }}</span>
+                      <span v-if="task.Status === 'Complete'">{{ format_date_time(task.FinishTime) }}</span>
                     </td>
                     <td>
-                      <d-progress v-if="task.Status == 'Running'" :value="task.Count" :max="task.Total" />
-                      <d-progress v-if="task.Status == 'Suspended'" :value="task.Count" :max="task.Total"
+                      <d-progress v-if="task.Status === 'Running'" :value="task.Count" :max="task.Total" />
+                      <d-progress
+                        v-if="task.Status === 'Suspended'"
+                        :value="task.Count"
+                        :max="task.Total"
                         theme="warning" />
-                      <d-progress v-if="task.Status == 'Complete'" :value="task.Total" :max="task.Total"
+                      <d-progress
+                        v-if="task.Status === 'Complete'"
+                        :value="task.Total"
+                        :max="task.Total"
                         theme="success" />
-                      <span style="color:red" v-if="task.Status == 'Failed'">{{ task.Error }}</span>
+                      <span style="color:red" v-if="task.Status === 'Failed'">{{ task.Error }}</span>
                     </td>
                   </tr>
                 </tbody>
@@ -56,7 +62,6 @@
 
   </div>
 </template>
-
 
 <script>
 import axios from 'axios';

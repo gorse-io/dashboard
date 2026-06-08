@@ -20,9 +20,9 @@
               <d-input-group-addon append>
                 <d-button class="btn-white" @click="search_item"><i class="material-icons">search</i></d-button>
                 <d-button class="btn-white" @click="previous_page"><i
-                    class="material-icons">arrow_back_ios</i></d-button>
+                  class="material-icons">arrow_back_ios</i></d-button>
                 <d-button class="btn-white" @click="next_page"><i
-                    class="material-icons">arrow_forward_ios</i></d-button>
+                  class="material-icons">arrow_forward_ios</i></d-button>
               </d-input-group-addon>
             </d-input-group>
           </div>
@@ -37,7 +37,7 @@
                     <th scope="col" class="border-0">Timestamp</th>
                     <th scope="col" class="border-0">Labels</th>
                     <th scope="col" class="border-0">Description</th>
-                    <th scope="col" class="border-0"></th>
+                    <th scope="col" class="border-0" />
                   </tr>
                 </thead>
                 <tbody>
@@ -64,9 +64,9 @@
                     <td>
                       <d-button-group>
                         <d-button size="small" outline @click="view_item(item.ItemId)"><i
-                            class="material-icons">visibility</i></d-button>
+                          class="material-icons">visibility</i></d-button>
                         <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)"><i
-                            class="material-icons">delete</i></d-button>
+                          class="material-icons">delete</i></d-button>
                       </d-button-group>
                     </td>
                   </tr>

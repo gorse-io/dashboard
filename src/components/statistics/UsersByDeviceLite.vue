@@ -3,7 +3,7 @@
     <!-- Card Header -->
     <d-card-header class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
-      <div class="block-handle"></div>
+      <div class="block-handle" />
     </d-card-header>
 
     <d-card-body class="p-0">
@@ -16,12 +16,12 @@
         >
           <span class="text-semibold text-fiord-blue"><i class="material-icons mr-1">{{ item.icon }}</i>{{ item.name }}</span>
           <span class="ml-auto text-right text-semibold text-reagent-gray"
-            >{{ format(query(item.key)) }}</span
+          >{{ format(query(item.key)) }}</span
           >
         </d-list-group-item>
       </d-list-group>
     </d-card-body>
-    <d-card-footer> </d-card-footer>
+    <d-card-footer />
   </d-card>
 </template>
 

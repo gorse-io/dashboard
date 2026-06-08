@@ -11,8 +11,15 @@
     <!-- Small Stats Blocks -->
     <d-row v-if="!timeseriesUpdate">
       <d-col lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
-        <small-stats :id="`small-stats-${idx}`" variation="1" :chart-data="stats.datasets" :label="stats.label"
-          :value="stats.value" :percentage="stats.percentage" :increase="stats.increase" :decrease="stats.decrease" />
+        <small-stats
+          :id="`small-stats-${idx}`"
+          variation="1"
+          :chart-data="stats.datasets"
+          :label="stats.label"
+          :value="stats.value"
+          :percentage="stats.percentage"
+          :increase="stats.increase"
+          :decrease="stats.decrease" />
       </d-col>
     </d-row>
 
@@ -36,7 +43,6 @@ import axios from 'axios';
 import SmallStats from '@/components/common/SmallStats.vue';
 import CategorizedItems from '@/components/common/CategorizedItems.vue';
 import UsersOverview from '@/components/statistics/UsersOverview.vue';
-import UsersByDevice from '@/components/statistics/UsersByDeviceLite.vue';
 
 const timeseriesName = ['num_users', 'num_items', 'num_feedback', 'num_pos_feedbacks', 'num_neg_feedbacks'];
 
@@ -44,7 +50,6 @@ export default {
   components: {
     SmallStats,
     boUsersOverview: UsersOverview,
-    boUsersByDevice: UsersByDevice,
     boTopItems: CategorizedItems,
   },
   data() {
@@ -76,13 +81,13 @@ export default {
 
     // load status
     this.timeseriesUpdate = true;
-    const requests = timeseriesName.map(name => axios({
+    const requests = timeseriesName.map((name) => axios({
       method: 'get',
       url: `/api/dashboard/timeseries/${name}`,
     }));
     axios.all(requests)
       .then(axios.spread((...responses) => {
-        this.timeseriesData = responses.map(response => response.data.map(item => item.Value));
+        this.timeseriesData = responses.map((response) => response.data.map((item) => item.Value));
         this.timeseriesValues = this.timeseriesData.map((item) => {
           if (item.length === 0) return '0';
           return item[item.length - 1].toLocaleString();

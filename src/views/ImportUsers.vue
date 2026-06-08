@@ -7,7 +7,11 @@
         <h3 class="page-title">Import Users</h3>
       </div>
     </div>
-    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
+    <d-alert
+      :theme="alertTheme"
+      :show="timeUntilDismissed"
+      dismissible
+      @alert-dismissed="timeUntilDismissed = 0"
       @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
     <div class="row">
       <div class="col">
@@ -21,18 +25,23 @@
                     <input type="file" class="custom-file-input" id="csvFile" @change="loadFile" required />
                     <label class="custom-file-label" for="customFile2">{{
                       fileName
-                      }}</label>
+                    }}</label>
                     <d-form-invalid-feedback>Upload local *.jsonl file.</d-form-invalid-feedback>
                   </div>
                 </d-col>
                 <d-col md="2"><strong class="text-muted d-block mb-2">&nbsp;</strong><d-button outline>Comfirm
-                    Import</d-button></d-col>
+                  Import</d-button></d-col>
               </d-form-row>
             </d-form>
           </div>
           <div class="progress" v-if="progressShow">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
-              aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              role="progressbar"
+              aria-valuenow="75"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style="width: 100%" />
           </div>
           <div class="card-body p-0 pb-3">
             <div class="table-responsive">
@@ -47,7 +56,7 @@
                 <tbody>
                   <tr v-for="(row, row_idx) in rows" :key="row_idx">
                     <td v-for="columnName in columnNames" :key="columnName">
-                      <div v-if="columnName == 'Labels'">
+                      <div v-if="columnName === 'Labels'">
                         <span
                           style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif">
                           {{ row[columnName] }}
@@ -98,7 +107,7 @@ export default {
       const reader = new FileReader();
       reader.readAsText(file.slice(0, 1024));
       reader.onload = (e) => {
-        this.rows = e.target.result.split('\n').slice(0, -1).map(line => JSON.parse(line));
+        this.rows = e.target.result.split('\n').slice(0, -1).map((line) => JSON.parse(line));
       };
     },
     format_date_time(timestamp) {

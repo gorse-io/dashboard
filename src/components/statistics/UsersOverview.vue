@@ -3,7 +3,7 @@
     <!-- Card Header -->
     <d-card-header class="border-bottom">
       <h6 class="m-0">{{ title }}</h6>
-      <div class="block-handle"></div>
+      <div class="block-handle" />
     </d-card-header>
 
     <d-card-body class="pt-0">
@@ -11,11 +11,18 @@
 
         <d-col col sm="6" class="d-flex mb-2 mb-sm-0">
           <d-input-group size="sm" class="date-range d-flex justify-content-right">
-            <d-datepicker v-model="dateRange.from"
-              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }" placeholder="Start Date" typeable
+            <d-datepicker
+              v-model="dateRange.from"
+              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
+              placeholder="Start Date"
+              typeable
               small />
-            <d-datepicker v-model="dateRange.to" :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
-              placeholder="End Date" typeable small />
+            <d-datepicker
+              v-model="dateRange.to"
+              :highlighted="{ from: dateRange.from, to: dateRange.to || new Date() }"
+              placeholder="End Date"
+              typeable
+              small />
             <template #append>
               <d-input-group-text>
                 <i class="material-icons">&#xE916;</i>
@@ -35,8 +42,8 @@
 
       </d-row>
       <!-- Legend & Chart -->
-      <div ref="legend"></div>
-      <canvas height="80" ref="canvas" style="max-width: 100% !important"></canvas>
+      <div ref="legend" />
+      <canvas height="80" ref="canvas" style="max-width: 100% !important" />
     </d-card-body>
   </d-card>
 </template>
@@ -45,7 +52,6 @@
 import axios from 'axios';
 import moment from 'moment';
 import Chart from '../../utils/chart';
-
 
 export default {
   name: 'users-overview',
@@ -56,7 +62,9 @@ export default {
     },
     positiveFeedbackTypes: {
       type: Array,
-      default: [],
+      default() {
+        return [];
+      },
     },
     chartData: {
       type: Object,
@@ -106,6 +114,7 @@ export default {
       chartInstance: null,
       plotRequestId: 0,
       plotAbortController: null,
+      localChartData: null,
     };
   },
   mounted() {
@@ -199,9 +208,15 @@ export default {
             return;
           }
 
-          this.chartData.labels = response.data.map(item => moment(item.Timestamp).format('MMM DD HH:mm'));
-          this.chartData.datasets[0].data = response.data.map(item => Number(item.Value).toFixed(5));
-          this.chartData.datasets[0].label = label;
+          this.localChartData = {
+            ...this.chartData,
+            labels: response.data.map((item) => moment(item.Timestamp).format('MMM DD HH:mm')),
+            datasets: this.chartData.datasets.map((dataset, index) => (index === 0 ? {
+              ...dataset,
+              data: response.data.map((item) => Number(item.Value).toFixed(5)),
+              label,
+            } : dataset)),
+          };
 
           const chartOptions = {
             ...{
@@ -230,7 +245,7 @@ export default {
                 }],
                 yAxes: [{
                   ticks: {
-                    suggestedMax: Math.max(...this.chartData.datasets[0].data),
+                    suggestedMax: Math.max(...this.localChartData.datasets[0].data),
                     callback(tick) {
                       if (tick === 0) {
                         return tick;
@@ -256,7 +271,7 @@ export default {
 
           const BlogUsersOverview = new Chart(this.$refs.canvas, {
             type: 'LineWithLine',
-            data: this.chartData,
+            data: this.localChartData,
             options: chartOptions,
           });
 
@@ -272,14 +287,9 @@ export default {
           // Render the chart.
           BlogUsersOverview.render();
         })
-        .catch((error) => {
-          // Ignore cancellations (switching timeseries quickly).
-          if (error && (error.name === 'CanceledError' || error.name === 'AbortError')) {
-
-          }
-          // Swallow other errors to avoid breaking the dashboard UI.
-          // (Optional: hook into a toast/notification system if available.)
-        });
+        // Ignore all errors to avoid breaking the dashboard UI, including
+        // cancellations caused by switching timeseries quickly.
+        .catch(() => null);
     },
     changeTimeseries(value) {
       this.timeseries = value;
