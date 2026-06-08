@@ -16,15 +16,16 @@
           </div>
           <div class="card-body border-bottom">
             <d-input-group>
-              <d-input id="item_id" placeholder="Item ID" v-model="item_id" @keyup.enter="search_item" />
+              <d-input id="item_id" placeholder="Search items" v-model="item_id" @keyup.enter="search_item" />
               <d-input-group-addon append>
                 <d-button class="btn-white" @click="search_item"><i class="material-icons">search</i></d-button>
-                <d-button class="btn-white" @click="previous_page"><i
+                <d-button class="btn-white" @click="previous_page" :disabled="is_searching"><i
                   class="material-icons">arrow_back_ios</i></d-button>
-                <d-button class="btn-white" @click="next_page"><i
+                <d-button class="btn-white" @click="next_page" :disabled="is_searching"><i
                   class="material-icons">arrow_forward_ios</i></d-button>
               </d-input-group-addon>
             </d-input-group>
+            <span v-if="search_error" style="color: red">{{ search_error }}</span>
           </div>
           <div class="card-body p-0 pb-3">
             <div class="table-responsive">
@@ -110,6 +111,8 @@ export default {
       items: null,
       cursors: [],
       item_id: null,
+      is_searching: false,
+      search_error: '',
       showDialog: false,
       deleteItemId: '',
       confirmItemId: '',
@@ -121,6 +124,8 @@ export default {
   },
   methods: {
     fetch_page() {
+      this.is_searching = false;
+      this.search_error = '';
       const cursor = this.cursors.empty ? '' : this.cursors[this.cursors.length - 1];
       axios({
         method: 'get',
@@ -153,12 +158,30 @@ export default {
       return moment(String(timestamp)).format('YYYY/MM/DD HH:mm');
     },
     search_item() {
+      const query = this.item_id ? this.item_id.trim() : '';
+      this.search_error = '';
+      if (query === '') {
+        this.cursors = [];
+        this.fetch_page();
+        return;
+      }
       axios({
         method: 'get',
-        url: `/api/item/${this.item_id}`,
+        url: '/api/items',
+        params: {
+          q: query,
+        },
       })
         .then((response) => {
-          this.items = [response.data];
+          this.items = response.data.Items;
+          this.cursors = [];
+          this.is_searching = true;
+        }).catch((error) => {
+          if (error.response) {
+            this.search_error = error.response.data;
+          } else {
+            this.search_error = error;
+          }
         });
     },
     view_item(itemId) {
