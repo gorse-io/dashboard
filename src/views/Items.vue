@@ -19,9 +19,9 @@
               <d-input id="item_id" placeholder="Search items" v-model="item_id" @keyup.enter="search_item" />
               <d-input-group-addon append>
                 <d-button class="btn-white" @click="search_item"><i class="material-icons">search</i></d-button>
-                <d-button class="btn-white" @click="previous_page" :disabled="is_searching"><i
+                <d-button class="btn-white" @click="previous_page" :disabled="is_searching && search_page === 0"><i
                   class="material-icons">arrow_back_ios</i></d-button>
-                <d-button class="btn-white" @click="next_page" :disabled="is_searching"><i
+                <d-button class="btn-white" @click="next_page" :disabled="is_searching && !has_next_search_page"><i
                   class="material-icons">arrow_forward_ios</i></d-button>
               </d-input-group-addon>
             </d-input-group>
@@ -113,6 +113,10 @@ export default {
       item_id: null,
       is_searching: false,
       search_error: '',
+      search_query: '',
+      search_page: 0,
+      page_size: 10,
+      has_next_search_page: false,
       showDialog: false,
       deleteItemId: '',
       confirmItemId: '',
@@ -126,6 +130,9 @@ export default {
     fetch_page() {
       this.is_searching = false;
       this.search_error = '';
+      this.search_query = '';
+      this.search_page = 0;
+      this.has_next_search_page = false;
       const cursor = this.cursors.empty ? '' : this.cursors[this.cursors.length - 1];
       axios({
         method: 'get',
@@ -139,7 +146,78 @@ export default {
           this.cursors.push(response.data.Cursor);
         });
     },
+    fetch_search_page(page) {
+      const start = page * this.page_size;
+      const end = start + this.page_size;
+      const n = end + this.page_size;
+      const query = this.search_query;
+      this.search_error = '';
+      const exactItemRequest = axios({
+        method: 'get',
+        url: `/api/item/${encodeURIComponent(query)}`,
+      })
+        .then((response) => response.data)
+        .catch(() => null);
+      const searchItemsRequest = axios({
+        method: 'get',
+        url: '/api/items',
+        params: {
+          q: query,
+          n,
+        },
+      })
+        .then((response) => ({
+          items: response.data.Items || [],
+          error: null,
+        }))
+        .catch((error) => ({
+          items: [],
+          error,
+        }));
+      Promise.all([exactItemRequest, searchItemsRequest])
+        .then(([exactItem, searchResult]) => {
+          if (query !== this.search_query) {
+            return;
+          }
+          if (searchResult.error && !exactItem) {
+            this.search_error = this.get_error_message(searchResult.error);
+            return;
+          }
+          const searchItems = this.merge_search_items(searchResult.items, exactItem);
+          const pageItems = searchItems.slice(start, end);
+          if (page > 0 && pageItems.length === 0) {
+            this.fetch_search_page(page - 1);
+            return;
+          }
+          this.items = pageItems;
+          this.cursors = [];
+          this.is_searching = true;
+          this.search_page = page;
+          this.has_next_search_page = searchItems.length > end;
+        });
+    },
+    merge_search_items(searchItems, exactItem) {
+      if (!exactItem) {
+        return searchItems;
+      }
+      return [
+        exactItem,
+        ...searchItems.filter((item) => item.ItemId !== exactItem.ItemId),
+      ];
+    },
+    get_error_message(error) {
+      if (error.response) {
+        return error.response.data;
+      }
+      return error;
+    },
     previous_page() {
+      if (this.is_searching) {
+        if (this.search_page > 0) {
+          this.fetch_search_page(this.search_page - 1);
+        }
+        return;
+      }
       if (this.cursors.length >= 2) {
         this.cursors.pop();
         this.cursors.pop();
@@ -149,6 +227,12 @@ export default {
       this.fetch_page();
     },
     next_page() {
+      if (this.is_searching) {
+        if (this.has_next_search_page) {
+          this.fetch_search_page(this.search_page + 1);
+        }
+        return;
+      }
       this.fetch_page();
     },
     format_date_time(timestamp) {
@@ -160,29 +244,15 @@ export default {
     search_item() {
       const query = this.item_id ? this.item_id.trim() : '';
       this.search_error = '';
+      this.search_query = query;
+      this.search_page = 0;
+      this.has_next_search_page = false;
       if (query === '') {
         this.cursors = [];
         this.fetch_page();
         return;
       }
-      axios({
-        method: 'get',
-        url: '/api/items',
-        params: {
-          q: query,
-        },
-      })
-        .then((response) => {
-          this.items = response.data.Items;
-          this.cursors = [];
-          this.is_searching = true;
-        }).catch((error) => {
-          if (error.response) {
-            this.search_error = error.response.data;
-          } else {
-            this.search_error = error;
-          }
-        });
+      this.fetch_search_page(0);
     },
     view_item(itemId) {
       this.$router.replace({
@@ -207,10 +277,14 @@ export default {
       })
         .then(() => {
           this.showDialog = false;
-          if (this.cursors.length >= 1) {
-            this.cursors.pop();
+          if (this.is_searching) {
+            this.fetch_search_page(this.search_page);
+          } else {
+            if (this.cursors.length >= 1) {
+              this.cursors.pop();
+            }
+            this.fetch_page();
           }
-          this.fetch_page();
         }).catch((error) => {
           if (error.response) {
             this.deleteItemError = error.response.data;
