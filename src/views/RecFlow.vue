@@ -3,7 +3,7 @@
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-10 text-center text-sm-left mb-0 d-flex align-items-center">
+      <div class="col-12 col-sm-10 text-center text-sm-left mb-0 d-flex align-items-center recflow-node-palette">
         <div
           class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
           style="cursor: grab;"
@@ -86,7 +86,12 @@
     <div class="card card-small h-100 position-relative mb-4">
       <div class="card-body p-0">
         <!-- LogicFlow Canvas -->
-        <div id="container" class="logic-flow-view" @drop="drop" @dragover.prevent />
+        <div
+          id="container"
+          ref="logicFlowContainer"
+          class="logic-flow-view"
+          @drop="drop"
+          @dragover.prevent />
       </div>
     </div>
 
@@ -572,6 +577,9 @@ export default {
       rankerDocumentPreviewResult: null,
       rankerPreviewError: null,
       rankerPreviewLoading: false,
+      logicFlowTouchContainer: null,
+      touchGesture: null,
+      touchEventOptions: { passive: false },
     };
   },
   computed: {
@@ -614,8 +622,10 @@ export default {
   mounted() {
     window.addEventListener('dashboard-theme-change', this.handleThemeChange);
 
+    const logicFlowContainer = this.$refs.logicFlowContainer || document.querySelector('#container');
+
     this.lf = new LogicFlow({
-      container: document.querySelector('#container'),
+      container: logicFlowContainer,
       grid: true,
       nodeTextEdit: false,
       edgeTextEdit: false,
@@ -759,8 +769,11 @@ export default {
     }).catch((error) => {
       console.error(error);
     });
+
+    this.bindLogicFlowTouchEvents();
   },
   beforeUnmount() {
+    this.unbindLogicFlowTouchEvents();
     window.removeEventListener('dashboard-theme-change', this.handleThemeChange);
     this.disposeMonaco();
   },
@@ -787,6 +800,152 @@ export default {
       this.timeUntilDismissed = this.duration;
       this.alertTheme = 'success';
       this.alertText = message;
+    },
+    bindLogicFlowTouchEvents() {
+      const container = this.$refs.logicFlowContainer;
+      if (!container) return;
+
+      this.logicFlowTouchContainer = container;
+      container.addEventListener('touchstart', this.handleLogicFlowTouchStart, this.touchEventOptions);
+      container.addEventListener('touchmove', this.handleLogicFlowTouchMove, this.touchEventOptions);
+      container.addEventListener('touchend', this.handleLogicFlowTouchEnd, this.touchEventOptions);
+      container.addEventListener('touchcancel', this.handleLogicFlowTouchEnd, this.touchEventOptions);
+    },
+    unbindLogicFlowTouchEvents() {
+      if (!this.logicFlowTouchContainer) return;
+
+      this.logicFlowTouchContainer.removeEventListener('touchstart', this.handleLogicFlowTouchStart);
+      this.logicFlowTouchContainer.removeEventListener('touchmove', this.handleLogicFlowTouchMove);
+      this.logicFlowTouchContainer.removeEventListener('touchend', this.handleLogicFlowTouchEnd);
+      this.logicFlowTouchContainer.removeEventListener('touchcancel', this.handleLogicFlowTouchEnd);
+      this.logicFlowTouchContainer = null;
+      this.touchGesture = null;
+    },
+    preventTouchDefault(event) {
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    },
+    getTouchPoint(touch) {
+      return {
+        identifier: touch.identifier,
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        screenX: touch.screenX,
+        screenY: touch.screenY,
+      };
+    },
+    getTouchDistance(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    },
+    getTouchCenter(touches) {
+      return {
+        x: (touches[0].clientX + touches[1].clientX) / 2,
+        y: (touches[0].clientY + touches[1].clientY) / 2,
+      };
+    },
+    dispatchTouchMouseEvent(type, touchPoint, target) {
+      if (!touchPoint || !target) return;
+
+      const mouseEvent = new MouseEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: touchPoint.clientX,
+        clientY: touchPoint.clientY,
+        screenX: touchPoint.screenX,
+        screenY: touchPoint.screenY,
+        button: 0,
+        buttons: type === 'mouseup' ? 0 : 1,
+      });
+      target.dispatchEvent(mouseEvent);
+    },
+    endTouchMouseDrag() {
+      if (!this.touchGesture || this.touchGesture.mode !== 'mouse') return;
+
+      this.dispatchTouchMouseEvent('mouseup', this.touchGesture.lastTouch, document);
+    },
+    startTouchPinch(event) {
+      if (!this.lf || event.touches.length < 2) return;
+
+      const distance = this.getTouchDistance(event.touches);
+      if (!distance) return;
+
+      this.touchGesture = {
+        mode: 'pinch',
+        initialDistance: distance,
+        initialScale: this.lf.graphModel.transformModel.SCALE_X,
+      };
+    },
+    zoomLogicFlowByTouch(event) {
+      if (!this.lf || !this.touchGesture || this.touchGesture.mode !== 'pinch') return;
+
+      const distance = this.getTouchDistance(event.touches);
+      if (!distance) return;
+
+      const center = this.getTouchCenter(event.touches);
+      const position = this.lf.graphModel.getPointByClient(center);
+      const nextScale = this.touchGesture.initialScale * (distance / this.touchGesture.initialDistance);
+      const { x, y } = position.canvasOverlayPosition;
+      this.lf.zoom(nextScale, [x, y]);
+    },
+    handleLogicFlowTouchStart(event) {
+      if (!this.lf) return;
+
+      this.preventTouchDefault(event);
+
+      if (event.touches.length === 1) {
+        const touchPoint = this.getTouchPoint(event.touches[0]);
+        this.touchGesture = {
+          mode: 'mouse',
+          target: event.target,
+          lastTouch: touchPoint,
+        };
+        this.dispatchTouchMouseEvent('mousedown', touchPoint, event.target);
+        return;
+      }
+
+      if (event.touches.length === 2) {
+        this.endTouchMouseDrag();
+        this.startTouchPinch(event);
+      }
+    },
+    handleLogicFlowTouchMove(event) {
+      if (!this.lf || !this.touchGesture) return;
+
+      this.preventTouchDefault(event);
+
+      if (event.touches.length === 1 && this.touchGesture.mode === 'mouse') {
+        const touchPoint = this.getTouchPoint(event.touches[0]);
+        this.touchGesture.lastTouch = touchPoint;
+        this.dispatchTouchMouseEvent('mousemove', touchPoint, document);
+        return;
+      }
+
+      if (event.touches.length >= 2) {
+        if (this.touchGesture.mode === 'mouse') {
+          this.endTouchMouseDrag();
+          this.startTouchPinch(event);
+        }
+        this.zoomLogicFlowByTouch(event);
+      }
+    },
+    handleLogicFlowTouchEnd(event) {
+      if (!this.touchGesture) return;
+
+      this.preventTouchDefault(event);
+
+      if (this.touchGesture.mode === 'mouse') {
+        const changedTouch = event.changedTouches && event.changedTouches[0];
+        const touchPoint = changedTouch ? this.getTouchPoint(changedTouch) : this.touchGesture.lastTouch;
+        this.dispatchTouchMouseEvent('mouseup', touchPoint, document);
+      }
+
+      if (event.touches.length === 0) {
+        this.touchGesture = null;
+      }
     },
     initGraph() {
       const { nodes, edges } = this.generateGraphData();
@@ -1787,6 +1946,21 @@ export default {
 .logic-flow-view {
   height: 75vh;
   width: 100%;
+  touch-action: none;
+  overscroll-behavior: contain;
+  user-select: none;
+}
+
+.recflow-node-palette {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recflow-node-palette .draggable-node {
+  flex: 0 0 auto;
 }
 
 .monaco-container {

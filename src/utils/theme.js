@@ -1,6 +1,10 @@
 export const THEME_STORAGE_KEY = 'gorse-dashboard-theme';
 export const LIGHT_THEME = 'light';
 export const DARK_THEME = 'dark';
+export const LIGHT_THEME_COLOR = '#ffffff';
+export const DARK_THEME_COLOR = '#111827';
+
+const THEME_COLOR_META_NAME = 'theme-color';
 
 function canUseDOM() {
   return typeof window !== 'undefined' && typeof document !== 'undefined';
@@ -8,6 +12,20 @@ function canUseDOM() {
 
 function normalizeTheme(theme) {
   return theme === DARK_THEME ? DARK_THEME : LIGHT_THEME;
+}
+
+function getThemeColor(theme) {
+  return normalizeTheme(theme) === DARK_THEME ? DARK_THEME_COLOR : LIGHT_THEME_COLOR;
+}
+
+function applyBrowserThemeColor(theme) {
+  let themeColorMeta = document.querySelector(`meta[name="${THEME_COLOR_META_NAME}"]`);
+  if (!themeColorMeta) {
+    themeColorMeta = document.createElement('meta');
+    themeColorMeta.setAttribute('name', THEME_COLOR_META_NAME);
+    document.head.appendChild(themeColorMeta);
+  }
+  themeColorMeta.setAttribute('content', getThemeColor(theme));
 }
 
 export function getStoredTheme() {
@@ -52,6 +70,7 @@ export function applyTheme(theme) {
 
   document.documentElement.setAttribute('data-theme', normalizedTheme);
   document.documentElement.style.colorScheme = normalizedTheme;
+  applyBrowserThemeColor(normalizedTheme);
 
   if (typeof window.CustomEvent === 'function') {
     window.dispatchEvent(new window.CustomEvent('dashboard-theme-change', {
