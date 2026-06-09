@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <link href="https://use.fontawesome.com/releases/v7.0.0/css/all.css" rel="stylesheet">
     <script>
@@ -15,6 +16,10 @@
           }
           document.documentElement.setAttribute('data-theme', theme);
           document.documentElement.style.colorScheme = theme;
+          var themeColorMeta = document.querySelector('meta[name="theme-color"]');
+          if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', theme === 'dark' ? '#111827' : '#ffffff');
+          }
         } catch (error) {
           // Ignore storage/media-query failures and let the app boot with its default theme.
         }
