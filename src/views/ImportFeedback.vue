@@ -7,7 +7,11 @@
         <h3 class="page-title">Import Feedback</h3>
       </div>
     </div>
-    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
+    <d-alert
+      :theme="alertTheme"
+      :show="timeUntilDismissed"
+      dismissible
+      @alert-dismissed="timeUntilDismissed = 0"
       @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
     <div class="row">
       <div class="col">
@@ -26,13 +30,18 @@
                   </div>
                 </d-col>
                 <d-col md="2" class="form-group"><strong class="text-muted d-block mb-2">&nbsp;</strong><d-button
-                    outline>Comfirm Import</d-button></d-col>
+                  outline>Comfirm Import</d-button></d-col>
               </d-form-row>
             </d-form>
           </div>
           <div class="progress" v-if="progressShow">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
-              aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated"
+              role="progressbar"
+              aria-valuenow="75"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style="width: 100%" />
           </div>
           <div class="card-body p-0 pb-3">
             <div class="table-responsive">
@@ -93,7 +102,7 @@ export default {
       reader.readAsText(file.slice(0, 1024));
       reader.onload = (e) => {
         this.text = e.target.result;
-        this.rows = e.target.result.split('\n').slice(0, -1).map(line => JSON.parse(line));
+        this.rows = e.target.result.split('\n').slice(0, -1).map((line) => JSON.parse(line));
       };
     },
     format_date_time(timestamp) {

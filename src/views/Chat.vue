@@ -18,8 +18,7 @@
               <d-list-group-item class="p-3">
                 <d-row class="mb-3">
                   <d-col sm="12" md="12">
-                    <d-form-textarea :rows="3" :max-rows="6" v-model="prompt">
-                    </d-form-textarea>
+                    <d-form-textarea :rows="3" :max-rows="6" v-model="prompt" />
                   </d-col>
                 </d-row>
                 <d-row>
@@ -30,7 +29,7 @@
                 <d-row v-if="message">
                   <d-col sm="12" md="12">
                     <div class="p-3 mt-3 border rounded">
-                      <div v-html="message"></div>
+                      <div v-html="message" />
                     </div>
                   </d-col>
                 </d-row>

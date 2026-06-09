@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable vuejs-accessibility/label-has-for -->
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">

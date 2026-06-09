@@ -1,45 +1,70 @@
 <template>
+  <!-- eslint-disable vuejs-accessibility/label-has-for, vuejs-accessibility/form-control-has-label -->
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
       <div class="col-12 col-sm-10 text-center text-sm-left mb-0 d-flex align-items-center">
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'latest')">
+        <div
+          class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'latest')">
           <i class="material-icons mr-2 text-primary">new_releases</i>
           <span>Latest</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'collaborative')">
+        <div
+          class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'collaborative')">
           <i class="material-icons mr-2 text-primary">group_work</i>
           <span>Collaborative</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'non-personalized')">
+        <div
+          class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'non-personalized')">
           <i class="material-icons mr-2 text-primary">public</i>
           <span>Non-Personalized</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'user-to-user')">
+        <div
+          class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'user-to-user')">
           <i class="material-icons mr-2 text-primary">people</i>
           <span>User to User</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'item-to-item')">
+        <div
+          class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'item-to-item')">
           <i class="material-icons mr-2 text-primary">apps</i>
           <span>Item to Item</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'external')">
+        <div
+          class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'external')">
           <i class="material-icons mr-2 text-primary">cloud_queue</i>
           <span>External</span>
         </div>
-        <div class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'ranker')">
+        <div
+          class="d-flex align-items-center p-2 mr-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'ranker')">
           <i class="material-icons mr-2 text-primary">sort</i>
           <span>Ranker</span>
         </div>
-        <div class="d-flex align-items-center p-2 border rounded bg-white draggable-node" style="cursor: grab;"
-          draggable="true" @dragstart="dragStart($event, 'fallback')">
+        <div
+          class="d-flex align-items-center p-2 border rounded bg-white draggable-node"
+          style="cursor: grab;"
+          draggable="true"
+          @dragstart="dragStart($event, 'fallback')">
           <i class="material-icons mr-2 text-primary">history</i>
           <span>Fallback</span>
         </div>
@@ -50,19 +75,26 @@
       </div>
     </div>
 
-    <d-alert :theme="alertTheme" :show="timeUntilDismissed" dismissible @alert-dismissed="timeUntilDismissed = 0"
+    <d-alert
+      :theme="alertTheme"
+      :show="timeUntilDismissed"
+      dismissible
+      @alert-dismissed="timeUntilDismissed = 0"
       @alert-dismiss-countdown="handleTimeChange">{{ alertText }}</d-alert>
 
     <!-- LogicFlow Container -->
     <div class="card card-small h-100 position-relative mb-4">
       <div class="card-body p-0">
         <!-- LogicFlow Canvas -->
-        <div id="container" class="logic-flow-view" @drop="drop" @dragover.prevent></div>
+        <div id="container" class="logic-flow-view" @drop="drop" @dragover.prevent />
       </div>
     </div>
 
     <!-- Node Property Modal -->
-    <d-modal v-if="showNodeModal" @close="closeNodeModal" centered
+    <d-modal
+      v-if="showNodeModal"
+      @close="closeNodeModal"
+      centered
       :size="(nodeForm.type === 'external' || nodeForm.type === 'ranker') ? 'lg' : null">
       <d-modal-header :close="false">
         <d-modal-title>{{ modalTitle }}</d-modal-title>
@@ -76,12 +108,14 @@
           <template v-if="nodeForm.type === 'data-source'">
             <div class="form-group">
               <label>Positive Feedback Types (comma separated)</label>
-              <d-input :value="nodeForm.properties.positive_feedback_types.join(',')"
+              <d-input
+                :value="nodeForm.properties.positive_feedback_types.join(',')"
                 @input="val => nodeForm.properties.positive_feedback_types = val.split(',').map(s => s.trim())" />
             </div>
             <div class="form-group">
               <label>Read Feedback Types (comma separated)</label>
-              <d-input :value="nodeForm.properties.read_feedback_types.join(',')"
+              <d-input
+                :value="nodeForm.properties.read_feedback_types.join(',')"
                 @input="val => nodeForm.properties.read_feedback_types = val.split(',').map(s => s.trim())" />
             </div>
             <div class="form-row">
@@ -102,14 +136,18 @@
             <div class="form-group">
               <label>Recommenders</label>
               <d-list-group>
-                <d-list-group-item v-for="(rec, index) in nodeForm.properties.recommenders" :key="rec"
+                <d-list-group-item
+                  v-for="(rec, index) in nodeForm.properties.recommenders"
+                  :key="rec"
                   class="d-flex align-items-center border">
                   <span class="mr-auto">{{ rec }}</span>
                   <d-input-group-addon append>
                     <d-button class="btn-white" @click="moveRecommender(index, -1)" :disabled="index === 0">
                       <i class="material-icons">arrow_upward</i>
                     </d-button>
-                    <d-button class="btn-white" @click="moveRecommender(index, 1)"
+                    <d-button
+                      class="btn-white"
+                      @click="moveRecommender(index, 1)"
                       :disabled="index === nodeForm.properties.recommenders.length - 1">
                       <i class="material-icons">arrow_downward</i>
                     </d-button>
@@ -155,14 +193,26 @@
             <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label>Query Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
-                      target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
-                  <textarea class="form-control" rows="8" v-model="nodeForm.properties.query_template"
-                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
-                  <label class="mt-4">Document Template <a href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
-                      target="_blank" class="ml-1"><i class="material-icons">help_outline</i></a></label>
-                  <textarea class="form-control" rows="7" v-model="nodeForm.properties.document_template"
-                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
+                  <label>Query Template <a
+                    href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="ml-1"><i class="material-icons">help_outline</i></a></label>
+                  <textarea
+                    class="form-control"
+                    rows="8"
+                    v-model="nodeForm.properties.query_template"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;" />
+                  <label class="mt-4">Document Template <a
+                    href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="ml-1"><i class="material-icons">help_outline</i></a></label>
+                  <textarea
+                    class="form-control"
+                    rows="7"
+                    v-model="nodeForm.properties.document_template"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;" />
                 </div>
                 <div class="form-group col-md-6">
                   <label>Preview</label>
@@ -174,8 +224,12 @@
                       </d-button>
                     </d-input-group-addon>
                   </d-input-group>
-                  <textarea class="form-control mt-2" rows="16" readonly
-                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;">{{ rankerPreviewResult || '' }}</textarea>
+                  <textarea
+                    class="form-control mt-2"
+                    rows="16"
+                    readonly
+                    :value="rankerPreviewResult || ''"
+                    style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;" />
                 </div>
               </div>
               <div class="form-group" v-if="rankerPreviewError">
@@ -274,7 +328,8 @@
                 <option value="items">Items</option>
               </d-select>
             </div>
-            <div class="form-group"
+            <div
+              class="form-group"
               v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
               <label>Column</label>
               <d-input v-model="nodeForm.properties.column" />
@@ -295,7 +350,8 @@
                 <option value="users">Users</option>
               </d-select>
             </div>
-            <div class="form-group"
+            <div
+              class="form-group"
               v-if="nodeForm.properties.type === 'embedding' || nodeForm.properties.type === 'tags'">
               <label>Column</label>
               <d-input v-model="nodeForm.properties.column" />
@@ -309,9 +365,12 @@
               <d-input v-model="nodeForm.properties.name" @input="syncNodeName" />
             </div>
             <div class="form-group">
-              <label>Script <a href="https://gorse.io/docs/concepts/recommenders/external.html" target="_blank"
-                  class="ml-1"><i class="material-icons">help_outline</i></a></label>
-              <div ref="monacoEditor" class="monaco-container"></div>
+              <label>Script <a
+                href="https://gorse.io/docs/concepts/recommenders/external.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="ml-1"><i class="material-icons">help_outline</i></a></label>
+              <div ref="monacoEditor" class="monaco-container" />
               <small class="text-muted" v-if="monacoError">{{ monacoError }}</small>
             </div>
             <div class="form-group">
@@ -326,7 +385,9 @@
             </div>
             <div class="form-group" v-if="previewResult || previewError">
               <label>Result</label>
-              <pre class="bg-light p-2 rounded border" v-if="!previewError"
+              <pre
+                class="bg-light p-2 rounded border"
+                v-if="!previewError"
                 style="max-height: 200px; overflow: auto;">{{ previewResult }}</pre>
               <d-alert theme="danger" show v-else>{{ previewError }}</d-alert>
             </div>
@@ -351,8 +412,11 @@
         </button>
       </d-modal-header>
       <d-modal-body>
-        <textarea v-model="exportData" rows="15" class="form-control w-100"
-          style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;"></textarea>
+        <textarea
+          v-model="exportData"
+          rows="15"
+          class="form-control w-100"
+          style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;" />
         <div class="mt-3 text-right">
           <d-button class="mr-2" theme="white" @click="copyExportData">Copy</d-button>
           <d-button theme="primary" @click="showExportModal = false">Close</d-button>
@@ -363,6 +427,7 @@
 </template>
 
 <script>
+/* eslint-disable max-classes-per-file */
 import LogicFlow, {
   HtmlNode,
   HtmlNodeModel,
@@ -387,8 +452,7 @@ class DashedEdgeModel extends BezierEdgeModel {
 class IconNodeModel extends HtmlNodeModel {
   setAttributes() {
     this.width = 270;
-    const { properties, text, type } = this;
-    const nodeText = typeof text === 'object' ? text.value : text;
+    const { type } = this;
 
     if (type === 'data-source') {
       this.width = 150;
@@ -416,7 +480,8 @@ class IconNodeModel extends HtmlNodeModel {
 
 class IconNode extends HtmlNode {
   setHtml(rootEl) {
-    rootEl.innerHTML = '';
+    const root = rootEl;
+    root.innerHTML = '';
     const { text, properties, type } = this.props.model;
     const el = document.createElement('div');
     el.className = 'card';
@@ -472,7 +537,7 @@ class IconNode extends HtmlNode {
       </div>
     `;
     el.innerHTML = html;
-    rootEl.appendChild(el);
+    root.appendChild(el);
   }
 }
 
@@ -604,7 +669,7 @@ export default {
     this.lf.on('edge:add,connection:add,edge:exchange-node', ({ data }) => {
       const sourceModel = this.lf.getNodeModelById(data.sourceNodeId);
       const targetModel = this.lf.getNodeModelById(data.targetNodeId);
-      const hasRanker = this.lf.getGraphData().nodes.some(n => n.type === 'ranker');
+      const hasRanker = this.lf.getGraphData().nodes.some((n) => n.type === 'ranker');
 
       if (sourceModel && targetModel && targetModel.type === 'recommend' && this.isRecommenderType(sourceModel.type)) {
         if (hasRanker) {
@@ -641,8 +706,8 @@ export default {
 
       const graphData = this.lf.getGraphData();
       const rankerIncoming = graphData.edges
-        .filter(e => e.targetNodeId === 'ranker')
-        .map(e => e.sourceNodeId);
+        .filter((e) => e.targetNodeId === 'ranker')
+        .map((e) => e.sourceNodeId);
 
       nodes.forEach((node) => {
         const nodeModel = this.lf.getNodeModelById(node.id);
@@ -676,7 +741,7 @@ export default {
         });
 
         if (existingRecommendEdges.length === 0) {
-          const candidate = rankerIncoming.find(sourceId => !deletedNodeIds.has(sourceId));
+          const candidate = rankerIncoming.find((sourceId) => !deletedNodeIds.has(sourceId));
           if (candidate) {
             this.lf.addEdge({
               sourceNodeId: candidate,
@@ -920,7 +985,7 @@ export default {
         }
 
         if (directNodeId) {
-          const exists = edges.some(e => e.sourceNodeId === directNodeId && e.targetNodeId === 'recommend');
+          const exists = edges.some((e) => e.sourceNodeId === directNodeId && e.targetNodeId === 'recommend');
           if (!exists) {
             edges.push({ sourceNodeId: directNodeId, targetNodeId: 'recommend', type: 'bezier' });
           }
@@ -932,7 +997,7 @@ export default {
         rankerRecommenders.forEach((rec) => {
           const nodeId = sourceNodeMap[rec];
           if (nodeId) {
-            const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'ranker');
+            const exists = edges.some((e) => e.sourceNodeId === nodeId && e.targetNodeId === 'ranker');
             if (!exists) {
               edges.push({ sourceNodeId: nodeId, targetNodeId: 'ranker', type: 'bezier' });
             }
@@ -946,7 +1011,7 @@ export default {
         fallbackRecommenders.forEach((rec) => {
           const nodeId = sourceNodeMap[rec];
           if (nodeId) {
-            const exists = edges.some(e => e.sourceNodeId === nodeId && e.targetNodeId === 'fallback');
+            const exists = edges.some((e) => e.sourceNodeId === nodeId && e.targetNodeId === 'fallback');
             if (!exists) {
               edges.push({ sourceNodeId: nodeId, targetNodeId: 'fallback', type: 'dashed-edge' });
             }
@@ -1046,7 +1111,7 @@ export default {
         const existingRecommenders = properties.recommenders || [];
 
         // Merge: Keep existing order, add new ones at the end
-        const merged = [...existingRecommenders.filter(r => connectedRecommenders.includes(r))];
+        const merged = [...existingRecommenders.filter((r) => connectedRecommenders.includes(r))];
         connectedRecommenders.forEach((r) => {
           if (!merged.includes(r)) {
             merged.push(r);
@@ -1082,18 +1147,18 @@ export default {
     getRecommenderName(sourceNode) {
       if (sourceNode.type === 'latest') {
         return 'latest';
-      } else if (sourceNode.type === 'collaborative') {
+      } if (sourceNode.type === 'collaborative') {
         return 'collaborative';
-      } else if (sourceNode.type === 'external') {
+      } if (sourceNode.type === 'external') {
         return sourceNode.properties && sourceNode.properties.name ? `external/${sourceNode.properties.name}` : null;
       }
       const p = sourceNode.properties;
       if (p && p.name) {
         if (sourceNode.type === 'non-personalized') {
           return `non-personalized/${p.name}`;
-        } else if (sourceNode.type === 'user-to-user') {
+        } if (sourceNode.type === 'user-to-user') {
           return `user-to-user/${p.name}`;
-        } else if (sourceNode.type === 'item-to-item') {
+        } if (sourceNode.type === 'item-to-item') {
           return `item-to-item/${p.name}`;
         }
       }
@@ -1189,7 +1254,7 @@ export default {
         if (!this.monaco) {
           this.monaco = await import('monaco-editor');
         }
-        const monaco = this.monaco;
+        const { monaco } = this;
         const container = this.$refs.monacoEditor;
         if (!container) return;
         if (this.monacoEditor) {
@@ -1357,7 +1422,7 @@ export default {
       });
 
       // Assign to config with property order respect
-      const hasRankerNode = data.nodes.some(n => n.type === 'ranker');
+      const hasRankerNode = data.nodes.some((n) => n.type === 'ranker');
       if (!hasRankerNode) {
         newRecommend.ranker = {
           ...newRecommend.ranker,
@@ -1376,12 +1441,12 @@ export default {
       ['ranker', 'fallback'].forEach((type) => {
         const connected = connections[type];
         // Find the corresponding node in graph data to get properties
-        const node = data.nodes.find(n => n.type === type);
+        const node = data.nodes.find((n) => n.type === type);
         let finalOrder = [];
 
         if (node && node.properties && node.properties.recommenders) {
           // Use saved order, filter out disconnected
-          finalOrder = node.properties.recommenders.filter(r => connected.includes(r));
+          finalOrder = node.properties.recommenders.filter((r) => connected.includes(r));
           // Append any new connections not in saved order
           connected.forEach((r) => {
             if (!finalOrder.includes(r)) {
@@ -1407,9 +1472,9 @@ export default {
     jsonToToml(obj) {
       let output = '';
 
-      const isPrimitive = v => v !== Object(v);
-      const isArray = v => Array.isArray(v);
-      const isObject = v => v !== null && typeof v === 'object' && !isArray(v);
+      const isPrimitive = (v) => v !== Object(v);
+      const isArray = (v) => Array.isArray(v);
+      const isObject = (v) => v !== null && typeof v === 'object' && !isArray(v);
 
       // Helper to format primitives
       const formatValue = (v) => {
@@ -1523,7 +1588,7 @@ export default {
       e.dataTransfer.setData('type', type);
     },
     getUniqueName(baseName, type) {
-      const nodes = this.lf.getGraphData().nodes;
+      const { nodes } = this.lf.getGraphData();
       const existingNames = new Set();
 
       nodes.forEach((node) => {
@@ -1550,26 +1615,26 @@ export default {
       const type = e.dataTransfer.getData('type');
       if (type) {
         if (type === 'latest') {
-          const nodes = this.lf.getGraphData().nodes;
-          if (nodes.some(node => node.type === 'latest')) {
+          const { nodes } = this.lf.getGraphData();
+          if (nodes.some((node) => node.type === 'latest')) {
             this.showDanger('Latest node already exists');
             return;
           }
         } else if (type === 'collaborative') {
-          const nodes = this.lf.getGraphData().nodes;
-          if (nodes.some(node => node.type === 'collaborative')) {
+          const { nodes } = this.lf.getGraphData();
+          if (nodes.some((node) => node.type === 'collaborative')) {
             this.showDanger('Collaborative node already exists');
             return;
           }
         } else if (type === 'ranker') {
-          const nodes = this.lf.getGraphData().nodes;
-          if (nodes.some(node => node.type === 'ranker')) {
+          const { nodes } = this.lf.getGraphData();
+          if (nodes.some((node) => node.type === 'ranker')) {
             this.showDanger('Ranker node already exists');
             return;
           }
         } else if (type === 'fallback') {
-          const nodes = this.lf.getGraphData().nodes;
-          if (nodes.some(node => node.type === 'fallback')) {
+          const { nodes } = this.lf.getGraphData();
+          if (nodes.some((node) => node.type === 'fallback')) {
             this.showDanger('Fallback node already exists');
             return;
           }
@@ -1657,10 +1722,10 @@ export default {
         this.lf.addNode(newNode);
 
         if (type === 'ranker') {
-          const nodes = this.lf.getGraphData().nodes;
-          const recommendNode = nodes.find(node => node.type === 'recommend');
+          const { nodes } = this.lf.getGraphData();
+          const recommendNode = nodes.find((node) => node.type === 'recommend');
           if (recommendNode) {
-            const hasEdge = this.lf.getGraphData().edges.some(edge => edge.sourceNodeId === newNode.id
+            const hasEdge = this.lf.getGraphData().edges.some((edge) => edge.sourceNodeId === newNode.id
               && edge.targetNodeId === recommendNode.id);
             if (!hasEdge) {
               this.lf.addEdge({
@@ -1673,9 +1738,9 @@ export default {
 
           const graphData = this.lf.getGraphData();
           graphData.edges.forEach((edge) => {
-            const sourceNode = graphData.nodes.find(n => n.id === edge.sourceNodeId);
+            const sourceNode = graphData.nodes.find((n) => n.id === edge.sourceNodeId);
             if (!sourceNode || !this.isRecommenderType(sourceNode.type)) return;
-            const targetNode = graphData.nodes.find(n => n.id === edge.targetNodeId);
+            const targetNode = graphData.nodes.find((n) => n.id === edge.targetNodeId);
             if (targetNode && targetNode.type === 'recommend') {
               this.lf.deleteEdge(edge.id);
               this.lf.addEdge({
@@ -1688,10 +1753,10 @@ export default {
         }
 
         if (type === 'fallback') {
-          const nodes = this.lf.getGraphData().nodes;
-          const recommendNode = nodes.find(node => node.type === 'recommend');
+          const { nodes } = this.lf.getGraphData();
+          const recommendNode = nodes.find((node) => node.type === 'recommend');
           if (recommendNode) {
-            const hasEdge = this.lf.getGraphData().edges.some(edge => edge.sourceNodeId === newNode.id
+            const hasEdge = this.lf.getGraphData().edges.some((edge) => edge.sourceNodeId === newNode.id
               && edge.targetNodeId === recommendNode.id);
             if (!hasEdge) {
               this.lf.addEdge({

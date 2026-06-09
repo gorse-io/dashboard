@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable vuejs-accessibility/label-has-for -->
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
@@ -23,32 +24,45 @@
                     <label>{{ name }}</label>
                   </d-col>
                   <d-col sm="12" md="10">
-                    <d-input v-if="value == null" type="text"
-                      :placeholder="'missing `' + name + '` in configuration file'" state="invalid" readonly />
-                    <div v-else-if="value.constructor === Array && value.length > 0 && typeof value[0] == 'object'">
+                    <d-input
+                      v-if="value == null"
+                      type="text"
+                      :placeholder="`missing \`${name}\` in configuration file`"
+                      state="invalid"
+                      readonly />
+                    <div v-else-if="value.constructor === Array && value.length > 0 && typeof value[0] === 'object'">
                       <div v-for="(item, i) in value" v-bind:key="item.Name">
-                        <div v-if="i > 0" class="mt-2 mb-2 border-top"></div>
+                        <div v-if="i > 0" class="mt-2 mb-2 border-top" />
                         <d-input-group v-for="(fieldValue, fieldName) in item" :key="fieldName" class="mb-2">
                           <template #prepend>
                             <d-input-group-text style="width: 250px">{{ fieldName }}</d-input-group-text>
                           </template>
                           <d-input v-if="fieldValue == null" type="text" readonly />
-                          <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
-                            type="text" :value="JSON.stringify(fieldValue)" readonly />
+                          <d-input
+                            v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
+                            type="text"
+                            :value="JSON.stringify(fieldValue)"
+                            readonly />
                           <d-input v-else :value="fieldValue.toString()" type="text" readonly />
                         </d-input-group>
                       </div>
                     </div>
-                    <d-input v-else-if="value.constructor === Array" type="text" :value="JSON.stringify(value)"
+                    <d-input
+                      v-else-if="value.constructor === Array"
+                      type="text"
+                      :value="JSON.stringify(value)"
                       readonly />
-                    <div v-else-if="typeof value == 'object'">
+                    <div v-else-if="typeof value === 'object'">
                       <d-input-group v-for="(fieldValue, fieldName) in value" :key="fieldName" class="mb-2">
                         <template #prepend>
                           <d-input-group-text style="width: 250px">{{ fieldName }}</d-input-group-text>
                         </template>
                         <d-input v-if="fieldValue == null" type="text" readonly />
-                        <d-input v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
-                          type="text" :value="JSON.stringify(fieldValue)" readonly />
+                        <d-input
+                          v-else-if="fieldValue.constructor === Object || fieldValue.constructor === Array"
+                          type="text"
+                          :value="JSON.stringify(fieldValue)"
+                          readonly />
                         <d-input v-else :value="fieldValue.toString()" type="text" readonly />
                       </d-input-group>
                     </div>

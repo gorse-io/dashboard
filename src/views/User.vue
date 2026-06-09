@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable vuejs-accessibility/label-has-for -->
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
@@ -70,7 +71,7 @@
                     <th scope="col" class="border-0">ID</th>
                     <th scope="col" class="border-0">Labels</th>
                     <th scope="col" class="border-0">Score</th>
-                    <th scope="col" class="border-0"></th>
+                    <th scope="col" class="border-0" />
                   </tr>
                 </thead>
                 <tbody>
@@ -84,10 +85,11 @@
                     </td>
                     <td>{{ user.Score.toFixed(5) }}</td>
                     <td>
-                      <router-link :to="{
-                        name: 'recommend',
-                        params: { user_id: user.UserId },
-                      }">
+                      <router-link
+                        :to="{
+                          name: 'recommend',
+                          params: { user_id: user.UserId },
+                        }">
                         <d-button size="small" outline><i class="material-icons">visibility</i></d-button>
                       </router-link>
                     </td>
@@ -136,7 +138,7 @@ export default {
       url: '/api/dashboard/config',
     }).then((response) => {
       this.cacheSize = response.data.database.cache_size;
-      this.recommenders = response.data.recommend['user-to-user'].map(recommender => recommender.name);
+      this.recommenders = response.data.recommend['user-to-user'].map((recommender) => recommender.name);
       if (this.recommenders.length > 0) {
         this.changeRecommender(this.recommenders[0]);
       }

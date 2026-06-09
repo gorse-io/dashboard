@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable vuejs-accessibility/label-has-for -->
   <div class="main-content-container container-fluid px-4">
     <!-- Page Header -->
     <div class="page-header row no-gutters py-4">
@@ -177,7 +178,7 @@ export default {
       url: '/api/dashboard/config',
     }).then((response) => {
       this.cacheSize = response.data.database.cache_size;
-      this.recommenders = response.data.recommend['item-to-item'].map(recommender => recommender.name);
+      this.recommenders = response.data.recommend['item-to-item'].map((recommender) => recommender.name);
       if (this.recommenders.length > 0) {
         this.changeRecommender(this.recommenders[0]);
       }
