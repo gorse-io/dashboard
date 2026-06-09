@@ -17,13 +17,22 @@
     <div class="nav-wrapper">
       <d-nav class="flex-column">
         <li v-for="(item, navItemIdx) in items" :key="navItemIdx" class="nav-item dropdown">
-          <d-link :class="['nav-link', item.items && item.items.length ? 'dropdown-toggle' : '']" :to="item.to" v-d-toggle="`snc-${navItemIdx}`">
+          <d-link
+            :class="['nav-link', item.items && item.items.length ? 'dropdown-toggle' : '']"
+            :to="item.to"
+            v-d-toggle="`snc-${navItemIdx}`"
+            @click="handleNavClick(item)">
             <div class="item-icon-wrapper" v-if="item.htmlBefore" v-html="item.htmlBefore" />
             <span v-if="item.title">{{ item.title }}</span>
             <div class="item-icon-wrapper" v-if="item.htmlAfter" v-html="item.htmlAfter" />
           </d-link>
           <d-collapse v-if="item.items && item.items.length" :id="`snc-${navItemIdx}`" class="dropdown-menu dropdown-menu-small" accordion="sidebar-items-accordion">
-            <d-dropdown-item v-for="(subItem, subItemIdx) in item.items" :key="subItemIdx" :href="subItem.href" :to="subItem.to">
+            <d-dropdown-item
+              v-for="(subItem, subItemIdx) in item.items"
+              :key="subItemIdx"
+              :href="subItem.href"
+              :to="subItem.to"
+              @click="handleNavClick(subItem)">
               {{ subItem.title }}
             </d-dropdown-item>
           </d-collapse>
@@ -66,6 +75,11 @@ export default {
   methods: {
     handleToggleSidebar() {
       this.sidebarVisible = !this.sidebarVisible;
+    },
+    handleNavClick(item) {
+      if (item.to || item.href) {
+        this.sidebarVisible = false;
+      }
     },
   },
 };
