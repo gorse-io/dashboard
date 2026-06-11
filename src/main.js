@@ -69,8 +69,9 @@ axios.interceptors.response.use(
         router.push({
           name: 'login',
           query: { redirect: router.currentRoute.value.fullPath },
-        });
+        }).catch(() => {});
       }
+      return new Promise(() => {});
     }
     return Promise.reject(error);
   },
@@ -84,4 +85,6 @@ app.component('default-layout', Default);
 app.component('login-layout', Login);
 app.config.globalProperties.$eventHub = createEventHub();
 
-app.mount('#app');
+router.isReady().then(() => {
+  app.mount('#app');
+});

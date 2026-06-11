@@ -19,6 +19,22 @@ import ImportFeedback from './views/ImportFeedback.vue';
 import RecFlow from './views/RecFlow.vue';
 import { getLoginStatus, setLoginStatus } from './utils/auth';
 
+async function verifyLoginStatus() {
+  try {
+    await axios.get('/api/dashboard/userinfo', {
+      skipAuthRedirect: true,
+    });
+    setLoginStatus(true);
+    return true;
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      setLoginStatus(false);
+      return false;
+    }
+    return null;
+  }
+}
+
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   linkActiveClass: 'active',
@@ -126,15 +142,23 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   if (to.name === 'login') {
     if (getLoginStatus() === true) {
-      next(to.query.redirect || '/overview');
-    } else {
-      next();
+      const isLoggedIn = await verifyLoginStatus();
+      if (isLoggedIn === true) {
+        next(to.query.redirect || '/overview');
+        return;
+      }
     }
+    next();
     return;
   }
 
   const loginStatus = getLoginStatus();
   if (loginStatus === true) {
+    const isLoggedIn = await verifyLoginStatus();
+    if (isLoggedIn === false) {
+      next({ name: 'login', query: { redirect: to.fullPath } });
+      return;
+    }
     next();
     return;
   }
@@ -144,18 +168,10 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  try {
-    await axios.get('/api/dashboard/userinfo', {
-      skipAuthRedirect: true,
-    });
-    setLoginStatus(true);
-    next();
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      setLoginStatus(false);
-      next({ name: 'login', query: { redirect: to.fullPath } });
-      return;
-    }
+  const isLoggedIn = await verifyLoginStatus();
+  if (isLoggedIn === false) {
+    next({ name: 'login', query: { redirect: to.fullPath } });
+  } else {
     next();
   }
 });
