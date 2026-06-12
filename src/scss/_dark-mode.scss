@@ -110,6 +110,16 @@ html[data-theme='dark'] {
     color: var(--gd-muted) !important;
   }
 
+  .stats-small__placeholder {
+    background: linear-gradient(
+      90deg,
+      rgba(156, 163, 175, 0.10) 25%,
+      rgba(156, 163, 175, 0.20) 37%,
+      rgba(156, 163, 175, 0.10) 63%
+    );
+    background-size: 400% 100%;
+  }
+
   .text-dark,
   .text-fiord-blue {
     color: var(--gd-heading) !important;

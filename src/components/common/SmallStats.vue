@@ -1,17 +1,27 @@
 <template>
-  <d-card :class="['stats-small', computedVariationClass, 'card', 'card-small']">
+  <d-card :class="['stats-small', computedVariationClass, 'card', 'card-small', { 'stats-small--loading': loading }]">
     <d-card-body :class="[computedBodyClass]">
       <div :class="['d-flex', computedInnerWrapperClass]">
         <div :class="['stats-small__data', computedDataFieldClass]">
           <span :class="['stats-small__label', 'text-uppercase', computedLabelClass]">{{ label }}</span>
-          <h6 :class="['stats-small__value', 'count', computedValueClass]">{{ value }}</h6>
+          <span
+            v-if="loading"
+            :class="['stats-small__placeholder', 'stats-small__placeholder--value', computedValueClass]"
+            aria-hidden="true"
+          />
+          <h6 v-else :class="['stats-small__value', 'count', computedValueClass]">{{ value }}</h6>
         </div>
         <div :class="['stats-small__data', computedInnerDataFieldClass]">
-          <span :class="['stats-small__percentage', `stats-small__percentage--${computedPercentageModifier}`]">{{
+          <span
+            v-if="loading"
+            class="stats-small__placeholder stats-small__placeholder--percentage"
+            aria-hidden="true"
+          />
+          <span v-else :class="['stats-small__percentage', `stats-small__percentage--${computedPercentageModifier}`]">{{
             percentage }}</span>
         </div>
       </div>
-      <canvas :height="computedCanvasHeight" ref="canvas" :class="[computedChartId]" />
+      <canvas v-show="!loading" :height="computedCanvasHeight" ref="canvas" :class="[computedChartId]" />
     </d-card-body>
   </d-card>
 </template>
@@ -100,6 +110,30 @@ export default {
       type: String,
       default: null,
     },
+    loading: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      chart: null,
+    };
+  },
+  watch: {
+    loading(isLoading, wasLoading) {
+      if (wasLoading && !isLoading) {
+        this.$nextTick(this.renderChart);
+      }
+    },
+    chartData: {
+      deep: true,
+      handler() {
+        if (!this.loading) {
+          this.$nextTick(this.renderChart);
+        }
+      },
+    },
   },
   computed: {
     computedChartId() {
@@ -162,63 +196,106 @@ export default {
     },
   },
   mounted() {
-    const chartOptions = {
-      ...{
-        maintainAspectRatio: true,
-        responsive: true,
-        legend: {
-          display: false,
-        },
-        tooltips: {
-          enabled: false,
-          custom: false,
-        },
-        elements: {
-          point: {
-            radius: 0,
-          },
-          line: {
-            tension: 0.33,
-          },
-        },
-        scales: {
-          xAxes: [{
-            gridLines: false,
-            ticks: {
-              display: false,
-            },
-          }],
-          yAxes: [{
-            gridLines: false,
-            scaleLabel: false,
-            ticks: {
-              display: false,
-              isplay: false,
-              // Avoid getting the graph line cut of at the top of the canvas.
-              // Chart.js bug link: https://github.com/chartjs/Chart.js/issues/4790
-              suggestedMax: Math.max(...this.chartData[0].data) + 1,
-            },
-          }],
-        },
-      },
-      ...this.chartOptions,
-    };
+    if (!this.loading) {
+      this.renderChart();
+    }
+  },
+  beforeUnmount() {
+    this.destroyChart();
+  },
+  methods: {
+    getChartDataMax() {
+      const dataset = this.chartData[0] || {};
+      const values = Array.isArray(dataset.data) ? dataset.data : [];
+      return values.length ? Math.max(...values) : 0;
+    },
+    renderChart() {
+      if (!this.$refs.canvas) {
+        return;
+      }
 
-    const chartConfig = {
-      ...{
-        type: 'line',
-        data: {
-          ...{ labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4', 'Label 5'] },
-          ...{
-            datasets: this.chartData,
+      if (this.chart) {
+        this.updateChart();
+        return;
+      }
+
+      const chartOptions = {
+        ...{
+          maintainAspectRatio: true,
+          responsive: true,
+          legend: {
+            display: false,
+          },
+          tooltips: {
+            enabled: false,
+            custom: false,
+          },
+          animation: {
+            duration: 0,
+          },
+          hover: {
+            animationDuration: 0,
+          },
+          responsiveAnimationDuration: 0,
+          elements: {
+            point: {
+              radius: 0,
+            },
+            line: {
+              tension: 0.33,
+            },
+          },
+          scales: {
+            xAxes: [{
+              gridLines: false,
+              ticks: {
+                display: false,
+              },
+            }],
+            yAxes: [{
+              gridLines: false,
+              scaleLabel: false,
+              ticks: {
+                display: false,
+                isplay: false,
+                // Avoid getting the graph line cut of at the top of the canvas.
+                // Chart.js bug link: https://github.com/chartjs/Chart.js/issues/4790
+                suggestedMax: this.getChartDataMax() + 1,
+              },
+            }],
           },
         },
-        options: chartOptions,
-      },
-      ...this.chartConfig,
-    };
+        ...this.chartOptions,
+      };
 
-    new Chart(this.$refs.canvas, chartConfig);
+      const chartConfig = {
+        ...{
+          type: 'line',
+          data: {
+            ...{ labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4', 'Label 5'] },
+            ...{
+              datasets: this.chartData,
+            },
+          },
+          options: chartOptions,
+        },
+        ...this.chartConfig,
+      };
+
+      this.chart = new Chart(this.$refs.canvas, chartConfig);
+    },
+    updateChart() {
+      this.chart.data.datasets = this.chartData;
+      this.chart.options.scales.yAxes[0].ticks.suggestedMax = this.getChartDataMax() + 1;
+      this.chart.update(0);
+    },
+    destroyChart() {
+      if (this.chart) {
+        this.chart.stop();
+        this.chart.destroy();
+        this.chart = null;
+      }
+    },
   },
 };
 </script>

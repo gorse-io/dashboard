@@ -9,11 +9,12 @@
     </d-row>
 
     <!-- Small Stats Blocks -->
-    <d-row v-if="!timeseriesUpdate">
+    <d-row>
       <d-col lg v-for="(stats, idx) in smallStats" :key="idx" class="mb-4">
         <small-stats
           :id="`small-stats-${idx}`"
           variation="1"
+          :loading="timeseriesUpdate"
           :chart-data="stats.datasets"
           :label="stats.label"
           :value="stats.value"
@@ -56,7 +57,7 @@ export default {
     return {
       cacheSize: 100,
       nonPersonalized: ['latest'],
-      timeseriesUpdate: false,
+      timeseriesUpdate: true,
       timeseriesData: new Array(timeseriesName.length).fill([]),
       timeseriesValues: new Array(timeseriesName.length).fill('0'),
       timeseriesPercentages: new Array(timeseriesName.length).fill('0'),

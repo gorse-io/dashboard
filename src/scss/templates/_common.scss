@@ -34,6 +34,36 @@
     font-weight: $small-stats-value-font-weight;
   }
 
+  &__placeholder {
+    display: block;
+    background: linear-gradient(
+      90deg,
+      rgba(90, 97, 105, 0.08) 25%,
+      rgba(90, 97, 105, 0.16) 37%,
+      rgba(90, 97, 105, 0.08) 63%
+    );
+    background-size: 400% 100%;
+    border-radius: 0.25rem;
+    animation: stats-small-placeholder-wave 1.4s ease infinite;
+  }
+
+  &__placeholder--value {
+    width: 4.75rem;
+    height: $small-stats-1-value-font-size;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  &__placeholder--percentage {
+    width: 2.5rem;
+    height: $small-stats-percentage-font-size;
+    margin-left: auto;
+  }
+
+  &--loading {
+    pointer-events: none;
+  }
+
   &__percentage {
     position: relative;
     display: table;
@@ -84,6 +114,10 @@
         margin: $small-stats-1-percentage-margin;
       }
 
+      &__placeholder--percentage {
+        margin: $small-stats-1-percentage-margin;
+      }
+
       &__value {
         font-size: $small-stats-1-value-font-size;
       }
@@ -107,4 +141,14 @@
 .card-group .stats-small {
   position: relative;
   overflow: hidden;
+}
+
+@keyframes stats-small-placeholder-wave {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
 }
