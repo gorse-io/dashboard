@@ -43,7 +43,9 @@
       </d-row>
       <!-- Legend & Chart -->
       <div ref="legend" />
-      <canvas height="80" ref="canvas" style="max-width: 100% !important" />
+      <div class="recommendation-performance__chart">
+        <canvas ref="canvas" />
+      </div>
     </d-card-body>
   </d-card>
 </template>
@@ -101,10 +103,13 @@ export default {
     },
   },
   data() {
+    const defaultEnd = moment();
+    const defaultBegin = defaultEnd.clone().subtract(7, 'days');
+
     return {
       dateRange: {
-        from: null,
-        to: null,
+        from: defaultBegin.toDate(),
+        to: defaultEnd.toDate(),
       },
       timeseries: {
         name: 'positive_feedback_ratio',
@@ -116,6 +121,10 @@ export default {
       plotAbortController: null,
       localChartData: null,
     };
+  },
+  watch: {
+    'dateRange.from': 'changeDateRange',
+    'dateRange.to': 'changeDateRange',
   },
   mounted() {
     this.plot(this.timeseries.name, this.timeseries.label);
@@ -182,7 +191,42 @@ export default {
     },
   },
   methods: {
+    getSelectedDateRange() {
+      const end = this.dateRange.to ? moment(this.dateRange.to).endOf('day') : moment().endOf('day');
+      const begin = this.dateRange.from
+        ? moment(this.dateRange.from).startOf('day')
+        : end.clone().subtract(7, 'days').startOf('day');
+
+      if (!begin.isValid() || !end.isValid() || begin.isAfter(end)) {
+        return null;
+      }
+
+      return { begin, end };
+    },
+    getXAxisTickLimit(pointCount) {
+      const chartElement = this.$refs.canvas && this.$refs.canvas.parentElement;
+      const width = chartElement ? chartElement.clientWidth : window.innerWidth;
+
+      if (pointCount <= 0) {
+        return 1;
+      }
+      if (pointCount <= 7) {
+        return pointCount;
+      }
+      if (width < 576) {
+        return Math.min(pointCount, 5);
+      }
+      if (width < 992) {
+        return Math.min(pointCount, 7);
+      }
+      return Math.min(pointCount, 10);
+    },
     plot(name, label) {
+      const dateRange = this.getSelectedDateRange();
+      if (!dateRange) {
+        return;
+      }
+
       this.plotRequestId += 1;
       const requestId = this.plotRequestId;
 
@@ -196,11 +240,13 @@ export default {
         this.chartInstance = null;
       }
 
-      const currentEnd = moment();
-      const currentBegin = currentEnd.clone().subtract(7, 'days');
+      const params = new URLSearchParams({
+        begin: dateRange.begin.toISOString(),
+        end: dateRange.end.toISOString(),
+      });
       axios({
         method: 'get',
-        url: `/api/dashboard/timeseries/${name}?begin=${currentBegin.toISOString()}&end=${currentEnd.toISOString()}`,
+        url: `/api/dashboard/timeseries/${name}?${params.toString()}`,
         signal: this.plotAbortController.signal,
       })
         .then((response) => {
@@ -208,12 +254,15 @@ export default {
             return;
           }
 
+          const values = response.data.map((item) => Number(item.Value));
+          const xTickLimit = this.getXAxisTickLimit(response.data.length);
+
           this.localChartData = {
             ...this.chartData,
             labels: response.data.map((item) => moment(item.Timestamp).format('MMM DD HH:mm')),
             datasets: this.chartData.datasets.map((dataset, index) => (index === 0 ? {
               ...dataset,
-              data: response.data.map((item) => Number(item.Value).toFixed(5)),
+              data: values.map((value) => value.toFixed(5)),
               label,
             } : dataset)),
           };
@@ -221,6 +270,7 @@ export default {
           const chartOptions = {
             ...{
               responsive: true,
+              maintainAspectRatio: false,
               legend: {
                 position: 'top',
               },
@@ -237,15 +287,15 @@ export default {
                 xAxes: [{
                   gridLines: false,
                   ticks: {
-                    callback(tick, index) {
-                      // Jump every 7 values on the X axis labels to avoid clutter.
-                      return index % 7 !== 0 ? '' : tick;
-                    },
+                    autoSkip: true,
+                    maxTicksLimit: xTickLimit,
+                    maxRotation: 0,
+                    minRotation: 0,
                   },
                 }],
                 yAxes: [{
                   ticks: {
-                    suggestedMax: Math.max(...this.localChartData.datasets[0].data),
+                    suggestedMax: values.length ? Math.max(...values) : 0,
                     callback(tick) {
                       if (tick === 0) {
                         return tick;
@@ -295,6 +345,32 @@ export default {
       this.timeseries = value;
       this.plot(value.name, value.label);
     },
+    changeDateRange() {
+      this.plot(this.timeseries.name, this.timeseries.label);
+    },
   },
 };
 </script>
+
+<style lang="scss">
+.recommendation-performance__chart {
+  position: relative;
+  width: 100%;
+  height: 17rem;
+  min-height: 17rem;
+  margin-top: 0.75rem;
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .recommendation-performance__chart {
+    height: 19rem;
+    min-height: 19rem;
+  }
+}
+</style>
