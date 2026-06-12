@@ -1,5 +1,4 @@
 /* eslint-disable */
-import axios from 'axios';
 import { createApp } from 'vue';
 import ShardsVue from '@gorse/shards-vue';
 
@@ -20,7 +19,6 @@ import 'material-icons/iconfont/material-icons.css';
 // Core
 import App from './App.vue';
 import router from './router';
-import { clearLoginStatus } from './utils/auth';
 import { applyTheme, getPreferredTheme } from './utils/theme';
 
 // Layouts
@@ -60,23 +58,6 @@ const app = createApp(App);
 
 applyTheme(getPreferredTheme());
 
-axios.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401 && !(error.config && error.config.skipAuthRedirect)) {
-      clearLoginStatus();
-      if (router.currentRoute.value.name !== 'login') {
-        router.push({
-          name: 'login',
-          query: { redirect: router.currentRoute.value.fullPath },
-        }).catch(() => {});
-      }
-      return new Promise(() => {});
-    }
-    return Promise.reject(error);
-  },
-);
-
 app.use(router);
 app.use(ShardsVue);
 app.use(hljsVuePlugin);
@@ -85,6 +66,4 @@ app.component('default-layout', Default);
 app.component('login-layout', Login);
 app.config.globalProperties.$eventHub = createEventHub();
 
-router.isReady().then(() => {
-  app.mount('#app');
-});
+app.mount('#app');
