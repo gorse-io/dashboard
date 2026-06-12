@@ -5,9 +5,9 @@
   "license": "MIT",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "lint": "vue-cli-service lint",
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "lint": "node scripts/vue-cli-service.js lint",
+    "serve": "node scripts/vue-cli-service.js serve",
+    "build": "node scripts/vue-cli-service.js build",
     "test": "jest"
   },
   "dependencies": {

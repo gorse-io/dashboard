@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { createRouter, createWebHistory } from 'vue-router';
 
 import Tasks from './views/Tasks.vue';
@@ -17,25 +16,8 @@ import ImportItems from './views/ImportItems.vue';
 import ImportUsers from './views/ImportUsers.vue';
 import ImportFeedback from './views/ImportFeedback.vue';
 import RecFlow from './views/RecFlow.vue';
-import { getLoginStatus, setLoginStatus } from './utils/auth';
 
-async function verifyLoginStatus() {
-  try {
-    await axios.get('/api/dashboard/userinfo', {
-      skipAuthRedirect: true,
-    });
-    setLoginStatus(true);
-    return true;
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      setLoginStatus(false);
-      return false;
-    }
-    return null;
-  }
-}
-
-const router = createRouter({
+export default createRouter({
   history: createWebHistory(process.env.BASE_URL),
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active',
@@ -138,42 +120,3 @@ const router = createRouter({
     },
   ],
 });
-
-router.beforeEach(async (to, from, next) => {
-  if (to.name === 'login') {
-    if (getLoginStatus() === true) {
-      const isLoggedIn = await verifyLoginStatus();
-      if (isLoggedIn === true) {
-        next(to.query.redirect || '/overview');
-        return;
-      }
-    }
-    next();
-    return;
-  }
-
-  const loginStatus = getLoginStatus();
-  if (loginStatus === true) {
-    const isLoggedIn = await verifyLoginStatus();
-    if (isLoggedIn === false) {
-      next({ name: 'login', query: { redirect: to.fullPath } });
-      return;
-    }
-    next();
-    return;
-  }
-
-  if (loginStatus === false) {
-    next({ name: 'login', query: { redirect: to.fullPath } });
-    return;
-  }
-
-  const isLoggedIn = await verifyLoginStatus();
-  if (isLoggedIn === false) {
-    next({ name: 'login', query: { redirect: to.fullPath } });
-  } else {
-    next();
-  }
-});
-
-export default router;

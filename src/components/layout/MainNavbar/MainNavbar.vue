@@ -40,8 +40,9 @@
             v-if="userInfo.auth_type.length === 0"
             id="user-actions"
             class="dropdown-menu dropdown-menu-small">
-            <d-dropdown-item href="#" class="text-danger" @click.prevent="logout">
-              <i class="material-icons text-danger">&#xE879;</i> Logout
+            <d-dropdown-item href="#" class="text-danger">
+              <a style="text-decoration: none; color: inherit;" href="/logout">
+                <i class="material-icons text-danger">&#xE879;</i> Logout</a>
             </d-dropdown-item>
           </d-collapse>
         </li>
@@ -54,7 +55,6 @@
 <script>
 import axios from 'axios';
 import multiavatar from '@multiavatar/multiavatar';
-import { clearLoginStatus } from '@/utils/auth';
 import {
   applyTheme,
   DARK_THEME,
@@ -154,13 +154,6 @@ export default {
       svg.documentElement.setAttribute('height', '100');
       const encodedSvg = encodeURIComponent(svg.documentElement.outerHTML);
       return `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
-    },
-    async logout() {
-      await axios.post('/logout', null, {
-        skipAuthRedirect: true,
-      });
-      clearLoginStatus();
-      this.$router.push({ name: 'login' });
     },
   },
 };
