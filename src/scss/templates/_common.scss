@@ -105,6 +105,12 @@
   // Stats Small - Alternate 1
   // Follow the same structure, but with the content centered.
   &--1 {
+    &.stats-small--loading {
+      .stats-small__placeholder--value {
+        width: 8rem;
+      }
+    }
+
     .stats-small {
       &__data {
         max-width: $small-stats-1-data-max-width;
