@@ -13,7 +13,7 @@
         <slot />
 
         <!-- Main Footer -->
-        <main-footer />
+        <main-footer v-if="!hideFooter" />
       </d-col>
 
     </d-row>
@@ -39,6 +39,11 @@ export default {
     return {
       sidebarItems: getSidebarItems(),
     };
+  },
+  computed: {
+    hideFooter() {
+      return this.$route.meta.hideFooter;
+    },
   },
 };
 </script>
