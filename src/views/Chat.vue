@@ -1,70 +1,51 @@
 <template>
-  <div class="main-content-container container-fluid px-4">
-    <!-- Page Header -->
-    <div class="page-header row no-gutters py-4">
-      <div class="col-12 col-sm-6 text-center text-sm-left mb-0">
-        <h3 class="page-title">Chat</h3>
-      </div>
-      <div class="col-12 col-sm-6 text-center text-sm-right mb-0">
-        <d-button outline size="sm" @click="clearMessages">New Chat</d-button>
-      </div>
-    </div>
-
-    <d-row>
-      <d-col lg="12" md="12" sm="12" class="mb-4">
-        <div class="card card-small mb-4 chat-card">
-          <div class="card-header border-bottom">
-            <h6 class="m-0">Conversation</h6>
-          </div>
-          <div class="card-body p-0 pb-2">
-            <d-list-group flush>
-              <d-list-group-item class="p-3">
-                <div class="chat-messages mb-3">
-                  <div v-if="messages.length === 0" class="chat-empty text-center text-muted">
-                    Send a message to start a conversation.
-                  </div>
-                  <div
-                    v-for="(message, index) in messages"
-                    :key="index"
-                    class="chat-message"
-                    :class="message.role"
-                  >
-                    <div class="chat-message-role text-uppercase text-muted">
-                      {{ message.role }}
-                    </div>
-                    <div class="chat-message-content" v-html="renderMessageContent(message.content)" />
-                  </div>
-                </div>
-                <d-row class="mb-3">
-                  <d-col sm="12" md="12">
-                    <d-form-textarea
-                      :rows="3"
-                      :max-rows="6"
-                      v-model="prompt"
-                      :disabled="isStreaming"
-                      placeholder="Type a message..."
-                      @keydown.enter.exact.prevent="send"
-                    />
-                  </d-col>
-                </d-row>
-                <d-row>
-                  <d-col sm="12" md="12" class="text-right">
-                    <d-button outline :disabled="isStreaming" @click="send">
-                      {{ isStreaming ? 'Sending...' : 'Send' }}
-                    </d-button>
-                  </d-col>
-                </d-row>
-              </d-list-group-item>
-            </d-list-group>
-          </div>
+  <div class="main-content-container container-fluid px-4 chat-container">
+    <div class="chat-shell">
+      <div class="chat-messages">
+        <div v-if="messages.length === 0" class="chat-empty text-center text-muted">
+          Send a message to start a conversation.
         </div>
-      </d-col>
-    </d-row>
+        <div
+          v-for="(message, index) in messages"
+          :key="index"
+          class="chat-message"
+          :class="message.role"
+        >
+          <div class="chat-message-content" v-html="renderMessageContent(message)" />
+        </div>
+      </div>
+      <d-input-group class="chat-composer">
+        <d-input
+          v-model="prompt"
+          :disabled="isStreaming"
+          placeholder="Type a message..."
+          @keydown.enter.exact.prevent="send"
+        />
+        <d-input-group-addon append>
+          <d-button
+            class="chat-composer-button"
+            :disabled="isStreaming"
+            @click="send"
+          >
+            {{ isStreaming ? 'Sending...' : 'Send' }}
+          </d-button>
+        </d-input-group-addon>
+      </d-input-group>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import { katex } from '@mdit/plugin-katex';
+import MarkdownIt from 'markdown-it';
+import 'katex/dist/katex.min.css';
+
+const markdown = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true,
+}).use(katex);
 
 export default {
   data() {
@@ -131,14 +112,9 @@ export default {
         this.isStreaming = false;
       });
     },
-    clearMessages() {
-      if (this.isStreaming) {
-        return;
-      }
-      this.messages = [];
-    },
     renderChatCompletionEvents(event, assistantIndex) {
       event.split('\n').forEach((line) => {
+        console.log(line);
         if (!line.startsWith('data:')) {
           return;
         }
@@ -155,7 +131,11 @@ export default {
         }
       });
     },
-    renderMessageContent(content) {
+    renderMessageContent(message) {
+      if (message.role === 'assistant') {
+        return markdown.render(message.content);
+      }
+      const { content } = message;
       return content
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -167,18 +147,48 @@ export default {
 </script>
 
 <style scoped>
-.chat-card {
-  min-height: calc(100vh - 12rem);
+.chat-container {
+  box-sizing: border-box;
+  display: flex;
+  height: calc(100vh - 3.75rem);
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.chat-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
 }
 
 .chat-messages {
-  min-height: 24rem;
-  max-height: calc(100vh - 22rem);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 5rem;
   overflow-y: auto;
 }
 
 .chat-empty {
-  padding: 8rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  padding: 0 1rem;
+}
+
+.chat-composer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.chat-composer-button {
+  min-width: 6rem;
 }
 
 .chat-message {
@@ -195,17 +205,50 @@ export default {
   align-items: flex-start;
 }
 
-.chat-message-role {
-  font-size: 0.7rem;
-  letter-spacing: 0.05rem;
-  margin-bottom: 0.25rem;
-}
-
 .chat-message-content {
   max-width: 80%;
   padding: 0.75rem 1rem;
   border-radius: 1rem;
   line-height: 1.5;
+  white-space: normal;
+}
+
+.chat-message-content :deep(p:last-child),
+.chat-message-content :deep(ul:last-child),
+.chat-message-content :deep(ol:last-child),
+.chat-message-content :deep(pre:last-child) {
+  margin-bottom: 0;
+}
+
+.chat-message-content :deep(.katex-display:last-child) {
+  margin-bottom: 0;
+}
+
+.chat-message-content :deep(ul),
+.chat-message-content :deep(ol) {
+  padding-left: 1.25rem;
+}
+
+.chat-message-content :deep(pre) {
+  max-width: 100%;
+  padding: 0.75rem;
+  overflow-x: auto;
+  color: #f8fafc;
+  background: #1f2937;
+  border-radius: 0.375rem;
+}
+
+.chat-message-content :deep(code) {
+  word-break: break-word;
+}
+
+.chat-message-content :deep(.katex-display) {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.chat-message-content :deep(.katex) {
   white-space: normal;
 }
 
@@ -216,8 +259,9 @@ export default {
 }
 
 .chat-message.assistant .chat-message-content {
-  color: #3d5170;
-  background: #f5f6f8;
+  color: var(--gd-text, #3d5170);
+  background: var(--gd-surface, #fff);
+  border: 1px solid var(--gd-border, #e1e5eb);
   border-bottom-left-radius: 0.25rem;
 }
 </style>

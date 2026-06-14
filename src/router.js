@@ -108,11 +108,13 @@ export default createRouter({
       path: '/chat',
       name: 'chat',
       component: Chat,
+      meta: { hideFooter: true },
     },
     {
       path: '/recflow',
       name: 'recflow',
       component: RecFlow,
+      meta: { hideFooter: true },
     },
     {
       path: '/:pathMatch(.*)*',
