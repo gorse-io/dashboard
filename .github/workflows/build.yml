@@ -49,6 +49,10 @@ jobs:
           go mod init github.com/gorse-io/dashboard
           go mod tidy
           git add statik.go go.mod go.sum
-          git commit -m "Build embed files"
+          if git rev-parse --verify HEAD >/dev/null 2>&1; then
+            git commit --amend -m "Build embed files"
+          else
+            git commit -m "Build embed files"
+          fi
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git push origin statik
+          git push --force origin statik
