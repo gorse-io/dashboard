@@ -58,7 +58,7 @@
                           class="material-icons">visibility</i></d-button>
                         <d-button size="small" outline @click="list_user_recommend(user.UserId)"><i
                           class="material-icons">favorite</i></d-button>
-                        <d-button size="small" theme="danger" outline @click="open_delete_user_dialog(user.UserId)"><i
+                        <d-button size="small" theme="danger" outline @click.stop="open_delete_user_dialog(user.UserId)"><i
                           class="material-icons">delete</i></d-button>
                       </d-button-group>
                     </td>
@@ -72,8 +72,11 @@
     </div>
 
     <d-modal v-if="showDialog" @close="showDialog = false" centered>
-      <d-modal-header>
-        <d-modal-title>Delete Item</d-modal-title>
+      <d-modal-header :close="false">
+        <d-modal-title>Delete User</d-modal-title>
+        <button type="button" class="close" aria-label="Close" @click.stop.prevent="showDialog = false">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </d-modal-header>
       <d-modal-body>
         <div class="mb-3">Are you sure to delete user <span style="font-weight: bold">{{ deleteUserId }}</span>? Please
