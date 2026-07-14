@@ -74,7 +74,7 @@ export default {
         this.positiveFeedbackTypes = response.data.recommend.data_source.positive_feedback_types;
         this.cacheSize = response.data.database.cache_size;
         this.nonPersonalized = ['latest'];
-        response.data.recommend['non-personalized'].forEach((recommender) => {
+        (response.data.recommend['non-personalized'] || []).forEach((recommender) => {
           this.nonPersonalized.push(`non-personalized/${recommender.name}`);
         });
       });
