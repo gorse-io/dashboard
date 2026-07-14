@@ -66,7 +66,7 @@
                       <d-button-group>
                         <d-button size="small" outline @click="view_item(item.ItemId)"><i
                           class="material-icons">visibility</i></d-button>
-                        <d-button size="small" theme="danger" outline @click="open_delete_item_dialog(item.ItemId)"><i
+                        <d-button size="small" theme="danger" outline @click.stop="open_delete_item_dialog(item.ItemId)"><i
                           class="material-icons">delete</i></d-button>
                       </d-button-group>
                     </td>
@@ -80,8 +80,11 @@
     </div>
 
     <d-modal v-if="showDialog" @close="showDialog = false" centered>
-      <d-modal-header>
+      <d-modal-header :close="false">
         <d-modal-title>Delete Item</d-modal-title>
+        <button type="button" class="close" aria-label="Close" @click.stop.prevent="showDialog = false">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </d-modal-header>
       <d-modal-body>
         <div class="mb-3">Are you sure to delete item <span style="font-weight: bold">{{ deleteItemId }}</span>? Please

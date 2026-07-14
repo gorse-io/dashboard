@@ -124,11 +124,14 @@
               <d-list-group-item class="p-3">
                 <d-row>
                   <d-col sm="12" md="2">
-                    <d-button outline theme="danger" @click="handleClick">&nbsp;Purge
+                    <d-button outline theme="danger" @click.stop="handleClick">&nbsp;Purge
                       Database&nbsp;</d-button>
                     <d-modal v-if="showDialog" @close="handleClose" centered>
-                      <d-modal-header>
+                      <d-modal-header :close="false">
                         <d-modal-title>Are you absolutely sure?</d-modal-title>
+                        <button type="button" class="close" aria-label="Close" @click.stop.prevent="handleClose">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
                       </d-modal-header>
                       <d-modal-body>
                         <label>This action <span style="color: red; font-weight: bold">cannot</span> be undone. This
