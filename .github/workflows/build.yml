@@ -1,9 +1,6 @@
 name: build
 
 on:
-  push:
-    branches: [ master ]
-
   workflow_dispatch:
 
 jobs:
@@ -35,7 +32,7 @@ jobs:
           go install github.com/rakyll/statik@latest
           statik -src=dist
 
-      - name: Commit embed files
+      - name: Commit and tag embed files
         run: |
           cd ..
           git clone https://github.com/gorse-io/dashboard.git dashboard-statik
@@ -49,10 +46,9 @@ jobs:
           go mod init github.com/gorse-io/dashboard
           go mod tidy
           git add statik.go go.mod go.sum
-          if git rev-parse --verify HEAD >/dev/null 2>&1; then
-            git commit --amend -m "Build embed files"
-          else
-            git commit -m "Build embed files"
-          fi
+          git commit -m "Build embed files"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git push --force origin statik
+          git push origin statik
+          tag="v$(date -u +%Y.%m.%d)"
+          git tag "$tag"
+          git push origin "$tag"
