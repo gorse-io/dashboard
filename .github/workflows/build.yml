@@ -49,6 +49,6 @@ jobs:
           git commit -m "Build embed files"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git push origin statik
-          tag="v$(date -u +%Y.%m.%d)"
+          tag="v0.5.$(date -u +%Y%m%d)"
           git tag "$tag"
           git push origin "$tag"
