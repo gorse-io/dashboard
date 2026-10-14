@@ -192,13 +192,28 @@
               <label>Type</label>
               <d-select v-model="nodeForm.properties.type">
                 <option value="fm">FM</option>
-                <option value="llm">LLM</option>
+                <option value="reranker">Reranker API</option>
+                <option value="decision">Decision API</option>
               </d-select>
             </div>
-            <div class="form-group" v-if="nodeForm.properties.type === 'llm'">
+            <div class="form-group" v-if="['reranker', 'decision'].includes(nodeForm.properties.type)">
               <div class="form-row">
                 <div class="form-group col-md-6">
-                  <label>Query Template <a
+                  <label>URL</label>
+                  <d-input v-model="rankerAPI.url" />
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Model</label>
+                  <d-input v-model="rankerAPI.model" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Auth Token</label>
+                <d-input type="password" v-model="rankerAPI.auth_token" autocomplete="off" />
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>{{ isDecisionRanker ? 'State Template' : 'Query Template' }} <a
                     href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -206,9 +221,9 @@
                   <textarea
                     class="form-control"
                     rows="8"
-                    v-model="nodeForm.properties.query_template"
+                    v-model="rankerAPI[isDecisionRanker ? 'state_template' : 'query_template']"
                     style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;" />
-                  <label class="mt-4">Document Template <a
+                  <label class="mt-4">{{ isDecisionRanker ? 'Instructions Template' : 'Document Template' }} <a
                     href="https://gorse.io/docs/concepts/ranking.html#large-language-models"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -216,7 +231,7 @@
                   <textarea
                     class="form-control"
                     rows="7"
-                    v-model="nodeForm.properties.document_template"
+                    v-model="rankerAPI[isDecisionRanker ? 'instructions_template' : 'document_template']"
                     style="font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; font-size: 0.85rem;" />
                 </div>
                 <div class="form-group col-md-6">
@@ -583,6 +598,12 @@ export default {
     };
   },
   computed: {
+    isDecisionRanker() {
+      return this.nodeForm.properties.type === 'decision';
+    },
+    rankerAPI() {
+      return this.nodeForm.properties[this.isDecisionRanker ? 'decision_api' : 'reranker_api'];
+    },
     modalTitle() {
       switch (this.nodeForm.type) {
         case 'data-source':
@@ -1244,8 +1265,22 @@ export default {
 
       if (data.type === 'ranker') {
         properties.type = properties.type || 'fm';
-        properties.query_template = properties.query_template || '';
-        properties.document_template = properties.document_template || '';
+        properties.reranker_api = {
+          url: '',
+          model: '',
+          auth_token: '',
+          query_template: '',
+          document_template: '',
+          ...properties.reranker_api,
+        };
+        properties.decision_api = {
+          url: '',
+          model: '',
+          auth_token: '',
+          state_template: '',
+          instructions_template: '',
+          ...properties.decision_api,
+        };
         properties.cache_expire = properties.cache_expire || '120h';
         if (!properties.early_stopping) {
           properties.early_stopping = {};
@@ -1448,18 +1483,22 @@ export default {
       this.rankerPreviewResult = null;
       this.rankerDocumentPreviewResult = null;
 
-      const queryTemplate = this.nodeForm.properties.query_template || '';
+      const { properties } = this.nodeForm;
+      const isDecision = properties.type === 'decision';
+      const api = properties[isDecision ? 'decision_api' : 'reranker_api'];
+      // Both rankers share the same template renderer and preview endpoint.
+      const queryTemplate = (isDecision ? api.state_template : api.query_template) || '';
       const encodedQueryTemplate = window.btoa(encodeURIComponent(queryTemplate).replace(
         /%([0-9A-F]{2})/g,
         (match, p1) => String.fromCharCode(`0x${p1}`),
       ));
-      const documentTemplate = this.nodeForm.properties.document_template || '';
+      const documentTemplate = (isDecision ? api.instructions_template : api.document_template) || '';
       const encodedDocumentTemplate = window.btoa(encodeURIComponent(documentTemplate).replace(
         /%([0-9A-F]{2})/g,
         (match, p1) => String.fromCharCode(`0x${p1}`),
       ));
 
-      axios.get('/api/dashboard/ranker/prompt', {
+      return axios.get('/api/dashboard/ranker/prompt', {
         params: {
           'query-template': encodedQueryTemplate,
           'document-template': encodedDocumentTemplate,
@@ -1638,11 +1677,7 @@ export default {
       // Helper to format primitives
       const formatValue = (v) => {
         if (typeof v === 'string') {
-          if (v.includes('\n')) {
-            return `"""\n${v}"""`;
-          }
-          // Escape quotes and backslashes
-          return `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
+          return JSON.stringify(v);
         }
         return v;
       };
@@ -1683,6 +1718,11 @@ export default {
                   output += `${ssk} = ${formatValue(ssv)}\n`;
                 } else if (isArray(ssv) && (ssv.length === 0 || isPrimitive(ssv[0]))) {
                   output += `${ssk} = [${ssv.map(formatValue).join(', ')}]\n`;
+                }
+              });
+              Object.entries(sv).forEach(([ssk, ssv]) => {
+                if (isObject(ssv)) {
+                  output += `\n${this.jsonToToml({ [`${k}.${sk}.${ssk}`]: ssv })}\n`;
                 }
               });
             } else if (isArray(sv) && sv.length > 0 && isObject(sv[0])) {
@@ -1829,8 +1869,12 @@ export default {
           newNode.properties = {
             fixedName: true,
             type: 'fm',
-            query_template: '',
-            document_template: '',
+            reranker_api: {
+              url: '', model: '', auth_token: '', query_template: '', document_template: '',
+            },
+            decision_api: {
+              url: '', model: '', auth_token: '', state_template: '', instructions_template: '',
+            },
             cache_expire: '120h',
             recommenders: ['latest', 'collaborative', 'non-personalized/most_starred_weekly', 'item-to-item/neighbors', 'user-to-user/neighbors'],
             fit_period: '60m',
